@@ -156,6 +156,7 @@ A PR is done only when all are true:
 - Required tests pass.
 - Required human approvals completed.
 - Documentation updated when behavior/policy changes.
+- For technology selection changes: `docs/tech-stack.md` updated + ADR added in `docs/decision-log/`.
 - Rollback approach noted for medium/high risk changes.
 
 ---
