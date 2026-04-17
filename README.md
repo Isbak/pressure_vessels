@@ -242,7 +242,7 @@ A governance starter policy is available at **`AGENT_GOVERNANCE.md`**. It define
 
 Adopt this as the baseline operating model for agent-assisted development in this project.
 
-See **`AGENT_FILE_STRUCTURE.md`** for a recommended repository layout for running both agents effectively.
+The recommended agentic repository layout is implemented under **`.agents/`**, **`.github/workflows/`**, and supporting docs in **`docs/`**.
 
 Note: this repository currently implements a **starter baseline**; treat it as a foundation and evolve toward stricter policy-as-code and security assurance controls over time.
 
