@@ -33,6 +33,20 @@ The model supports engineering design, fabrication, inspection, operations, and 
   - Specific combinations of loads and boundary conditions.
 - **CodeRule**
   - Clause from governing standards (e.g., ASME VIII Div 1/2, PED harmonized references).
+- **Requirement**
+  - Structured requirement statement with immutable ID, source, rationale, and revision.
+- **DesignBasis**
+  - Project-specific selection of code editions, jurisdiction, assumptions, and exclusions.
+- **StandardPackage**
+  - Versioned machine-readable package of clauses, variables, and applicability predicates.
+- **ApplicabilityRule**
+  - Executable predicate that decides whether a clause is required for a given context.
+- **EngineeringModel**
+  - Executable model implementing a standards obligation with assumptions and validity envelope.
+- **VerificationTask**
+  - Unit-safe deterministic check that binds requirement + clause + model + acceptance logic.
+- **DecisionRecord**
+  - Captured rationale/approval for applicability, assumptions, model selection, and disposition.
 - **CalculationRecord**
   - Machine-readable calculation input/output and pass/fail disposition.
 - **InspectionTestRecord**
@@ -74,14 +88,23 @@ The model supports engineering design, fabrication, inspection, operations, and 
 
 ### 2.3 Key Relationships (Object Properties)
 
+- `PressureVesselSystem definedBy Requirement`
+- `Requirement constrainedBy DesignBasis`
+- `DesignBasis adopts StandardPackage`
+- `StandardPackage contains CodeRule`
+- `CodeRule activatedBy ApplicabilityRule`
+- `ApplicabilityRule instantiates VerificationTask`
+- `VerificationTask executes EngineeringModel`
 - `PressureVesselSystem hasModule VesselModule`
 - `VesselModule hasComponent Component`
 - `Component connectedBy Joint`
 - `PressureBoundaryComponent madeOf MaterialSpecification`
 - `PressureVesselSystem designedFor DesignCondition`
 - `DesignCondition evaluatedBy LoadCase`
-- `LoadCase checkedBy CalculationRecord`
+- `LoadCase checkedBy VerificationTask`
+- `VerificationTask produces CalculationRecord`
 - `CalculationRecord assesses CodeRule`
+- `DecisionRecord governs (ApplicabilityRule | EngineeringModel | ComplianceEvidence)`
 - `InspectionTestRecord verifies Component`
 - `ComplianceEvidence references (CodeRule, CalculationRecord, InspectionTestRecord, DigitalArtifact)`
 - `LifecycleEvent affects (PressureVesselSystem | VesselModule | Component)`
@@ -128,6 +151,72 @@ Below is an implementation-friendly entity model.
 - `status`
 - `current_configuration_id`
 - `created_at`, `updated_at`
+
+### `requirement`
+- `requirement_id` (PK)
+- `vessel_id` (FK -> vessel_system)
+- `source_type` (prompt/spec/regulatory/assumption)
+- `statement_text`
+- `rationale`
+- `priority` (mandatory/conditional/derived)
+- `status` (draft/approved/superseded)
+- `revision`
+- `source_artifact_id` (FK -> digital_artifact, nullable)
+- `created_at`, `updated_at`
+
+### `design_basis`
+- `design_basis_id` (PK)
+- `vessel_id` (FK -> vessel_system)
+- `jurisdiction`
+- `governing_code`
+- `code_edition`
+- `assumptions_json`
+- `exclusions_json`
+- `approved_by`
+- `approved_at`
+- `baseline_configuration_id` (FK -> configuration_baseline, nullable)
+
+### `standard_package`
+- `package_id` (PK)
+- `code_name`
+- `edition`
+- `release_date`
+- `source_provenance`
+- `checksum`
+- `status` (draft/released/deprecated)
+
+### `applicability_rule`
+- `applicability_rule_id` (PK)
+- `package_id` (FK -> standard_package)
+- `rule_id` (FK -> code_rule)
+- `predicate_expression`
+- `severity` (required/conditional/informative)
+- `rationale`
+- `version`
+- `is_active` (bool)
+
+### `engineering_model`
+- `model_id` (PK)
+- `model_name`
+- `model_family` (formula/chart/analysis_lookup/fea)
+- `equation_set_ref`
+- `assumptions_json`
+- `validity_domain_json`
+- `unit_schema_json`
+- `verification_status` (validated/provisional/deprecated)
+- `version`
+
+### `verification_task`
+- `task_id` (PK)
+- `vessel_id` (FK -> vessel_system)
+- `requirement_id` (FK -> requirement)
+- `rule_id` (FK -> code_rule)
+- `model_id` (FK -> engineering_model)
+- `load_case_id` (FK -> load_case, nullable)
+- `input_schema_json`
+- `acceptance_expression`
+- `task_status` (pending/passed/failed/blocked)
+- `executed_at`
 
 ### `module`
 - `module_id` (PK)
@@ -242,6 +331,17 @@ Below is an implementation-friendly entity model.
 - `reviewed_at`
 - `comments`
 
+### `decision_record`
+- `decision_id` (PK)
+- `vessel_id` (FK -> vessel_system)
+- `subject_type` (applicability/model/assumption/nonconformance)
+- `subject_id`
+- `decision_text`
+- `decision_status` (accepted/rejected/needs_review)
+- `approved_by`
+- `approved_at`
+- `artifact_id` (FK -> digital_artifact, nullable)
+
 ### `configuration_baseline`
 - `configuration_id` (PK)
 - `vessel_id` (FK -> vessel_system)
@@ -277,10 +377,15 @@ Below is an implementation-friendly entity model.
 ## 4) Cardinality Rules (Business Constraints)
 
 - One `vessel_system` has **1..n** `module`.
+- One `vessel_system` has **1..n** `requirement`.
+- One `vessel_system` has exactly **1..n** approved `design_basis` revisions over lifecycle.
 - One `module` has **1..n** `component`.
 - One `component` can participate in **0..n** `joint`.
 - One `design_condition` has **1..n** `load_case`.
-- One `load_case` has **1..n** `calculation_record`.
+- One `standard_package` has **1..n** `code_rule`.
+- One `code_rule` has **0..n** `applicability_rule`.
+- One `verification_task` maps to exactly **1** (`requirement`, `code_rule`, `engineering_model`) triplet.
+- One `load_case` has **0..n** `verification_task` and **0..n** `calculation_record`.
 - One `code_rule` can map to **0..n** `calculation_record` and **0..n** `compliance_evidence`.
 - One `configuration_baseline` references a time-consistent set of modules/components.
 - At least one `compliance_evidence` record is required per mandatory governing rule.
@@ -295,6 +400,22 @@ Below is an implementation-friendly entity model.
   "tag_number": "PV-201A",
   "governing_code": "ASME Section VIII Div 1",
   "code_edition": "2025",
+  "requirements": [
+    {
+      "requirement_id": "REQ-SYS-001",
+      "source_type": "prompt",
+      "statement_text": "Maintain pressure boundary integrity for all approved load cases.",
+      "priority": "mandatory",
+      "revision": 1
+    }
+  ],
+  "design_basis": {
+    "design_basis_id": "DB-001",
+    "jurisdiction": "US-TX",
+    "governing_code": "ASME Section VIII Div 1",
+    "code_edition": "2025",
+    "assumptions": {"corrosion_allowance_mm": 3}
+  },
   "design_conditions": [
     {
       "design_condition_id": "DC-NORMAL",
@@ -341,6 +462,9 @@ Below is an implementation-friendly entity model.
 3. Mandatory material traceability for pressure-boundary parts.
 4. No release of new configuration baseline without compliance evidence completeness check.
 5. Any rerating event must trigger recalculation of all affected load cases.
+6. Every mandatory `code_rule` in the selected `standard_package` must resolve to at least one `verification_task`.
+7. Every `verification_task` must reference a validated `engineering_model` within model domain limits.
+8. Any failed/blocked verification task must have a closed `decision_record` before baseline release.
 
 ---
 
@@ -350,4 +474,3 @@ Below is an implementation-friendly entity model.
 - Manufacturing capability ontology (shop constraints, weld position limits).
 - Cost model entities (material, labor, NDE, transport).
 - Runtime telemetry integration (pressure/temperature historian for digital twin).
-

@@ -227,6 +227,19 @@ Each requirement should map to:
 
 No configuration baseline is released unless all mandatory requirements have closed verification status.
 
+## 9.4 Semantic Verification Workflow (Automation Backbone)
+
+To keep verification deterministic and auditable, V&V should execute through six semantic workflows:
+
+1. **Requirement normalization** — parse prompt/spec text into approved requirement IDs and close mandatory gaps.
+2. **Standard applicability mapping** — determine required clauses from selected code package + jurisdiction.
+3. **Model binding** — bind each required clause to one validated engineering model and acceptance expression.
+4. **Deterministic execution** — run verification tasks with unit safety and reproducibility hashes.
+5. **Compliance assembly** — generate clause-by-clause evidence from requirement -> clause -> model -> result -> artifact.
+6. **Change impact re-verification** — recompute minimal affected task set for requirement/code/model deltas.
+
+These workflows should be treated as release-gating functions, not optional reporting steps.
+
 ---
 
 ## 10) Configuration Management Model
@@ -236,6 +249,16 @@ No configuration baseline is released unless all mandatory requirements have clo
 - Change requests linked to impacted requirements and code clauses.
 - Forward and backward traceability across revisions.
 - Immutable audit trail for engineering decisions and approvals.
+
+### 10.1 Trigger-to-Workflow Rules
+
+For configuration control, the following events must trigger semantic re-verification:
+
+- **Requirement change** -> rerun workflows 1 through 6 for affected scopes.
+- **Code edition/interpretation update** -> rerun workflows 2 through 6.
+- **Material data update** -> rerun workflows 3 through 6.
+- **Module replacement / geometric change** -> rerun workflows 3 through 6.
+- **Inspector nonconformance** -> open decision record and rerun workflow 5 after disposition.
 
 ---
 
@@ -277,6 +300,17 @@ Optional methods: FMEA/FMECA, HAZOP integration, and risk-based inspection plann
 7. Risk register and mitigation allocation.
 8. Configuration management and change log.
 9. Compliance evidence index.
+
+### 13.1 Semantic-Layer Deliverables (Required)
+
+In addition to the baseline package above, each released revision should include:
+
+1. Frozen requirement set with assumption register and source references.
+2. Signed design basis with exact code editions and jurisdiction assumptions.
+3. Verification plan mapping requirement IDs -> clause IDs -> model IDs.
+4. Verification task execution records (including unit checks and reproducibility hashes).
+5. Clause-level compliance matrix with closed nonconformance dispositions.
+6. Change-impact report showing why checks were or were not re-executed.
 
 ---
 
