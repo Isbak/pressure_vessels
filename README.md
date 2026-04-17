@@ -230,7 +230,25 @@ To support ASME/PED-style review workflows:
 
 ---
 
-## 13. Disclaimer
+
+## 14. Agent Governance (Codex + Claude Code)
+
+A governance starter policy is available at **`AGENT_GOVERNANCE.md`**. It defines:
+
+- Risk-based merge gates
+- Dual-agent workflow and separation of duties
+- Required controls (branch protection, CI, secret scanning)
+- Audit logging expectations and rollout plan
+
+Adopt this as the baseline operating model for agent-assisted development in this project.
+
+See **`AGENT_FILE_STRUCTURE.md`** for a recommended repository layout for running both agents effectively.
+
+Note: this repository currently implements a **starter baseline**; treat it as a foundation and evolve toward stricter policy-as-code and security assurance controls over time.
+
+---
+
+## 15. Disclaimer
 
 This tool is intended to assist qualified engineers, not replace engineering judgment or statutory review. Final responsibility for design compliance and certification remains with authorized professionals and governing bodies.
 
