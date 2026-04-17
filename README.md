@@ -14,8 +14,10 @@ This README describes a product blueprint for a modular toolchain that supports:
 Related repository docs:
 
 - `docs/architecture.md`
+- `docs/tech-stack.md`
 - `docs/modular_pressure_vessel_ontology_and_information_model.md`
 - `docs/semantic_layer_workflows_for_requirements_verification.md`
+- `docs/decision-log/`
 
 ---
 
