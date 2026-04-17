@@ -11,6 +11,12 @@ This README describes a product blueprint for a modular toolchain that supports:
 - Manufacturing package generation
 - Certification-ready documentation and audit trails
 
+Related repository docs:
+
+- `docs/architecture.md`
+- `docs/modular_pressure_vessel_ontology_and_information_model.md`
+- `docs/semantic_layer_workflows_for_requirements_verification.md`
+
 ---
 
 ## 1. Vision
@@ -251,4 +257,3 @@ Note: this repository currently implements a **starter baseline**; treat it as a
 ## 15. Disclaimer
 
 This tool is intended to assist qualified engineers, not replace engineering judgment or statutory review. Final responsibility for design compliance and certification remains with authorized professionals and governing bodies.
-
