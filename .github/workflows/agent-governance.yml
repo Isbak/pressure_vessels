@@ -1,0 +1,15 @@
+name: Agent Governance
+
+on:
+  pull_request:
+
+jobs:
+  governance-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure governance artifacts exist
+        run: |
+          test -f .github/pull_request_template.md
+          test -f .agents/codex/AGENTS.md
+          test -f .agents/claude/CLAUDE.md
