@@ -252,7 +252,7 @@ items:
   area: verification
   phase: 'Phase 2: Production'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-003

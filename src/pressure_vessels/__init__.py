@@ -54,6 +54,23 @@ from .dossier_export_pipeline import (
     write_certification_dossier_export,
 )
 
+
+from .change_impact_pipeline import (
+    BASELINE_UPDATE_STATUS_VERSION,
+    IMPACT_REPORT_VERSION,
+    BaselineUpdateStatus,
+    ImpactReport,
+    ReverificationResult,
+    RevisionDelta,
+    RevisionTraceSnapshot,
+    build_revision_trace_snapshot,
+    compute_minimal_reverification_set,
+    detect_revision_delta,
+    execute_selective_reverification,
+    generate_change_impact_report,
+    write_impact_report,
+)
+
 from .traceability_pipeline import (
     AUDIT_REPORT_TEMPLATE_VERSION,
     TRACEABILITY_GRAPH_REVISION_VERSION,
@@ -104,6 +121,19 @@ __all__ = [
     "ReportSectionTemplate",
     "SignedCalculationSnapshotRef",
     "SizingCheckInput",
+    "BASELINE_UPDATE_STATUS_VERSION",
+    "IMPACT_REPORT_VERSION",
+    "BaselineUpdateStatus",
+    "ImpactReport",
+    "ReverificationResult",
+    "RevisionDelta",
+    "RevisionTraceSnapshot",
+    "build_revision_trace_snapshot",
+    "compute_minimal_reverification_set",
+    "detect_revision_delta",
+    "execute_selective_reverification",
+    "generate_change_impact_report",
+    "write_impact_report",
     "AUDIT_REPORT_TEMPLATE_VERSION",
     "ApprovalRecord",
     "TRACEABILITY_GRAPH_REVISION_VERSION",

@@ -6,6 +6,7 @@ This document defines a practical starting point for governing two coding agents
 
 - **Claude Code-based agent** (analysis, review, hardening, and secondary implementation)
 
+
 It is intentionally lightweight so teams can adopt it immediately and evolve it with real project experience.
 
 ---
@@ -22,6 +23,7 @@ It is intentionally lightweight so teams can adopt it immediately and evolve it 
 
 5. **Continuous improvement**: measure outcomes and tighten controls over time.
 
+
 ---
 
 ## 2) Scope & Applicability
@@ -34,11 +36,13 @@ This policy applies to:
 
 - Local, CI, and cloud execution contexts.
 
+
 Out of scope (for now):
 
 - Third-party infrastructure governance outside this repository.
 
 - Organization-wide IAM policies (should be referenced from corporate standards).
+
 
 ---
 
@@ -54,6 +58,7 @@ Out of scope (for now):
 
 - **Security Reviewer**: required for permission model, secrets, or supply-chain changes.
 
+
 ### Agent Roles
 
 - **Codex Agent**:
@@ -67,6 +72,7 @@ Out of scope (for now):
   - Secondary implementation/review agent.
 
   - Performs independent risk review on substantial changes.
+
 
 > Either agent may author code. Neither agent may self-approve for merge.
 
@@ -82,6 +88,7 @@ Classify every PR as one of:
 
 - **High risk**: calculation logic tied to compliance, security controls, CI/CD permissions, data/schema migrations.
 
+
 ### Minimum approvals
 
 - **Low risk**: 1 human reviewer.
@@ -89,6 +96,7 @@ Classify every PR as one of:
 - **Medium risk**: 1 engineering reviewer + passing CI.
 
 - **High risk**: 2 humans (engineering + domain/security as applicable) + passing CI + explicit checklist completion.
+
 
 ---
 
@@ -120,6 +128,7 @@ Classify every PR as one of:
 
    - Only after all required checks and approvals pass.
 
+
 ---
 
 ## 6) Required Controls (Baseline)
@@ -134,6 +143,7 @@ Classify every PR as one of:
 
 - Require at least one non-author human approval.
 
+
 ### CI controls
 
 - Run formatting, linting, and tests on every PR.
@@ -142,6 +152,7 @@ Classify every PR as one of:
 
 - Store build/test artifacts for auditability.
 
+
 ### Secret and dependency controls
 
 - Enable secret scanning in CI.
@@ -149,6 +160,7 @@ Classify every PR as one of:
 - Block commits that introduce plaintext secrets.
 
 - Require lockfile updates and vulnerability scan on dependency changes.
+
 
 ---
 
@@ -164,17 +176,20 @@ Classify every PR as one of:
 
 - Agents must avoid disabling tests/security checks to pass CI.
 
+
 ### Codex-specific
 
 - Prefer small, incremental commits with tests.
 
 - Include file-level rationale in PR description.
 
+
 ### Claude Code-specific
 
 - Perform adversarial review for edge cases on medium/high risk PRs.
 
 - Explicitly call out uncertainty and required human validation.
+
 
 ---
 
@@ -191,6 +206,7 @@ For each agent-authored PR, record:
 - Review outcomes and approval identity.
 
 - Final merge decision and timestamp.
+
 
 Store logs in PR metadata and CI artifacts for a minimum retention period defined by your organization.
 
@@ -212,6 +228,7 @@ A PR is done only when all are true:
 
 - Rollback approach noted for medium/high risk changes.
 
+
 ---
 
 ## 10) Starter Governance Checklist
@@ -232,6 +249,7 @@ Use this checklist in every PR description:
 
 - [ ] Rollback plan included (for medium/high)
 
+
 ---
 
 ## 11) 30/60/90-Day Rollout
@@ -244,6 +262,7 @@ Use this checklist in every PR description:
 
 - Start collecting basic metrics (PR cycle time, escaped defects).
 
+
 ### By 60 days
 
 - Add dependency + secret scanning gates.
@@ -252,6 +271,7 @@ Use this checklist in every PR description:
 
 - Introduce incident review template for agent-related regressions.
 
+
 ### By 90 days
 
 - Add policy-as-code checks for PR metadata completeness.
@@ -259,6 +279,7 @@ Use this checklist in every PR description:
 - Establish quarterly governance review with engineering + domain stakeholders.
 
 - Tune controls based on observed failure patterns.
+
 
 ---
 
@@ -273,6 +294,7 @@ Use this checklist in every PR description:
 - Security finding count/severity.
 
 - % PRs with complete governance checklist.
+
 
 Use trends to improve prompts, review depth, and gate strictness.
 
@@ -290,6 +312,7 @@ Use this repository as **Level 1 (Foundational)** governance. Move toward best p
 
 - **Level 4 (Optimized):** measured risk-based autonomy (agent permissions vary by task risk), automated rollback validation, and quarterly control tuning from defect/security trends.
 
+
 ### Practical benchmark for "best practice"
 
 You are close to best practice when all of the following are true:
@@ -303,6 +326,7 @@ You are close to best practice when all of the following are true:
 4. Agent identity, prompts (sanitized), and decision trail are logged for each change.
 
 5. Regular governance reviews produce policy improvements with evidence.
+
 
 ---
 

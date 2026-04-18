@@ -4,6 +4,7 @@
 
 - Date: 2026-04-17
 
+
 ## Context
 
 Agentic retrieval workflows require open-source semantic retrieval integrated with knowledge graph and standards-aware search.
@@ -18,6 +19,7 @@ Adopt **Qdrant** as the default vector retrieval store.
 
 - Milvus
 
+
 ## Consequences
 
 - Supports high-quality semantic retrieval with manageable operational footprint.
@@ -25,6 +27,7 @@ Adopt **Qdrant** as the default vector retrieval store.
 - Requires embedding schema governance and re-index processes.
 
 - Must be validated regularly against retrieval quality benchmarks.
+
 
 ## Rollback / Migration Trigger
 

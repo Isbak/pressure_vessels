@@ -6,11 +6,13 @@
 
 - Prompt/template wording edits.
 
+
 ## Medium Risk
 
 - Workflow automation changes.
 
 - Agent instruction changes that affect review or approval sequencing.
+
 
 ## High Risk
 

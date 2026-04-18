@@ -7,6 +7,7 @@ This document defines the deterministic contract for the BL-007 certification do
 - Python API: `pressure_vessels.dossier_export_pipeline.generate_certification_dossier_export(requirement_set, design_basis, applicability_matrix, calculation_records, non_conformance_list, compliance_dossier_human, compliance_dossier_machine, traceability_graph_revision, revision_id, previous_revision_id=None, now_utc=None)`
 - Persistence helper: `pressure_vessels.dossier_export_pipeline.write_certification_dossier_export(export_package, directory, filename_prefix="")`
 
+
 ## BL-007 Handoff Gate (Required)
 
 BL-007 proceeds only if all are true:
@@ -16,6 +17,7 @@ BL-007 proceeds only if all are true:
 - `revision_id` is non-empty.
 - Traceability graph references the exact machine dossier hash (`source_compliance_dossier_hash == ComplianceDossierMachine.deterministic_hash`).
 
+
 If any condition fails, BL-007 raises a deterministic `ValueError` (fail closed).
 
 ## Output Artifact
@@ -23,6 +25,7 @@ If any condition fails, BL-007 raises a deterministic `ValueError` (fail closed)
 `generate_certification_dossier_export` returns:
 
 - `CertificationDossierExportPackage.v1`
+
 
 The package includes:
 
@@ -33,6 +36,7 @@ The package includes:
 5. **Inspector/regulator workflow scaffold** (`InspectorRegulatorWorkflow.v1`).
 6. **Template catalog** (`CertificationDossierTemplateCatalog.v1`) for report section composition.
 
+
 ### Key JSON Fields
 
 - `template_catalog[]`: deterministic section catalog used by PDF rendering and package review.
@@ -42,12 +46,14 @@ The package includes:
 - `pdf_payload`: canonical payload for future PDF renderer.
 - `package_artifact_refs[]`: evidence references tying package, PDF payload, compliance, traceability, signed snapshots, and change impact sections.
 
+
 ## Deterministic Controls
 
 - `generated_at_utc` supports injection via `now_utc` for reproducible tests.
 - Signed snapshots are sorted by `check_id`.
 - Section templates and workflow steps are fixed deterministic catalogs.
 - Package hash is SHA-256 of canonical unsigned payload (`json.dumps(..., sort_keys=True, separators=(",", ":"))`).
+
 
 ## Acceptance-Criteria Mapping
 

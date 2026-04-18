@@ -16,6 +16,7 @@ Audit of the BL-003 delivery (commit `cc23b81` "Implement BL-003 deterministic c
 
 - `AGENT_GOVERNANCE.md`, `docs/decision-log/`
 
+
 ## Method
 
 1. Re-read the BL-003 acceptance criteria, deliverables, and referenced workflow/README sections.
@@ -25,6 +26,7 @@ Audit of the BL-003 delivery (commit `cc23b81` "Implement BL-003 deterministic c
 3. Ran the full test suite (`pytest -q`) — 12/12 green.
 
 4. Re-executed the pipeline on the canonical propane prompt and compared `deterministic_hash`/payloads against the checked-in sample artifacts — both the `CalculationRecords.v1` and `NonConformanceList.v1` samples reproduce byte-for-byte.
+
 
 ## Executive Summary
 
@@ -88,6 +90,7 @@ Not implemented and not tracked anywhere as deferred:
 
 - Model-domain / validity-envelope check (Workflow D step 4; Quality Gate #2)
 
+
 The BL-003 acceptance criterion only requires "shell/head/nozzle **and related checks**" so the delivery is defensible as an MVP slice, but the narrower scope is not recorded. Code comments label the formulas as "Placeholder extension point" (`calculation_pipeline.py:247, 267, 287`) but that is not visible from the roadmap.
 
 **Recommended fix:** either (a) add follow-up backlog items for MAWP, external pressure, reinforcement, utilization, and domain gating; or (b) add explicit "deferred from BL-003" notes in `docs/development_backlog.yaml` and/or a new ADR, so the coverage gap is auditable rather than implicit.
@@ -116,6 +119,7 @@ When `sizing_input=None`, `_normalize_and_resolve_inputs` (`calculation_pipeline
 
 - `nozzle_inside_diameter = 0.35 m`, `nozzle_provided_thickness = 0.004 m`
 
+
 These values are load-bearing — they determine pass/fail — but are not recorded in `DesignBasis.assumptions` (the BL-002 slot for exactly this), not surfaced as `unresolved_gaps` on the RequirementSet, and not mentioned in an ADR or the sample artifact commentary.
 
 This conflicts with:
@@ -125,6 +129,7 @@ This conflicts with:
 - README §9 "Explainability: Every result includes formula and clause provenance" (`README.md:273`).
 
 - `AGENT_GOVERNANCE.md` expectation that engineering assumptions are explicit and reviewable.
+
 
 **Impact:** the sample `CalculationRecords` artifact looks authoritative (signed hash, deterministic), but the pass/fail outcome depends on hidden assumptions that would never survive a certification review. A reader of `DesignBasis.v1.sample.json` cannot see why allowable stress is 138 MPa.
 
@@ -156,6 +161,7 @@ Acceptance criterion 3 says the records are "stored". The pipeline returns datac
 
 - Using SHA-256 over canonicalized JSON for both per-check and per-artifact reproducibility hashes, with the specific canonicalization rule `sort_keys=True, separators=(",",":")`.
 
+
 **Impact:** medium-term auditability — future reviewers (or an agent doing BL-008 change-impact analysis) have no single place to understand why the numeric outputs are what they are.
 
 **Recommended fix:** add `ADR-0005-bl-003-sizing-check-scope-and-defaults.md` documenting the MVP placeholder scope, the chosen canonical hashing scheme, and the default material/geometry assumptions (until the Materials Module replaces them).
@@ -172,6 +178,7 @@ Acceptance criterion 3 says the records are "stored". The pipeline returns datac
 
 5. **P3 — Strengthen handoff unit gate (F7), add persistence helper (F8), and capture BL-003 decisions in an ADR (F9).**
 
+
 ## Commands Run
 
 - `pytest -q` (12 passed)
@@ -179,6 +186,7 @@ Acceptance criterion 3 says the records are "stored". The pipeline returns datac
 - Independent re-execution of `run_calculation_pipeline` on the canonical propane prompt and comparison against `artifacts/bl-003/*.v1.sample.json`
 
 - Review of `git log` around BL-003 merge (`cc23b81`, `818f057`)
+
 
 ## Audit Conclusion
 

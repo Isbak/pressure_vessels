@@ -12,6 +12,7 @@ This document defines a **semantic layer** that lets an agent-driven pressure ve
 
 - and produce auditable evidence for certification.
 
+
 It is intended to work alongside the architecture and ontology documents in this repository.
 
 ---
@@ -30,6 +31,7 @@ The semantic layer is a normalized knowledge graph + rule model that maps:
 
 5. **Evidence artifacts** (what proves compliance).
 
+
 ### 2.1 Canonical Semantic Objects
 
 - **Requirement**: pressure, temperature, fluid, volume, corrosion allowance, design life, cyclic duty.
@@ -45,6 +47,7 @@ The semantic layer is a normalized knowledge graph + rule model that maps:
 - **DecisionRecord**: why a rule/model/task was selected.
 
 - **EvidenceBundle**: calculation snapshot, report section, source clause, reviewer sign-off.
+
 
 ---
 
@@ -70,6 +73,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 
 5. Assign requirement IDs and frozen revision hash.
 
+
 **Outputs:** `RequirementSet.vX` + unresolved gap list.
 
 ---
@@ -92,6 +96,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 
 5. Record justification for any non-applicable clause.
 
+
 **Outputs:** signed `DesignBasis` + `ApplicabilityMatrix`.
 
 ---
@@ -111,6 +116,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 4. Register assumptions and conservative defaults.
 
 5. Freeze model version references used for this design revision.
+
 
 **Outputs:** `VerificationPlan` linking requirement IDs -> clause IDs -> model IDs.
 
@@ -132,6 +138,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 
 5. Persist calculation input/output snapshots with reproducibility hashes.
 
+
 **Outputs:** `CalculationRecords` + non-conformance list.
 
 ---
@@ -152,6 +159,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 
 5. Produce export package (human-readable + machine-readable).
 
+
 **Outputs:** `ComplianceDossier` with complete trace graph.
 
 ---
@@ -171,6 +179,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 4. Re-run affected tasks and compare against prior baseline.
 
 5. Produce signed change impact report.
+
 
 **Outputs:** `ImpactReport` + updated baseline status.
 
@@ -194,6 +203,7 @@ The semantic layer should encode standards as typed obligations, not only text c
 
   - Conformity assessment and essential safety requirements mapping.
 
+
 ## 4.2 Supporting Standards (Typical)
 
 - Material specifications (e.g., ASME Section II references).
@@ -205,6 +215,7 @@ The semantic layer should encode standards as typed obligations, not only text c
 - Pressure testing and inspection requirements.
 
 - Relief and overpressure protection references.
+
 
 > Note: exact code editions and adopted references are project/jurisdiction-specific and must be captured explicitly in `DesignBasis`.
 
@@ -228,6 +239,7 @@ Each `EngineeringModel` entry should be tagged with model family and validity en
 
 - **Flange/closure rating and gasket seating relationships** (where applicable by selected route).
 
+
 ## 5.2 Load and Strength Interaction Models
 
 - Combined pressure + external loads (wind, seismic, nozzle loads) per selected acceptance route.
@@ -235,6 +247,7 @@ Each `EngineeringModel` entry should be tagged with model family and validity en
 - Primary membrane/bending stress categorization when required by chosen standard path.
 
 - Local discontinuity treatment via rule-based or analysis-based method.
+
 
 ## 5.3 Material and Temperature Models
 
@@ -244,6 +257,7 @@ Each `EngineeringModel` entry should be tagged with model family and validity en
 
 - Corrosion allowance and minimum structural thickness logic.
 
+
 ## 5.4 Fatigue / Cyclic Service (When Applicable)
 
 - Cycle counting category and screening thresholds.
@@ -251,6 +265,7 @@ Each `EngineeringModel` entry should be tagged with model family and validity en
 - Fatigue curve-based usage factors for applicable standards/routes.
 
 - Cumulative damage rules where explicitly required.
+
 
 ## 5.5 Safety/Relief Basis Models (Interface Layer)
 
@@ -260,6 +275,7 @@ Each `EngineeringModel` entry should be tagged with model family and validity en
 
 - Relief sizing model references (if included in project scope).
 
+
 ## 5.6 Numerical / High-Fidelity Models (Optional)
 
 - FEA-based stress linearization workflows (for analysis routes).
@@ -267,6 +283,7 @@ Each `EngineeringModel` entry should be tagged with model family and validity en
 - Buckling eigenvalue and nonlinear collapse workflows when required.
 
 - CFD/thermal coupling only where performance requirements demand it.
+
 
 ---
 
@@ -294,6 +311,7 @@ Add the following entities to the information model for better automation fideli
 
   - `decision_id`, `subject_type`, `subject_id`, `decision_text`, `approved_by`, `approved_at`
 
+
 ---
 
 ## 7) Automation Quality Gates
@@ -309,6 +327,7 @@ Every automated workflow execution should enforce:
 4. **Traceability gate**: fail if any pass/fail result lacks source clause + input snapshot.
 
 5. **Determinism gate**: rerun with same inputs/version must match previous results.
+
 
 ---
 
@@ -327,5 +346,6 @@ For each project revision, the platform should emit:
 - Clause-by-clause `ComplianceMatrix` and evidence links.
 
 - A `ChangeImpactReport` for every revision after baseline release.
+
 
 This gives a complete digital thread from user intent to certifiable evidence.

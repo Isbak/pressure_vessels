@@ -14,6 +14,7 @@ Implement scoped tasks safely, with tests and clear rationale.
 
 - Document assumptions and uncertainty in PR notes.
 
+
 ## Handoff expectations
 
 For medium/high-risk changes, request independent Claude review before merge.

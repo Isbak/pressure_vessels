@@ -6,6 +6,7 @@ This document defines the minimal deterministic contract for the **Prompt Intake
 
 - Python API: `pressure_vessels.requirements_pipeline.parse_prompt_to_requirement_set(prompt: str, now_utc: datetime | None = None)`
 
+
 ## Output Artifact
 
 The parser returns a `RequirementSet.v1` structure suitable for JSON serialization.
@@ -49,11 +50,13 @@ The following fields are mandatory for downstream design-basis processing:
 
 - `code_standard`
 
+
 If any mandatory field is absent/unparseable:
 
 - it is listed in `unresolved_gaps`
 
 - `downstream_blocked` is set to `true`
+
 
 ## Canonical Unit Policy
 
@@ -67,6 +70,7 @@ Normalized canonical units in `RequirementSet.v1`:
 
 - `corrosion_allowance` → `mm`
 
+
 ## Determinism/Traceability Controls
 
 - Deterministic regex-based extraction only (no non-deterministic model calls).
@@ -76,6 +80,7 @@ Normalized canonical units in `RequirementSet.v1`:
 - `source_text` stores matched prompt substring for traceability.
 
 - `generated_at_utc` can be injected (`now_utc`) to support reproducible tests.
+
 
 ## BL-002 Handoff Contract
 
