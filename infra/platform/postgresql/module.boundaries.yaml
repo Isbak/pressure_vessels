@@ -1,0 +1,41 @@
+version: 1
+kind: PlatformDatastorePostgresqlModule
+metadata:
+  name: platform-datastore-postgresql-boundaries
+spec:
+  owner: data-platform
+  engine:
+    family: postgresql
+    major_version: "16"
+  schema_ownership:
+    - schema: platform_control
+      owner: platform-runtime
+      lifecycle: platform-release-managed
+      write_access:
+        - services/backend
+    - schema: compliance_records
+      owner: compliance-engineering
+      lifecycle: append-only-revisioned
+      write_access:
+        - services/backend
+    - schema: traceability_graph
+      owner: knowledge-platform
+      lifecycle: migration-reviewed
+      write_access:
+        - services/backend
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    migration_execution_owner: platform-runtime
+    migration_approval_required_from:
+      - owning-domain-team
+      - engineering-reviewer
+    backup_policy:
+      dev: daily-7d
+      staging: daily-30d
+  governance:
+    direct_service_access:
+      allowed: false
+      path: backend-api-only
+    deterministic_naming:
+      database: pressure_vessels
+      role_prefix: pv_

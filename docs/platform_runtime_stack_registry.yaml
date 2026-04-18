@@ -14,10 +14,10 @@ components:
     notes: NestJS-style service skeleton committed in-repo.
   - key: datastore-postgresql
     capability: data
-    status: planned
+    status: deployed
     owner: data-platform
     module_path: infra/platform/postgresql
-    notes: Persistent relational data store.
+    notes: PostgreSQL datastore module skeleton with schema ownership and lifecycle boundaries committed in-repo.
   - key: cache-redis
     capability: cache-and-queue
     status: planned
