@@ -50,9 +50,9 @@ from .standards_ingestion_pipeline import (
 )
 
 from .dossier_export_pipeline import (
+    CANONICAL_DOSSIER_PDF_RENDER_VERSION,
     CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION,
     CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION,
-    CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION,
     INSPECTOR_WORKFLOW_VERSION,
     SIGNED_CALCULATION_SNAPSHOT_SET_VERSION,
     TEMPLATE_CATALOG_VERSION,
@@ -60,7 +60,9 @@ from .dossier_export_pipeline import (
     InspectorWorkflowStep,
     ReportSectionTemplate,
     SignedCalculationSnapshotRef,
+    WorkflowSignoffTransition,
     generate_certification_dossier_export,
+    render_canonical_dossier_pdf,
     write_certification_dossier_export,
 )
 
@@ -160,7 +162,7 @@ __all__ = [
     "ReviewChecklistItem",
     "CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION",
     "CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION",
-    "CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION",
+    "CANONICAL_DOSSIER_PDF_RENDER_VERSION",
     "INSPECTOR_WORKFLOW_VERSION",
     "SIGNED_CALCULATION_SNAPSHOT_SET_VERSION",
     "TEMPLATE_CATALOG_VERSION",
@@ -168,6 +170,7 @@ __all__ = [
     "InspectorWorkflowStep",
     "ReportSectionTemplate",
     "SignedCalculationSnapshotRef",
+    "WorkflowSignoffTransition",
     "SizingCheckInput",
     "CAD_PARAMETER_EXPORT_VERSION",
     "GEOMETRY_INPUT_VERSION",
@@ -233,6 +236,7 @@ __all__ = [
     "write_calculation_artifacts",
     "write_compliance_artifacts",
     "generate_certification_dossier_export",
+    "render_canonical_dossier_pdf",
     "write_certification_dossier_export",
     "ParsedClause",
     "NormalizedClause",
