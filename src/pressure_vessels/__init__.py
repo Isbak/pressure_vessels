@@ -134,6 +134,18 @@ from .governance_pipeline import (
     evaluate_governance_gates,
 )
 
+
+from .workflow_orchestrator import (
+    APPROVAL_GATE_EVENT_VERSION,
+    WORKFLOW_EXECUTION_REPORT_VERSION,
+    ApprovalGateEvent,
+    WorkflowExecutionReport,
+    WorkflowExecutionTraceEvent,
+    WorkflowStageSpec,
+    build_approval_gate_event,
+    orchestrate_workflow,
+)
+
 from .requirements_pipeline import (
     Gap,
     RequirementSet,
@@ -231,6 +243,14 @@ __all__ = [
     "PolicyExceptionApproval",
     "build_governance_policy",
     "evaluate_governance_gates",
+    "APPROVAL_GATE_EVENT_VERSION",
+    "WORKFLOW_EXECUTION_REPORT_VERSION",
+    "ApprovalGateEvent",
+    "WorkflowExecutionReport",
+    "WorkflowExecutionTraceEvent",
+    "WorkflowStageSpec",
+    "build_approval_gate_event",
+    "orchestrate_workflow",
     "build_design_basis",
     "generate_compliance_dossier",
     "parse_prompt_to_requirement_set",
