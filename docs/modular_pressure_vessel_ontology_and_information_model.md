@@ -8,7 +8,6 @@ This document defines:
 
 - An **information model** (entities, attributes, identifiers, lifecycle state) that can be implemented in relational, document, or graph stores.
 
-
 The model supports engineering design, fabrication, inspection, operations, and compliance traceability for vessels assembled from reusable modules.
 
 ---
@@ -101,7 +100,6 @@ The model supports engineering design, fabrication, inspection, operations, and 
 
   - Drawings, WPS/PQR, MTRs, certificates, reports, CAD, simulation files.
 
-
 ### 2.2 Class Hierarchy (Simplified)
 
 - **Component**
@@ -150,7 +148,6 @@ The model supports engineering design, fabrication, inspection, operations, and 
 
   - MaterialVerificationRecord
 
-
 ### 2.3 Key Relationships (Object Properties)
 
 - `PressureVesselSystem definedBy Requirement`
@@ -195,7 +192,6 @@ The model supports engineering design, fabrication, inspection, operations, and 
 
 - `DigitalArtifact documents (Component | Joint | CalculationRecord | InspectionTestRecord)`
 
-
 ### 2.4 Data Properties (Selected)
 
 - **Identifiers & versioning**
@@ -216,7 +212,6 @@ The model supports engineering design, fabrication, inspection, operations, and 
 
   - `effectiveFrom`, `effectiveTo`, `state` (Designed/Fabricated/Installed/InService/Retired)
 
-
 ### 2.5 Ontology Constraints (Examples)
 
 - Every `PressureBoundaryComponent` **must** reference one `MaterialSpecification`.
@@ -228,7 +223,6 @@ The model supports engineering design, fabrication, inspection, operations, and 
 - If a module is replaced (`LifecycleEvent = ModuleReplacement`), previous and new `configurationId` must be traceable.
 
 - A `ComplianceEvidence` bundle is complete only if it includes at least one rule, one calculation, and one verification artifact.
-
 
 ---
 
@@ -264,7 +258,6 @@ Below is an implementation-friendly entity model.
 
 - `created_at`, `updated_at`
 
-
 ### `requirement`
 
 - `requirement_id` (PK)
@@ -286,7 +279,6 @@ Below is an implementation-friendly entity model.
 - `source_artifact_id` (FK -> digital_artifact, nullable)
 
 - `created_at`, `updated_at`
-
 
 ### `design_basis`
 
@@ -310,7 +302,6 @@ Below is an implementation-friendly entity model.
 
 - `baseline_configuration_id` (FK -> configuration_baseline, nullable)
 
-
 ### `standard_package`
 
 - `package_id` (PK)
@@ -326,7 +317,6 @@ Below is an implementation-friendly entity model.
 - `checksum`
 
 - `status` (draft/released/deprecated)
-
 
 ### `applicability_rule`
 
@@ -345,7 +335,6 @@ Below is an implementation-friendly entity model.
 - `version`
 
 - `is_active` (bool)
-
 
 ### `engineering_model`
 
@@ -366,7 +355,6 @@ Below is an implementation-friendly entity model.
 - `verification_status` (validated/provisional/deprecated)
 
 - `version`
-
 
 ### `verification_task`
 
@@ -390,7 +378,6 @@ Below is an implementation-friendly entity model.
 
 - `executed_at`
 
-
 ### `module`
 
 - `module_id` (PK)
@@ -412,7 +399,6 @@ Below is an implementation-friendly entity model.
 - `status`
 
 - `effective_from`, `effective_to`
-
 
 ### `component`
 
@@ -440,7 +426,6 @@ Below is an implementation-friendly entity model.
 
 - `revision`
 
-
 ### `joint`
 
 - `joint_id` (PK)
@@ -459,7 +444,6 @@ Below is an implementation-friendly entity model.
 
 - `leak_tightness_class`
 
-
 ### `material_specification`
 
 - `material_spec_id` (PK)
@@ -477,7 +461,6 @@ Below is an implementation-friendly entity model.
 - `temperature_limit_min`, `temperature_limit_max`
 
 - `traceability_required` (bool)
-
 
 ### `design_condition`
 
@@ -499,7 +482,6 @@ Below is an implementation-friendly entity model.
 
 - `notes`
 
-
 ### `load_case`
 
 - `load_case_id` (PK)
@@ -513,7 +495,6 @@ Below is an implementation-friendly entity model.
 - `load_factors_json`
 
 - `acceptance_criteria_json`
-
 
 ### `code_rule`
 
@@ -530,7 +511,6 @@ Below is an implementation-friendly entity model.
 - `machine_expression` (nullable)
 
 - `applicability_json`
-
 
 ### `calculation_record`
 
@@ -558,7 +538,6 @@ Below is an implementation-friendly entity model.
 
 - `reproducibility_hash`
 
-
 ### `inspection_test_record`
 
 - `test_id` (PK)
@@ -583,7 +562,6 @@ Below is an implementation-friendly entity model.
 
 - `evidence_artifact_id` (FK -> digital_artifact)
 
-
 ### `compliance_evidence`
 
 - `evidence_id` (PK)
@@ -606,7 +584,6 @@ Below is an implementation-friendly entity model.
 
 - `comments`
 
-
 ### `decision_record`
 
 - `decision_id` (PK)
@@ -627,7 +604,6 @@ Below is an implementation-friendly entity model.
 
 - `artifact_id` (FK -> digital_artifact, nullable)
 
-
 ### `configuration_baseline`
 
 - `configuration_id` (PK)
@@ -643,7 +619,6 @@ Below is an implementation-friendly entity model.
 - `released_by`
 
 - `released_at`
-
 
 ### `lifecycle_event`
 
@@ -662,7 +637,6 @@ Below is an implementation-friendly entity model.
 - `summary`
 
 - `artifact_id` (FK -> digital_artifact, nullable)
-
 
 ### `digital_artifact`
 
@@ -683,7 +657,6 @@ Below is an implementation-friendly entity model.
 - `created_by`
 
 - `created_at`
-
 
 ---
 
@@ -714,7 +687,6 @@ Below is an implementation-friendly entity model.
 - One `configuration_baseline` references a time-consistent set of modules/components.
 
 - At least one `compliance_evidence` record is required per mandatory governing rule.
-
 
 ---
 
@@ -782,7 +754,6 @@ Below is an implementation-friendly entity model.
 
 - **Immutable event log** for lifecycle and audit.
 
-
 ---
 
 ## 7) Minimum Viable Validation Rules
@@ -802,7 +773,6 @@ Below is an implementation-friendly entity model.
 7. Every `verification_task` must reference a validated `engineering_model` within model domain limits.
 
 8. Any failed/blocked verification task must have a closed `decision_record` before baseline release.
-
 
 ---
 

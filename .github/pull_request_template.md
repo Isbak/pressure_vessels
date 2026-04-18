@@ -8,7 +8,6 @@
 
 - [ ] High
 
-
 ## Agent Attribution
 
 - [ ] Codex
@@ -16,7 +15,6 @@
 - [ ] Claude Code
 
 - [ ] Both
-
 
 ## Governance Checklist
 

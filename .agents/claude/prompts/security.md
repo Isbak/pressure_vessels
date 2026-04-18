@@ -10,7 +10,6 @@ Check for:
 
 - Injection or authz gaps
 
-
 Output:
 
 - Risks, impacted paths, and mitigation recommendations.

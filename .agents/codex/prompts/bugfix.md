@@ -8,7 +8,6 @@ Reproduction:
 
 2. <step>
 
-
 Acceptance:
 
 - Bug no longer reproduces.

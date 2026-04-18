@@ -4,7 +4,6 @@
 
 - Date: 2026-04-17
 
-
 ## Context
 
 The platform needs graph-native reasoning for standards clauses, requirement traceability, and evidence links across design artifacts.
@@ -19,7 +18,6 @@ Adopt **Neo4j Community** as the primary knowledge graph store.
 
 - ArangoDB
 
-
 ## Consequences
 
 - Enables expressive graph traversal and lineage queries.
@@ -27,7 +25,6 @@ Adopt **Neo4j Community** as the primary knowledge graph store.
 - Introduces dedicated graph schema and backup lifecycle to operations.
 
 - Requires integration guidance for graph + vector hybrid retrieval.
-
 
 ## Rollback / Migration Trigger
 

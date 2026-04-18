@@ -8,7 +8,6 @@
 
 - Related interface contract: `docs/interfaces/calculation_pipeline_contract.md`
 
-
 ## Context
 
 BL-003 delivers the first executable slice of the Calculation Engine described in `README.md` §3 and Workflow D of `docs/semantic_layer_workflows_for_requirements_verification.md`. The slice must be deterministic, unit-safe, traceable, and reproducible. Three engineering-significant choices were not captured in a decision record as part of the initial delivery (flagged by the BL-003 audit as F4, F6, F9). This ADR documents them so that downstream items (BL-004 compliance report, BL-008 change-impact analysis) have a single source of truth for their inputs.
@@ -25,7 +24,6 @@ BL-003 implements thickness checks for:
 
 - UG-45 nozzle neck minimum thickness (simplified, pending reinforcement-area logic)
 
-
 The following items from Workflow D are deferred and tracked as follow-up backlog entries, not silent gaps:
 
 - BL-003a MAWP check
@@ -37,7 +35,6 @@ The following items from Workflow D are deferred and tracked as follow-up backlo
 - BL-003d Margin / utilization near-limit reporting (basic margin and utilization ratio are now emitted; threshold-based near-limit reporting remains)
 
 - BL-003e Model-domain / validity-envelope gating
-
 
 ### 2. Placeholder defaults when `sizing_input` is absent
 
@@ -78,7 +75,6 @@ The BL-003 handoff gate iterates over `requirements_pipeline.CANONICAL_UNITS` an
 - The placeholder allowable stress and joint efficiency **must** be replaced before any output is used for a real certification; this ADR makes that dependency explicit.
 
 - The BL-002 `ApplicabilityMatrix` is extended with UG-27, UG-32, UG-45 clauses (applicable under internal pressure), so BL-003's clause-coverage gate is satisfiable with the BL-002 MVP output.
-
 
 ## Alternatives Considered
 

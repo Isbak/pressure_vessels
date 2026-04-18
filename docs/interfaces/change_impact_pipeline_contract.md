@@ -13,7 +13,6 @@
 - `generate_change_impact_report(previous_snapshot, current_snapshot, previous_graph, current_graph, current_calculation_records, signing_key_ref, now_utc=None)`
 - `write_impact_report(impact_report, directory, filename_prefix="")`
 
-
 ## Schemas
 
 ### `RevisionTraceSnapshot.v1`
@@ -30,14 +29,12 @@ Required fields:
 - `code_fingerprint`
 - `model_fingerprint`
 
-
 ### `RevisionDelta.v1`
 
 Computed deterministic comparison between two snapshots.
 
 - `changed_domains[]`: subset of `requirement`, `code`, `model`
 - `changed_hashes`: `from`/`to` values by changed domain
-
 
 ### `ImpactReport.v1`
 
@@ -51,7 +48,6 @@ Signed artifact produced per revision delta.
 - `signing` (`algorithm`, `signing_key_ref`, deterministic `signature`)
 - `deterministic_hash`
 
-
 ### `BaselineUpdateStatus.v1`
 
 Explicit baseline decision persisted with each report.
@@ -60,14 +56,12 @@ Explicit baseline decision persisted with each report.
 - `rationale`
 - `reverification_check_ids[]`
 
-
 ## Re-verification Scope Rules
 
 - If code changes, all current checks are re-verified.
 - If model changes, impacted clauses/models are found from traceability graph link deltas.
 - If requirement changes, impacted requirement->clause links define clause scope.
 - Re-verification execution uses deterministic, already-produced calculation outcomes and emits clause/check-scoped evidence refs.
-
 
 ## Artifact Example
 

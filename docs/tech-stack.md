@@ -10,7 +10,6 @@ This document is the repository source of truth for selected implementation tech
 
 - Require evidence-based change control for medium/high-risk technology decisions.
 
-
 ## Selection Matrix
 
 | Layer | Selected Technology | Why Selected | Alternatives Considered | Owner | Upgrade Cadence |
@@ -43,7 +42,6 @@ Any pull request that changes selected technologies must include:
 
 4. Migration and rollback plan.
 
-
 ## Validation Requirements for Stack Changes
 
 - Functional: existing workflows remain operational.
@@ -51,7 +49,6 @@ Any pull request that changes selected technologies must include:
 - Non-functional: latency, throughput, and cost impact measured.
 
 - Governance: approvals follow risk class and merge gates.
-
 
 ## Exit Strategy Requirements
 
