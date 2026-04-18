@@ -62,7 +62,7 @@ items:
   area: calculation
   phase: 'Phase 1: MVP'
   priority: P0
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-001
@@ -71,6 +71,8 @@ items:
   - README.md#phase-1-mvp
   - README.md#core-modules
   - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  - docs/interfaces/calculation_pipeline_contract.md
+  - docs/decision-log/ADR-0005-bl-003-sizing-check-scope-and-defaults.md
   acceptance_criteria:
   - Deterministic sizing checks run for shell/head/nozzle and related checks.
   - All calculations are unit-safe with reproducibility hashes.
@@ -78,6 +80,94 @@ items:
   deliverables:
   - CalculationRecords
   - Non-conformance list
+  deferred_scope:
+  - BL-003a MAWP check (deferred to follow-up item)
+  - BL-003b External-pressure / buckling check (deferred to follow-up item)
+  - BL-003c Reinforcement-area replacement (UG-37/UG-45 full) (deferred)
+  - BL-003d Margin/utilization ratio reporting (deferred)
+  - BL-003e Model-domain / validity-envelope gating (deferred)
+- id: BL-003a
+  title: Implement MAWP check
+  area: calculation
+  phase: 'Phase 1: MVP'
+  priority: P1
+  status: todo
+  effort: S
+  depends_on:
+  - BL-003
+  references:
+  - README.md#core-modules
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  acceptance_criteria:
+  - MAWP is computed per applicable ASME Div 1 clauses for each sized component.
+  - Result is stored in CalculationRecords with clause_id and reproducibility hash.
+  deliverables:
+  - MAWP entries in CalculationRecords
+- id: BL-003b
+  title: Implement external-pressure / buckling check
+  area: calculation
+  phase: 'Phase 1: MVP'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-003
+  references:
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  acceptance_criteria:
+  - External-pressure check runs when external pressure is declared in RequirementSet.
+  - Uses UG-28 chart/equation route deterministically.
+  deliverables:
+  - External-pressure entries in CalculationRecords
+- id: BL-003c
+  title: Implement reinforcement-area replacement (UG-37/UG-45 full)
+  area: calculation
+  phase: 'Phase 1: MVP'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-003
+  references:
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  acceptance_criteria:
+  - Reinforcement-area replacement computed per UG-37/UG-45 for each nozzle.
+  - Records reference both nozzle and parent shell/head.
+  deliverables:
+  - Reinforcement entries in CalculationRecords
+- id: BL-003d
+  title: Report margins and utilization ratios
+  area: calculation
+  phase: 'Phase 1: MVP'
+  priority: P2
+  status: todo
+  effort: S
+  depends_on:
+  - BL-003
+  references:
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  acceptance_criteria:
+  - Each CalculationRecord exposes provided/required margin and utilization ratio.
+  - Near-limit threshold is configurable and persisted on the record.
+  deliverables:
+  - Margin/utilization fields on CalculationRecord
+- id: BL-003e
+  title: Enforce model-domain / validity-envelope gate
+  area: calculation
+  phase: 'Phase 1: MVP'
+  priority: P2
+  status: todo
+  effort: S
+  depends_on:
+  - BL-003
+  references:
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  - docs/semantic_layer_workflows_for_requirements_verification.md
+  acceptance_criteria:
+  - Each engineering model declares a validity envelope.
+  - Pipeline fails closed when inputs fall outside the declared envelope.
+  deliverables:
+  - Validity envelope metadata on CalculationRecord
 - id: BL-004
   title: Generate basic compliance report
   area: reporting

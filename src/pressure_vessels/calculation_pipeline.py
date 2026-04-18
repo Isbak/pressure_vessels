@@ -6,17 +6,36 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
-from .design_basis_pipeline import DesignBasis
-from .requirements_pipeline import RequirementSet
+from .design_basis_pipeline import ApplicabilityMatrix, DesignBasis
+from .requirements_pipeline import CANONICAL_UNITS, RequirementSet
 
 CALCULATION_RECORDS_VERSION = "CalculationRecords.v1"
 NON_CONFORMANCE_LIST_VERSION = "NonConformanceList.v1"
 
-_EXPECTED_REQUIREMENT_UNITS = {
-    "design_pressure": "Pa",
-    "corrosion_allowance": "mm",
+# BL-003 MVP placeholder defaults used when sizing_input is not supplied.
+# These are surfaced in the CalculationRecordsArtifact.applied_defaults section
+# so that every pass/fail outcome is traceable to an explicit assumption.
+_MVP_DEFAULTS = {
+    "allowable_stress_Pa": 138_000_000.0,
+    "joint_efficiency": 0.85,
+    "shell_inside_diameter_m": 2.0,
+    "shell_provided_thickness_m": 0.020,
+    "head_inside_diameter_m": 2.0,
+    "head_provided_thickness_m": 0.018,
+    "nozzle_inside_diameter_m": 0.35,
+    "nozzle_provided_thickness_m": 0.004,
+    "corrosion_allowance_fallback_mm": 1.5,
+    "source": "BL-003 MVP placeholder; replace with Materials Module outputs.",
+}
+
+# Maps each BL-003 check to the ApplicabilityMatrix clause it implements.
+_CHECK_CLAUSE_MAP: dict[str, str] = {
+    "UG-27-shell": "UG-27",
+    "UG-32-head": "UG-32",
+    "UG-45-nozzle": "UG-45",
 }
 
 
@@ -55,22 +74,28 @@ class SizingCheckInput:
 @dataclass(frozen=True)
 class CalculationRecord:
     check_id: str
+    clause_id: str
     component: str
     formula: str
     inputs: dict[str, float]
     required_thickness_m: float
     provided_thickness_m: float
+    margin_m: float
+    utilization_ratio: float
     pass_status: bool
     reproducibility: ReproducibilityMetadata
 
     def to_json_dict(self) -> dict[str, Any]:
         return {
             "check_id": self.check_id,
+            "clause_id": self.clause_id,
             "component": self.component,
             "formula": self.formula,
             "inputs": self.inputs,
             "required_thickness_m": self.required_thickness_m,
             "provided_thickness_m": self.provided_thickness_m,
+            "margin_m": self.margin_m,
+            "utilization_ratio": self.utilization_ratio,
             "pass_status": self.pass_status,
             "reproducibility": self.reproducibility.to_json_dict(),
         }
@@ -79,6 +104,7 @@ class CalculationRecord:
 @dataclass(frozen=True)
 class NonConformanceEntry:
     check_id: str
+    clause_id: str
     component: str
     observed: str
     required: str
@@ -94,6 +120,8 @@ class CalculationRecordsArtifact:
     generated_at_utc: str
     source_requirement_set_hash: str
     source_design_basis_signature: str
+    source_applicability_matrix_hash: str
+    applied_defaults: dict[str, Any]
     checks: list[CalculationRecord]
     deterministic_hash: str
 
@@ -103,6 +131,8 @@ class CalculationRecordsArtifact:
             "generated_at_utc": self.generated_at_utc,
             "source_requirement_set_hash": self.source_requirement_set_hash,
             "source_design_basis_signature": self.source_design_basis_signature,
+            "source_applicability_matrix_hash": self.source_applicability_matrix_hash,
+            "applied_defaults": self.applied_defaults,
             "checks": [record.to_json_dict() for record in self.checks],
             "deterministic_hash": self.deterministic_hash,
         }
@@ -129,15 +159,20 @@ class NonConformanceListArtifact:
 def run_calculation_pipeline(
     requirement_set: RequirementSet,
     design_basis: DesignBasis,
+    applicability_matrix: ApplicabilityMatrix,
     sizing_input: SizingCheckInput | None = None,
     *,
     now_utc: datetime | None = None,
 ) -> tuple[CalculationRecordsArtifact, NonConformanceListArtifact]:
     """Run deterministic shell/head/nozzle sizing checks for BL-003 MVP."""
-    _validate_handoff_gate(requirement_set=requirement_set, design_basis=design_basis)
+    _validate_handoff_gate(
+        requirement_set=requirement_set,
+        design_basis=design_basis,
+        applicability_matrix=applicability_matrix,
+    )
 
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
-    normalized_input = _normalize_and_resolve_inputs(requirement_set, sizing_input)
+    normalized_input, applied_defaults = _normalize_and_resolve_inputs(requirement_set, sizing_input)
 
     checks = [
         _build_shell_check(normalized_input),
@@ -145,11 +180,15 @@ def run_calculation_pipeline(
         _build_nozzle_check(normalized_input),
     ]
 
+    _validate_clause_coverage(checks, applicability_matrix)
+
     calc_payload = {
         "schema_version": CALCULATION_RECORDS_VERSION,
         "generated_at_utc": generated_at,
         "source_requirement_set_hash": requirement_set.deterministic_hash,
         "source_design_basis_signature": design_basis.deterministic_signature,
+        "source_applicability_matrix_hash": applicability_matrix.deterministic_hash,
+        "applied_defaults": applied_defaults,
         "checks": [record.to_json_dict() for record in checks],
     }
     calc_hash = _sha256_payload(calc_payload)
@@ -159,6 +198,8 @@ def run_calculation_pipeline(
         generated_at_utc=generated_at,
         source_requirement_set_hash=requirement_set.deterministic_hash,
         source_design_basis_signature=design_basis.deterministic_signature,
+        source_applicability_matrix_hash=applicability_matrix.deterministic_hash,
+        applied_defaults=applied_defaults,
         checks=checks,
         deterministic_hash=calc_hash,
     )
@@ -183,28 +224,83 @@ def run_calculation_pipeline(
     return calc_artifact, non_conformance_artifact
 
 
-def _validate_handoff_gate(requirement_set: RequirementSet, design_basis: DesignBasis) -> None:
+def write_calculation_artifacts(
+    calc_artifact: CalculationRecordsArtifact,
+    non_conformance_artifact: NonConformanceListArtifact,
+    directory: str | Path,
+    *,
+    filename_prefix: str = "",
+) -> tuple[Path, Path]:
+    """Persist BL-003 artifacts to disk in canonical JSON form."""
+    target = Path(directory)
+    target.mkdir(parents=True, exist_ok=True)
+
+    calc_path = target / f"{filename_prefix}{CALCULATION_RECORDS_VERSION}.json"
+    nc_path = target / f"{filename_prefix}{NON_CONFORMANCE_LIST_VERSION}.json"
+
+    calc_path.write_text(
+        json.dumps(calc_artifact.to_json_dict(), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    nc_path.write_text(
+        json.dumps(non_conformance_artifact.to_json_dict(), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    return calc_path, nc_path
+
+
+def _validate_handoff_gate(
+    requirement_set: RequirementSet,
+    design_basis: DesignBasis,
+    applicability_matrix: ApplicabilityMatrix,
+) -> None:
     if requirement_set.downstream_blocked:
         raise ValueError("BL-003 handoff gate failed: requirement_set.downstream_blocked must be false.")
     if requirement_set.unresolved_gaps:
         raise ValueError("BL-003 handoff gate failed: requirement_set.unresolved_gaps must be empty.")
     if design_basis.primary_standard != "ASME Section VIII Division 1":
         raise ValueError("BL-003 MVP supports only ASME Section VIII Division 1 design basis.")
+    if applicability_matrix.source_requirement_set_hash != requirement_set.deterministic_hash:
+        raise ValueError(
+            "BL-003 handoff gate failed: applicability_matrix.source_requirement_set_hash "
+            "does not match the provided requirement_set."
+        )
 
-    for field, expected_unit in _EXPECTED_REQUIREMENT_UNITS.items():
-        if field in requirement_set.requirements and requirement_set.requirements[field].unit != expected_unit:
+    # Unit-consistency gate: every canonical field present on the RequirementSet
+    # must match the canonical unit policy defined in BL-001.
+    for field, expected_unit in CANONICAL_UNITS.items():
+        value = requirement_set.requirements.get(field)
+        if value is None:
+            continue
+        if value.unit != expected_unit:
             raise ValueError(
                 f"BL-003 handoff gate failed: expected {field} unit {expected_unit}, "
-                f"got {requirement_set.requirements[field].unit}."
+                f"got {value.unit}."
+            )
+
+
+def _validate_clause_coverage(
+    checks: list[CalculationRecord],
+    applicability_matrix: ApplicabilityMatrix,
+) -> None:
+    applicable_clauses = {
+        record.clause_id for record in applicability_matrix.records if record.applicable
+    }
+    for check in checks:
+        if check.clause_id not in applicable_clauses:
+            raise ValueError(
+                f"BL-003 clause-coverage gate failed: clause {check.clause_id} for check "
+                f"{check.check_id} is not marked applicable in the ApplicabilityMatrix."
             )
 
 
 def _normalize_and_resolve_inputs(
     requirement_set: RequirementSet,
     sizing_input: SizingCheckInput | None,
-) -> SizingCheckInput:
+) -> tuple[SizingCheckInput, dict[str, Any]]:
     if sizing_input is not None:
-        return SizingCheckInput(
+        normalized = SizingCheckInput(
             internal_pressure=_to_si_pressure(sizing_input.internal_pressure),
             allowable_stress=_to_si_pressure(sizing_input.allowable_stress),
             joint_efficiency=sizing_input.joint_efficiency,
@@ -216,24 +312,38 @@ def _normalize_and_resolve_inputs(
             nozzle_inside_diameter=_to_si_length(sizing_input.nozzle_inside_diameter),
             nozzle_provided_thickness=_to_si_length(sizing_input.nozzle_provided_thickness),
         )
+        applied_defaults = {"applied_mvp_defaults": False, "values": {}, "source": "caller-provided"}
+        return normalized, applied_defaults
 
     pressure_pa = float(requirement_set.requirements["design_pressure"].value)
     corrosion = requirement_set.requirements.get("corrosion_allowance")
-    ca_mm = float(corrosion.value) if corrosion else 1.5
+    ca_mm = float(corrosion.value) if corrosion else _MVP_DEFAULTS["corrosion_allowance_fallback_mm"]
     ca_m = round(ca_mm / 1000.0, 9)
 
-    return SizingCheckInput(
+    normalized = SizingCheckInput(
         internal_pressure=Quantity(value=pressure_pa, unit="Pa"),
-        allowable_stress=Quantity(value=138_000_000.0, unit="Pa"),
-        joint_efficiency=0.85,
+        allowable_stress=Quantity(value=_MVP_DEFAULTS["allowable_stress_Pa"], unit="Pa"),
+        joint_efficiency=_MVP_DEFAULTS["joint_efficiency"],
         corrosion_allowance=Quantity(value=ca_m, unit="m"),
-        shell_inside_diameter=Quantity(value=2.0, unit="m"),
-        shell_provided_thickness=Quantity(value=0.020, unit="m"),
-        head_inside_diameter=Quantity(value=2.0, unit="m"),
-        head_provided_thickness=Quantity(value=0.018, unit="m"),
-        nozzle_inside_diameter=Quantity(value=0.35, unit="m"),
-        nozzle_provided_thickness=Quantity(value=0.004, unit="m"),
+        shell_inside_diameter=Quantity(value=_MVP_DEFAULTS["shell_inside_diameter_m"], unit="m"),
+        shell_provided_thickness=Quantity(
+            value=_MVP_DEFAULTS["shell_provided_thickness_m"], unit="m"
+        ),
+        head_inside_diameter=Quantity(value=_MVP_DEFAULTS["head_inside_diameter_m"], unit="m"),
+        head_provided_thickness=Quantity(
+            value=_MVP_DEFAULTS["head_provided_thickness_m"], unit="m"
+        ),
+        nozzle_inside_diameter=Quantity(value=_MVP_DEFAULTS["nozzle_inside_diameter_m"], unit="m"),
+        nozzle_provided_thickness=Quantity(
+            value=_MVP_DEFAULTS["nozzle_provided_thickness_m"], unit="m"
+        ),
     )
+    applied_defaults = {
+        "applied_mvp_defaults": True,
+        "values": dict(_MVP_DEFAULTS),
+        "source": _MVP_DEFAULTS["source"],
+    }
+    return normalized, applied_defaults
 
 
 def _build_shell_check(inputs: SizingCheckInput) -> CalculationRecord:
@@ -307,26 +417,35 @@ def _to_record(
 ) -> CalculationRecord:
     required_rounded = round(required, 9)
     provided_rounded = round(provided, 9)
+    margin = round(provided_rounded - required_rounded, 9)
+    utilization = round(required_rounded / provided_rounded, 9) if provided_rounded > 0.0 else float("inf")
     pass_status = provided_rounded >= required_rounded
+    clause_id = _CHECK_CLAUSE_MAP[check_id]
 
     canonical = {
         "check_id": check_id,
+        "clause_id": clause_id,
         "component": component,
         "formula": formula,
         "inputs": inputs,
         "required_thickness_m": required_rounded,
         "provided_thickness_m": provided_rounded,
+        "margin_m": margin,
+        "utilization_ratio": utilization,
         "pass_status": pass_status,
     }
     check_hash = _sha256_payload(canonical)
 
     return CalculationRecord(
         check_id=check_id,
+        clause_id=clause_id,
         component=component,
         formula=formula,
         inputs=inputs,
         required_thickness_m=required_rounded,
         provided_thickness_m=provided_rounded,
+        margin_m=margin,
+        utilization_ratio=utilization,
         pass_status=pass_status,
         reproducibility=ReproducibilityMetadata(
             canonical_payload_sha256=check_hash,
@@ -339,6 +458,7 @@ def _build_non_conformances(checks: list[CalculationRecord]) -> list[NonConforma
     return [
         NonConformanceEntry(
             check_id=record.check_id,
+            clause_id=record.clause_id,
             component=record.component,
             observed=f"provided={record.provided_thickness_m:.6f} m",
             required=f"minimum={record.required_thickness_m:.6f} m",
