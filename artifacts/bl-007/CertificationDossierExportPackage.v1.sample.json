@@ -1,0 +1,254 @@
+{
+  "change_impact_report": {
+    "impact_rows": [
+      {
+        "clause_id": "UG-27",
+        "impact_level": "to_be_computed",
+        "rationale": "BL-008 will compute revision deltas and impacted evidence links."
+      },
+      {
+        "clause_id": "UG-32",
+        "impact_level": "to_be_computed",
+        "rationale": "BL-008 will compute revision deltas and impacted evidence links."
+      },
+      {
+        "clause_id": "UG-37",
+        "impact_level": "to_be_computed",
+        "rationale": "BL-008 will compute revision deltas and impacted evidence links."
+      },
+      {
+        "clause_id": "UG-45",
+        "impact_level": "to_be_computed",
+        "rationale": "BL-008 will compute revision deltas and impacted evidence links."
+      }
+    ],
+    "previous_revision_id": "REV-0006",
+    "revision_id": "REV-0007",
+    "schema_version": "ChangeImpactReport.v1.placeholder",
+    "status": "pending_bl_008_integration",
+    "summary_lines": [
+      "Placeholder change impact section for BL-008 selective re-verification.",
+      "Detected impacted clauses from current snapshot: UG-27, UG-32, UG-37, UG-45"
+    ]
+  },
+  "change_impact_report_schema_version": "ChangeImpactReport.v1.placeholder",
+  "deterministic_hash": "7d757280be159cc75d98b8951f695c28291bc5b177e65b63ee45e43fa35fd715",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "inspector_regulator_workflow": [
+    {
+      "prompt": "Assemble dossier package and verify hashes before external review.",
+      "required_artifact_refs": [
+        "ComplianceDossierMachine.v1#cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1"
+      ],
+      "role": "design_authority",
+      "status": "pending",
+      "step_id": "WF-001"
+    },
+    {
+      "prompt": "Review signed calculation snapshots and clause-level evidence coverage.",
+      "required_artifact_refs": [
+        "SignedCalculationSnapshotSet.v1",
+        "TraceabilityGraphRevision.v1#9ba1cf51a4427933cfee58d92fcd2fcd735dc4fb29973b426990ef11d8ebf7d2"
+      ],
+      "role": "authorized_inspector",
+      "status": "pending",
+      "step_id": "WF-002"
+    },
+    {
+      "prompt": "Approve or reject dossier package for certification release.",
+      "required_artifact_refs": [
+        "CertificationDossierExportPackage.v1",
+        "CertificationDossierPDFPayload.v1"
+      ],
+      "role": "regulator",
+      "status": "pending",
+      "step_id": "WF-003"
+    }
+  ],
+  "inspector_workflow_schema_version": "InspectorRegulatorWorkflow.v1",
+  "package_artifact_refs": [
+    "CertificationDossierExportPackage.v1#7d757280be159cc75d98b8951f695c28291bc5b177e65b63ee45e43fa35fd715",
+    "CertificationDossierPDFPayload.v1#abf6a9fd959af80ecfd8eb96bfc74ad75f78390e80b5cfb19f5f12cb46f3ffca",
+    "ComplianceDossierMachine.v1#cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1",
+    "TraceabilityGraphRevision.v1#9ba1cf51a4427933cfee58d92fcd2fcd735dc4fb29973b426990ef11d8ebf7d2",
+    "SignedCalculationSnapshotSet.v1#08d275629fb1143a3b7a5c247a4db2c347e02f5dd9220b6bc12b8e34dea9ed75",
+    "ChangeImpactReport.v1.placeholder#b5ee9a67e7e6ecec4df91511f1a1b133afc96acfe136ebfe6aaabec63b1eb2ee"
+  ],
+  "pdf_payload": {
+    "generated_at_utc": "2026-04-18T00:00:00+00:00",
+    "revision_id": "REV-0007",
+    "schema_version": "CertificationDossierPDFPayload.v1",
+    "summary_lines": [
+      "RequirementSet hash: 0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+      "Compliance dossier machine hash: cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1",
+      "Traceability graph hash: 9ba1cf51a4427933cfee58d92fcd2fcd735dc4fb29973b426990ef11d8ebf7d2",
+      "Signed snapshots: 8"
+    ],
+    "template_sections": [
+      {
+        "render_required": true,
+        "section_id": "SEC-001",
+        "source_refs": [
+          "ComplianceDossierHuman.v1",
+          "ComplianceDossierMachine.v1"
+        ],
+        "title": "Compliance summary"
+      },
+      {
+        "render_required": true,
+        "section_id": "SEC-002",
+        "source_refs": [
+          "ComplianceDossierMachine.v1"
+        ],
+        "title": "Clause matrix and evidence trace"
+      },
+      {
+        "render_required": true,
+        "section_id": "SEC-003",
+        "source_refs": [
+          "CalculationRecords.v1",
+          "SignedCalculationSnapshotSet.v1"
+        ],
+        "title": "Signed calculation snapshots"
+      },
+      {
+        "render_required": true,
+        "section_id": "SEC-004",
+        "source_refs": [
+          "ChangeImpactReport.v1.placeholder"
+        ],
+        "title": "Change impact report"
+      },
+      {
+        "render_required": true,
+        "section_id": "SEC-005",
+        "source_refs": [
+          "InspectorRegulatorWorkflow.v1",
+          "TraceabilityGraphRevision.v1"
+        ],
+        "title": "Inspector/regulator workflow"
+      }
+    ],
+    "title": "BL-007 Certification Dossier"
+  },
+  "previous_revision_id": "REV-0006",
+  "reproducibility": {
+    "canonicalization": "json.sort_keys+compact",
+    "hash_algorithm": "sha256"
+  },
+  "revision_id": "REV-0007",
+  "schema_version": "CertificationDossierExportPackage.v1",
+  "signed_calculation_snapshot_set_schema_version": "SignedCalculationSnapshotSet.v1",
+  "signed_calculation_snapshots": [
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell",
+      "canonical_payload_sha256": "14fdb46d5dd4e5641de61365088cd9bb61f9034dcbe4b84c3806e6ec4ee28850",
+      "check_id": "UG-27-shell",
+      "clause_id": "UG-27",
+      "signature_ref": "sha256:14fdb46d5dd4e5641de61365088cd9bb61f9034dcbe4b84c3806e6ec4ee28850"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp",
+      "canonical_payload_sha256": "f53eff9dfbfea8de84dc06536bba9d4bc714a2c6b5526883c69ad3636688992b",
+      "check_id": "UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "signature_ref": "sha256:f53eff9dfbfea8de84dc06536bba9d4bc714a2c6b5526883c69ad3636688992b"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head",
+      "canonical_payload_sha256": "ad1b02b68699de8193cc8d47dc8a0466c00cd1fe927da881ad2e41edf742d60e",
+      "check_id": "UG-32-head",
+      "clause_id": "UG-32",
+      "signature_ref": "sha256:ad1b02b68699de8193cc8d47dc8a0466c00cd1fe927da881ad2e41edf742d60e"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head-mawp",
+      "canonical_payload_sha256": "0a547329dc55f22389911b4ccc7a142b413cbad0c5913a53f71192cc9ed03f8d",
+      "check_id": "UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "signature_ref": "sha256:0a547329dc55f22389911b4ccc7a142b413cbad0c5913a53f71192cc9ed03f8d"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-head-reinforcement",
+      "canonical_payload_sha256": "403c6f4310c6e91640690ee3a7f0ecb3c85b8797f023792aa462b0757e3d123c",
+      "check_id": "UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "signature_ref": "sha256:403c6f4310c6e91640690ee3a7f0ecb3c85b8797f023792aa462b0757e3d123c"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-shell-reinforcement",
+      "canonical_payload_sha256": "259d54c152b73611035799d8d526172a6c663085a9af9c8a7b52059ece4739bd",
+      "check_id": "UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "signature_ref": "sha256:259d54c152b73611035799d8d526172a6c663085a9af9c8a7b52059ece4739bd"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle",
+      "canonical_payload_sha256": "763d2290a127f0b23520aa6f2ca747a0b4a75fc3f022066f4f976eef6b0f785f",
+      "check_id": "UG-45-nozzle",
+      "clause_id": "UG-45",
+      "signature_ref": "sha256:763d2290a127f0b23520aa6f2ca747a0b4a75fc3f022066f4f976eef6b0f785f"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle-mawp",
+      "canonical_payload_sha256": "a33f1beffe89997cea41bd69f723570d51f8a107d6b5981df8b6c4a0811ea23b",
+      "check_id": "UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "signature_ref": "sha256:a33f1beffe89997cea41bd69f723570d51f8a107d6b5981df8b6c4a0811ea23b"
+    }
+  ],
+  "source_applicability_matrix_hash": "7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527",
+  "source_calculation_records_hash": "8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a",
+  "source_compliance_dossier_human_hash": "6d07374c247186432099263feeb652b370bc0c5e0d92ecf64b2cb74be889ee46",
+  "source_compliance_dossier_machine_hash": "cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1",
+  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
+  "source_non_conformance_hash": "ed09bfdf784bb6845ef5b15810a9524b8753f7d36382f61d1fb31539d1e7edf6",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+  "source_traceability_graph_hash": "9ba1cf51a4427933cfee58d92fcd2fcd735dc4fb29973b426990ef11d8ebf7d2",
+  "template_catalog": [
+    {
+      "required": true,
+      "section_id": "SEC-001",
+      "source_refs": [
+        "ComplianceDossierHuman.v1",
+        "ComplianceDossierMachine.v1"
+      ],
+      "title": "Compliance summary"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-002",
+      "source_refs": [
+        "ComplianceDossierMachine.v1"
+      ],
+      "title": "Clause matrix and evidence trace"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-003",
+      "source_refs": [
+        "CalculationRecords.v1",
+        "SignedCalculationSnapshotSet.v1"
+      ],
+      "title": "Signed calculation snapshots"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-004",
+      "source_refs": [
+        "ChangeImpactReport.v1.placeholder"
+      ],
+      "title": "Change impact report"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-005",
+      "source_refs": [
+        "InspectorRegulatorWorkflow.v1",
+        "TraceabilityGraphRevision.v1"
+      ],
+      "title": "Inspector/regulator workflow"
+    }
+  ],
+  "template_catalog_schema_version": "CertificationDossierTemplateCatalog.v1"
+}

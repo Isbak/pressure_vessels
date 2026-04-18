@@ -1,0 +1,48 @@
+{
+  "schema_version": "CertificationDossierTemplateCatalog.v1",
+  "sections": [
+    {
+      "required": true,
+      "section_id": "SEC-001",
+      "source_refs": [
+        "ComplianceDossierHuman.v1",
+        "ComplianceDossierMachine.v1"
+      ],
+      "title": "Compliance summary"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-002",
+      "source_refs": [
+        "ComplianceDossierMachine.v1"
+      ],
+      "title": "Clause matrix and evidence trace"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-003",
+      "source_refs": [
+        "CalculationRecords.v1",
+        "SignedCalculationSnapshotSet.v1"
+      ],
+      "title": "Signed calculation snapshots"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-004",
+      "source_refs": [
+        "ChangeImpactReport.v1.placeholder"
+      ],
+      "title": "Change impact report"
+    },
+    {
+      "required": true,
+      "section_id": "SEC-005",
+      "source_refs": [
+        "InspectorRegulatorWorkflow.v1",
+        "TraceabilityGraphRevision.v1"
+      ],
+      "title": "Inspector/regulator workflow"
+    }
+  ]
+}
