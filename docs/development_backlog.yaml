@@ -211,7 +211,7 @@ items:
   area: traceability
   phase: 'Phase 2: Production'
   priority: P1
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-003

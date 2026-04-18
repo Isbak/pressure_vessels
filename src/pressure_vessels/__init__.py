@@ -39,6 +39,20 @@ from .standards_ingestion_pipeline import (
     write_standards_package,
 )
 
+from .traceability_pipeline import (
+    AUDIT_REPORT_TEMPLATE_VERSION,
+    TRACEABILITY_GRAPH_REVISION_VERSION,
+    ApprovalRecord,
+    TraceabilityGraphRevision,
+    TraceabilityLink,
+    build_audit_report_template,
+    build_traceability_graph_revision,
+    query_clause_evidence,
+    query_graph_by_revision,
+    with_additional_links,
+    write_traceability_graph_revision,
+)
+
 from .requirements_pipeline import (
     Gap,
     RequirementSet,
@@ -65,6 +79,17 @@ __all__ = [
     "ReproducibilityMetadata",
     "ReviewChecklistItem",
     "SizingCheckInput",
+    "AUDIT_REPORT_TEMPLATE_VERSION",
+    "ApprovalRecord",
+    "TRACEABILITY_GRAPH_REVISION_VERSION",
+    "TraceabilityGraphRevision",
+    "TraceabilityLink",
+    "build_audit_report_template",
+    "build_traceability_graph_revision",
+    "query_clause_evidence",
+    "query_graph_by_revision",
+    "with_additional_links",
+    "write_traceability_graph_revision",
     "build_design_basis",
     "generate_compliance_dossier",
     "parse_prompt_to_requirement_set",

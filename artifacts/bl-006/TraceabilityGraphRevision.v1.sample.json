@@ -1,0 +1,500 @@
+{
+  "deterministic_hash": "461bb0010c69b29324d4dacf5e116eed5d3b775caccccda5af701e53893f97eb",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "immutable": true,
+  "links": [
+    {
+      "clause_id": "UCS-66",
+      "link_id": "ApplicabilityModel.v1:UCS-66:applicable=false:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "ApplicabilityModel.v1",
+      "target_kind": "calculation",
+      "target_ref": "UCS-66:applicable=false"
+    },
+    {
+      "clause_id": "UG-16",
+      "link_id": "ApplicabilityModel.v1:UG-16:applicable=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "ApplicabilityModel.v1",
+      "target_kind": "calculation",
+      "target_ref": "UG-16:applicable=true"
+    },
+    {
+      "clause_id": "UG-20",
+      "link_id": "ApplicabilityModel.v1:UG-20:applicable=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "ApplicabilityModel.v1",
+      "target_kind": "calculation",
+      "target_ref": "UG-20:applicable=true"
+    },
+    {
+      "clause_id": "UG-25",
+      "link_id": "ApplicabilityModel.v1:UG-25:applicable=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "ApplicabilityModel.v1",
+      "target_kind": "calculation",
+      "target_ref": "UG-25:applicable=true"
+    },
+    {
+      "clause_id": "UG-28",
+      "link_id": "ApplicabilityModel.v1:UG-28:applicable=false:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "ApplicabilityModel.v1",
+      "target_kind": "calculation",
+      "target_ref": "UG-28:applicable=false"
+    },
+    {
+      "clause_id": null,
+      "link_id": "ComplianceDossierMachine.v1#cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1:APR-001:artifact-approval",
+      "relation": "approved_by:authorized_inspector:approved",
+      "source_kind": "artifact",
+      "source_ref": "ComplianceDossierMachine.v1#cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1",
+      "target_kind": "approval",
+      "target_ref": "APR-001"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA)):UG-32-head-mawp:pass=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "target_kind": "calculation",
+      "target_ref": "UG-32-head-mawp:pass=true"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA)):UG-27-shell-mawp:pass=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "target_kind": "calculation",
+      "target_ref": "UG-27-shell-mawp:pass=true"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA)):UG-45-nozzle-mawp:pass=false:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "target_kind": "calculation",
+      "target_ref": "UG-45-nozzle-mawp:pass=false"
+    },
+    {
+      "clause_id": "UCS-66",
+      "link_id": "UCS-66:ApplicabilityModel.v1:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UCS-66",
+      "target_kind": "model",
+      "target_ref": "ApplicabilityModel.v1"
+    },
+    {
+      "clause_id": "UCS-66",
+      "link_id": "UCS-66:applicable=false:ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UCS-66:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UCS-66:applicable=false",
+      "target_kind": "artifact",
+      "target_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UCS-66"
+    },
+    {
+      "clause_id": "UG-16",
+      "link_id": "UG-16:ApplicabilityModel.v1:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-16",
+      "target_kind": "model",
+      "target_ref": "ApplicabilityModel.v1"
+    },
+    {
+      "clause_id": "UG-16",
+      "link_id": "UG-16:applicable=true:ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-16:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-16:applicable=true",
+      "target_kind": "artifact",
+      "target_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-16"
+    },
+    {
+      "clause_id": "UG-20",
+      "link_id": "UG-20:ApplicabilityModel.v1:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-20",
+      "target_kind": "model",
+      "target_ref": "ApplicabilityModel.v1"
+    },
+    {
+      "clause_id": "UG-20",
+      "link_id": "UG-20:applicable=true:ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-20:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-20:applicable=true",
+      "target_kind": "artifact",
+      "target_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-20"
+    },
+    {
+      "clause_id": "UG-25",
+      "link_id": "UG-25:ApplicabilityModel.v1:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-25",
+      "target_kind": "model",
+      "target_ref": "ApplicabilityModel.v1"
+    },
+    {
+      "clause_id": "UG-25",
+      "link_id": "UG-25:applicable=true:ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-25:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-25:applicable=true",
+      "target_kind": "artifact",
+      "target_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-25"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27-shell-mawp:pass=true:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-27-shell-mawp:pass=true",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27-shell:pass=true:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-27-shell:pass=true",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27:MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA)):clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-27",
+      "target_kind": "model",
+      "target_ref": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27:t = (P*D)/(2*(S*E-0.6P)) + CA:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-27",
+      "target_kind": "model",
+      "target_ref": "t = (P*D)/(2*(S*E-0.6P)) + CA"
+    },
+    {
+      "clause_id": "UG-28",
+      "link_id": "UG-28:ApplicabilityModel.v1:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-28",
+      "target_kind": "model",
+      "target_ref": "ApplicabilityModel.v1"
+    },
+    {
+      "clause_id": "UG-28",
+      "link_id": "UG-28:applicable=false:ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-28:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-28:applicable=false",
+      "target_kind": "artifact",
+      "target_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-28"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "UG-32-head-mawp:pass=true:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head-mawp:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-32-head-mawp:pass=true",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head-mawp"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "UG-32-head:pass=true:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-32-head:pass=true",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "UG-32:MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA)):clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-32",
+      "target_kind": "model",
+      "target_ref": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "UG-32:t = (0.885*P*D)/(2*S*E-0.2P) + CA:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-32",
+      "target_kind": "model",
+      "target_ref": "t = (0.885*P*D)/(2*S*E-0.2P) + CA"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "UG-37-nozzle-head-reinforcement:pass=false:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-head-reinforcement:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-37-nozzle-head-reinforcement:pass=false",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-head-reinforcement"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "UG-37-nozzle-shell-reinforcement:pass=false:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-shell-reinforcement:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-37-nozzle-shell-reinforcement:pass=false",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-shell-reinforcement"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent)):UG-37-nozzle-head-reinforcement:pass=false:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "target_kind": "calculation",
+      "target_ref": "UG-37-nozzle-head-reinforcement:pass=false"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent)):UG-37-nozzle-shell-reinforcement:pass=false:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "target_kind": "calculation",
+      "target_ref": "UG-37-nozzle-shell-reinforcement:pass=false"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "UG-37:UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent)):clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-37",
+      "target_kind": "model",
+      "target_ref": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "UG-45-nozzle-mawp:pass=false:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle-mawp:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-45-nozzle-mawp:pass=false",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle-mawp"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "UG-45-nozzle:pass=false:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle:calc-artifact",
+      "relation": "recorded_in",
+      "source_kind": "calculation",
+      "source_ref": "UG-45-nozzle:pass=false",
+      "target_kind": "artifact",
+      "target_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "UG-45:MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA)):clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-45",
+      "target_kind": "model",
+      "target_ref": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "UG-45:t = (0.5*P*d)/(S*E-0.4P) + CA:clause-model",
+      "relation": "implemented_by",
+      "source_kind": "clause",
+      "source_ref": "UG-45",
+      "target_kind": "model",
+      "target_ref": "t = (0.5*P*d)/(S*E-0.4P) + CA"
+    },
+    {
+      "clause_id": "UG-16",
+      "link_id": "code_standard:UG-16:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "code_standard",
+      "target_kind": "clause",
+      "target_ref": "UG-16"
+    },
+    {
+      "clause_id": "UG-20",
+      "link_id": "code_standard:UG-20:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "code_standard",
+      "target_kind": "clause",
+      "target_ref": "UG-20"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "code_standard:UG-27:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "code_standard",
+      "target_kind": "clause",
+      "target_ref": "UG-27"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "code_standard:UG-32:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "code_standard",
+      "target_kind": "clause",
+      "target_ref": "UG-32"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "code_standard:UG-37:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "code_standard",
+      "target_kind": "clause",
+      "target_ref": "UG-37"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "code_standard:UG-45:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "code_standard",
+      "target_kind": "clause",
+      "target_ref": "UG-45"
+    },
+    {
+      "clause_id": "UG-25",
+      "link_id": "corrosion_allowance:UG-25:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "corrosion_allowance",
+      "target_kind": "clause",
+      "target_ref": "UG-25"
+    },
+    {
+      "clause_id": "UG-16",
+      "link_id": "design_pressure:UG-16:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_pressure",
+      "target_kind": "clause",
+      "target_ref": "UG-16"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "design_pressure:UG-27:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_pressure",
+      "target_kind": "clause",
+      "target_ref": "UG-27"
+    },
+    {
+      "clause_id": "UG-28",
+      "link_id": "design_pressure:UG-28:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_pressure",
+      "target_kind": "clause",
+      "target_ref": "UG-28"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "design_pressure:UG-32:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_pressure",
+      "target_kind": "clause",
+      "target_ref": "UG-32"
+    },
+    {
+      "clause_id": "UG-37",
+      "link_id": "design_pressure:UG-37:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_pressure",
+      "target_kind": "clause",
+      "target_ref": "UG-37"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "design_pressure:UG-45:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_pressure",
+      "target_kind": "clause",
+      "target_ref": "UG-45"
+    },
+    {
+      "clause_id": "UCS-66",
+      "link_id": "design_temperature:UCS-66:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_temperature",
+      "target_kind": "clause",
+      "target_ref": "UCS-66"
+    },
+    {
+      "clause_id": "UG-20",
+      "link_id": "design_temperature:UG-20:req-clause",
+      "relation": "satisfies",
+      "source_kind": "requirement",
+      "source_ref": "design_temperature",
+      "target_kind": "clause",
+      "target_ref": "UG-20"
+    },
+    {
+      "clause_id": "UG-45",
+      "link_id": "t = (0.5*P*d)/(S*E-0.4P) + CA:UG-45-nozzle:pass=false:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "target_kind": "calculation",
+      "target_ref": "UG-45-nozzle:pass=false"
+    },
+    {
+      "clause_id": "UG-32",
+      "link_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA:UG-32-head:pass=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "target_kind": "calculation",
+      "target_ref": "UG-32-head:pass=true"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "t = (P*D)/(2*(S*E-0.6P)) + CA:UG-27-shell:pass=true:model-calc",
+      "relation": "produces",
+      "source_kind": "model",
+      "source_ref": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "target_kind": "calculation",
+      "target_ref": "UG-27-shell:pass=true"
+    }
+  ],
+  "previous_revision_id": null,
+  "revision_id": "REV-0001",
+  "schema_version": "TraceabilityGraphRevision.v1",
+  "source_applicability_matrix_hash": "7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527",
+  "source_compliance_dossier_hash": "cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1",
+  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
+}

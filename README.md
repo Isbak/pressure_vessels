@@ -34,6 +34,8 @@ Related repository docs:
 
 - `docs/interfaces/calculation_pipeline_contract.md`
 
+- `docs/interfaces/traceability_pipeline_contract.md`
+
 ---
 
 ## 1. Vision

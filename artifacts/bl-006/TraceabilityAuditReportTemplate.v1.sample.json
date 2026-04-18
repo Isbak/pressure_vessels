@@ -1,0 +1,68 @@
+{
+  "clause_scope": "UG-27",
+  "evidence_rows": [
+    {
+      "clause_id": "UG-27",
+      "link_id": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA)):UG-27-shell-mawp:pass=true:model-calc",
+      "relation": "produces",
+      "source": "model:MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "target": "calculation:UG-27-shell-mawp:pass=true"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27-shell-mawp:pass=true:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp:calc-artifact",
+      "relation": "recorded_in",
+      "source": "calculation:UG-27-shell-mawp:pass=true",
+      "target": "artifact:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27-shell:pass=true:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell:calc-artifact",
+      "relation": "recorded_in",
+      "source": "calculation:UG-27-shell:pass=true",
+      "target": "artifact:CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27:MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA)):clause-model",
+      "relation": "implemented_by",
+      "source": "clause:UG-27",
+      "target": "model:MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "UG-27:t = (P*D)/(2*(S*E-0.6P)) + CA:clause-model",
+      "relation": "implemented_by",
+      "source": "clause:UG-27",
+      "target": "model:t = (P*D)/(2*(S*E-0.6P)) + CA"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "code_standard:UG-27:req-clause",
+      "relation": "satisfies",
+      "source": "requirement:code_standard",
+      "target": "clause:UG-27"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "design_pressure:UG-27:req-clause",
+      "relation": "satisfies",
+      "source": "requirement:design_pressure",
+      "target": "clause:UG-27"
+    },
+    {
+      "clause_id": "UG-27",
+      "link_id": "t = (P*D)/(2*(S*E-0.6P)) + CA:UG-27-shell:pass=true:model-calc",
+      "relation": "produces",
+      "source": "model:t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "target": "calculation:UG-27-shell:pass=true"
+    }
+  ],
+  "revision_id": "REV-0001",
+  "schema_version": "TraceabilityAuditReportTemplate.v1",
+  "summary_lines": [
+    "Revision: REV-0001",
+    "Immutable: true",
+    "Traceability links: 8"
+  ]
+}

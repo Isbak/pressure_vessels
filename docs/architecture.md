@@ -11,3 +11,10 @@ Primary concerns:
 - Compliance traceability and report generation
 
 - Human-in-the-loop governance and approvals
+
+
+## BL-006 Traceability Graph
+
+- Schema: `TraceabilityGraphRevision.v1` with immutable, revision-scoped link snapshots.
+- Link endpoints: requirement, clause, model, calculation, artifact, approval.
+- Audit helpers support revision-scoped and clause-scoped evidence retrieval and report templating.
