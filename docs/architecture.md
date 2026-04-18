@@ -28,5 +28,7 @@ Primary concerns:
 
 - Schema set: `RevisionTraceSnapshot.v1`, `RevisionDelta.v1`, `ImpactReport.v1`, and `BaselineUpdateStatus.v1`.
 - Revision deltas are detected automatically for requirement, code, and model fingerprints.
+- Impact analysis validates snapshot alignment to revisioned traceability artifacts (`revision_id`, requirement hash, and graph hash) plus current calculation hash integrity before delta computation.
 - Minimal re-verification scope is computed from traceability graph link deltas and executed deterministically against current calculation records.
 - Every revision delta emits a signed `ImpactReport.v1` artifact with evidence links and an explicit baseline update decision.
+- Baseline decisions can also be persisted as standalone `BaselineUpdateStatus.v1` artifacts for release-gate consumption.

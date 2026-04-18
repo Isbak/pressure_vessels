@@ -68,6 +68,7 @@ from .change_impact_pipeline import (
     detect_revision_delta,
     execute_selective_reverification,
     generate_change_impact_report,
+    write_baseline_update_status,
     write_impact_report,
 )
 
@@ -133,6 +134,7 @@ __all__ = [
     "detect_revision_delta",
     "execute_selective_reverification",
     "generate_change_impact_report",
+    "write_baseline_update_status",
     "write_impact_report",
     "AUDIT_REPORT_TEMPLATE_VERSION",
     "ApprovalRecord",
