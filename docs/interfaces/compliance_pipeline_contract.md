@@ -5,7 +5,6 @@ This document defines the deterministic contract for the **Compliance Dossier** 
 ## Entry Point
 
 - Python API: `pressure_vessels.compliance_pipeline.generate_compliance_dossier(requirement_set, design_basis, applicability_matrix, calculation_records, non_conformance_list, now_utc=None)`
-
 - Persistence helper: `pressure_vessels.compliance_pipeline.write_compliance_artifacts(human_dossier, machine_dossier, directory)`
 
 ## BL-003 Handoff Gate (Required)

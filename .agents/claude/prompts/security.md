@@ -5,9 +5,7 @@ Assess: <change set>
 Check for:
 
 - Secret exposure
-
 - Unsafe defaults
-
 - Injection or authz gaps
 
 Output:

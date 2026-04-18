@@ -1,11 +1,8 @@
 # ADR-0005: BL-003 Sizing-Check Scope, Default Assumptions, and Canonical Hashing
 
 - Status: accepted
-
 - Date: 2026-04-18
-
 - Related backlog items: BL-003, BL-003a..BL-003e
-
 - Related interface contract: `docs/interfaces/calculation_pipeline_contract.md`
 
 ## Context
@@ -19,21 +16,15 @@ BL-003 delivers the first executable slice of the Calculation Engine described i
 BL-003 implements thickness checks for:
 
 - UG-27 cylindrical shell under internal pressure
-
 - UG-32 head under internal pressure (simplified formula, pending head-type selection)
-
 - UG-45 nozzle neck minimum thickness (simplified, pending reinforcement-area logic)
 
 The following items from Workflow D are deferred and tracked as follow-up backlog entries, not silent gaps:
 
 - BL-003a MAWP check
-
 - BL-003b External-pressure / buckling check (UG-28 route)
-
 - BL-003c Reinforcement-area replacement (UG-37 / UG-45 full)
-
 - BL-003d Margin / utilization near-limit reporting (basic margin and utilization ratio are now emitted; threshold-based near-limit reporting remains)
-
 - BL-003e Model-domain / validity-envelope gating
 
 ### 2. Placeholder defaults when `sizing_input` is absent
@@ -69,17 +60,12 @@ The BL-003 handoff gate iterates over `requirements_pipeline.CANONICAL_UNITS` an
 ## Consequences
 
 - BL-003 outputs are fully reproducible and auditable without reading the source of `calculation_pipeline.py`.
-
 - Downstream items (BL-004 compliance report, BL-006 traceability graph) can rely on `clause_id`, `source_applicability_matrix_hash`, and `applied_defaults` being present in every artifact.
-
 - The placeholder allowable stress and joint efficiency **must** be replaced before any output is used for a real certification; this ADR makes that dependency explicit.
-
 - The BL-002 `ApplicabilityMatrix` is extended with UG-27, UG-32, UG-45 clauses (applicable under internal pressure), so BL-003's clause-coverage gate is satisfiable with the BL-002 MVP output.
 
 ## Alternatives Considered
 
 - **Fail-closed when `sizing_input` is absent.** Rejected because it would force every caller (including smoke tests and the repository's canonical-prompt example) to wire a full geometry before the Materials/Geometry modules exist. Deferred to a future hardening pass once those modules ship.
-
 - **Store defaults in `DesignBasis.assumptions` only.** Rejected because the defaults are numeric and BL-003-specific; putting them in the DesignBasis would couple BL-002 to BL-003 and still leave the values invisible to consumers of the CalculationRecords artifact. Placing them in `applied_defaults` keeps the concern inside BL-003.
-
 - **Use Decimal for pass/fail arithmetic.** Rejected for MVP; the sha256 canonicalization plus explicit `round(..., 9)` is sufficient for determinism at current precision.
