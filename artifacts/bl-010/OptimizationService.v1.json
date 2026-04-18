@@ -1,0 +1,132 @@
+{
+  "compliant_candidates": [
+    {
+      "candidate_id": "C-001",
+      "compliance_justification": "All mandatory UG-27/UG-32/UG-45 and route checks pass.",
+      "dry_weight_kg": 9800.0,
+      "estimated_cost_usd": 80500.0,
+      "hard_compliance_pass": true,
+      "head_thickness_m": 0.016,
+      "manufacturability_score": 0.88,
+      "nozzle_thickness_m": 0.006,
+      "shell_thickness_m": 0.017
+    },
+    {
+      "candidate_id": "C-002",
+      "compliance_justification": "All mandatory UG-27/UG-32/UG-45 and route checks pass.",
+      "dry_weight_kg": 9300.0,
+      "estimated_cost_usd": 84500.0,
+      "hard_compliance_pass": true,
+      "head_thickness_m": 0.015,
+      "manufacturability_score": 0.81,
+      "nozzle_thickness_m": 0.005,
+      "shell_thickness_m": 0.016
+    },
+    {
+      "candidate_id": "C-003",
+      "compliance_justification": "All mandatory UG-27/UG-32/UG-45 and route checks pass.",
+      "dry_weight_kg": 10050.0,
+      "estimated_cost_usd": 78000.0,
+      "hard_compliance_pass": true,
+      "head_thickness_m": 0.016,
+      "manufacturability_score": 0.73,
+      "nozzle_thickness_m": 0.006,
+      "shell_thickness_m": 0.018
+    }
+  ],
+  "deterministic_hash": "59b23b3e15ba53e4adbfec73cab2e909b4c77ef19a0bede495f89ea54ee39c0b",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "pareto_candidate_ids": [
+    "C-001",
+    "C-002",
+    "C-003"
+  ],
+  "ranked_candidates": [
+    {
+      "candidate_id": "C-002",
+      "composite_score": 0.562,
+      "normalized_terms": {
+        "cost_benefit": 0.0,
+        "manufacturability": 0.81,
+        "weight_benefit": 1.0
+      },
+      "objective_values": {
+        "dry_weight_kg": 9300.0,
+        "estimated_cost_usd": 84500.0,
+        "manufacturability_score": 0.81
+      },
+      "pareto_optimal": true,
+      "rank": 1,
+      "rationale": [
+        "Hard compliance gate passed.",
+        "Weighted objective contributions: weight=0.400000, cost=0.000000, manufacturability=0.162000",
+        "Pareto frontier status: on_frontier.",
+        "All mandatory UG-27/UG-32/UG-45 and route checks pass."
+      ]
+    },
+    {
+      "candidate_id": "C-001",
+      "composite_score": 0.555487179,
+      "normalized_terms": {
+        "cost_benefit": 0.615384615,
+        "manufacturability": 0.88,
+        "weight_benefit": 0.333333333
+      },
+      "objective_values": {
+        "dry_weight_kg": 9800.0,
+        "estimated_cost_usd": 80500.0,
+        "manufacturability_score": 0.88
+      },
+      "pareto_optimal": true,
+      "rank": 2,
+      "rationale": [
+        "Hard compliance gate passed.",
+        "Weighted objective contributions: weight=0.133333, cost=0.246154, manufacturability=0.176000",
+        "Pareto frontier status: on_frontier.",
+        "All mandatory UG-27/UG-32/UG-45 and route checks pass."
+      ]
+    },
+    {
+      "candidate_id": "C-003",
+      "composite_score": 0.546,
+      "normalized_terms": {
+        "cost_benefit": 1.0,
+        "manufacturability": 0.73,
+        "weight_benefit": 0.0
+      },
+      "objective_values": {
+        "dry_weight_kg": 10050.0,
+        "estimated_cost_usd": 78000.0,
+        "manufacturability_score": 0.73
+      },
+      "pareto_optimal": true,
+      "rank": 3,
+      "rationale": [
+        "Hard compliance gate passed.",
+        "Weighted objective contributions: weight=0.000000, cost=0.400000, manufacturability=0.146000",
+        "Pareto frontier status: on_frontier.",
+        "All mandatory UG-27/UG-32/UG-45 and route checks pass."
+      ]
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "candidate_id": "C-004",
+      "compliance_justification": "Rejected: UG-32 head MAWP below design pressure.",
+      "dry_weight_kg": 9000.0,
+      "estimated_cost_usd": 77000.0,
+      "hard_compliance_pass": false,
+      "head_thickness_m": 0.014,
+      "manufacturability_score": 0.92,
+      "nozzle_thickness_m": 0.005,
+      "shell_thickness_m": 0.015
+    }
+  ],
+  "schema_version": "OptimizationService.v1",
+  "source_ref": "BL-010.sample",
+  "weights": {
+    "cost": 0.4,
+    "manufacturability": 0.2,
+    "weight": 0.4
+  }
+}
