@@ -19,6 +19,7 @@ Related repository docs:
 - `docs/semantic_layer_workflows_for_requirements_verification.md`
 - `docs/decision-log/`
 - `docs/interfaces/requirements_pipeline_contract.md`
+- `docs/interfaces/design_basis_pipeline_contract.md`
 
 ---
 

@@ -1,0 +1,13 @@
+{
+  "schema_version": "DesignBasis.v1",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+  "primary_standard": "ASME Section VIII Division 1",
+  "primary_standard_version": "ASME_BPVC_2023",
+  "secondary_standards": [],
+  "assumptions": [
+    "MVP assumes internal pressure service unless external pressure input is provided.",
+    "No secondary standards are auto-selected in BL-002 MVP."
+  ],
+  "deterministic_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4"
+}

@@ -1,15 +1,25 @@
 """Pressure vessels package."""
 
+from .design_basis_pipeline import (
+    ApplicabilityMatrix,
+    ClauseApplicabilityRecord,
+    DesignBasis,
+    build_design_basis,
+)
 from .requirements_pipeline import (
+    Gap,
     RequirementSet,
     RequirementValue,
-    Gap,
     parse_prompt_to_requirement_set,
 )
 
 __all__ = [
+    "ApplicabilityMatrix",
+    "ClauseApplicabilityRecord",
+    "DesignBasis",
+    "Gap",
     "RequirementSet",
     "RequirementValue",
-    "Gap",
+    "build_design_basis",
     "parse_prompt_to_requirement_set",
 ]

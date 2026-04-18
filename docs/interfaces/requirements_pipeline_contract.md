@@ -70,6 +70,8 @@ Normalized canonical units in `RequirementSet.v1`:
 
 BL-002 may proceed **only when**:
 
+See also: `docs/interfaces/design_basis_pipeline_contract.md` for BL-002 output contract.
+
 - `downstream_blocked == false`
 - `unresolved_gaps` is empty
 - Required normalized fields listed above are present in `requirements`
