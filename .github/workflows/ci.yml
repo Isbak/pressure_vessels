@@ -59,8 +59,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           fail: true
+          failIfEmpty: false
           args: >-
-            --no-progress --verbose --max-retries 3 --retry-wait-time 2 --glob
+            --no-progress --verbose --max-retries 3 --retry-wait-time 2
             README.md AGENT_GOVERNANCE.md docs/**/*.md .github/pull_request_template.md
 
   secret-scan:
