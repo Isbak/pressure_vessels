@@ -10,6 +10,7 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 | `services/backend` | Platform Runtime Team | API orchestration and all data plane access. |
 | `infra/platform/*` | Platform Runtime + domain teams | Environment modules, deploy orchestration, and infrastructure lifecycle. |
 | `infra/platform/postgresql` | Data Platform Team + owning domain teams | Relational schema ownership boundaries, migration approvals, backup lifecycle defaults. |
+| `infra/platform/redis` | Data Platform Team + owning domain teams | Cache namespace and queue stream ownership boundaries, retention defaults, and persistence mode by environment. |
 
 ## Environment Provisioning Inputs
 
@@ -19,8 +20,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 4. `infra/platform/secrets/module.boundaries.yaml` defines issuance and encryption boundaries for provider-neutral secret handling.
 5. `infra/platform/observability/module.boundaries.yaml` defines metrics/logs/traces/dashboard boundaries and incident signal inventory.
 6. `infra/platform/postgresql/module.boundaries.yaml` defines datastore schema ownership, migration approval, and backup lifecycle boundaries.
-7. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-8. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+7. `infra/platform/redis/module.boundaries.yaml` defines queue/cache ownership, retention defaults, and persistence boundaries.
+8. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+9. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -39,6 +41,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f infra/platform/observability/module.boundaries.yaml`
 - Confirm datastore boundary module exists:
   - `test -f infra/platform/postgresql/module.boundaries.yaml`
+- Confirm cache/queue boundary module exists:
+  - `test -f infra/platform/redis/module.boundaries.yaml`
 
 ## Incident Operations
 

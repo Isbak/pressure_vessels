@@ -18,6 +18,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `frontend-nextjs`
 - Component: `backend-nestjs`
 - Component: `datastore-postgresql`
+- Component: `cache-redis`
 - Component: `iac-opentofu-or-terraform`
 - Component: `secrets-vault-or-sops-age`
 - Component: `observability-prometheus-grafana-loki-tempo`
@@ -28,7 +29,6 @@ The technologies below are documented target-state components and are **not** cu
 
 ### Runtime stack components (planned)
 
-- Component: `cache-redis`
 - Component: `graph-neo4j`
 - Component: `retrieval-qdrant`
 - Component: `llm-serving-vllm`
