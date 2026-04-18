@@ -48,7 +48,7 @@ items:
   depends_on:
   - BL-001
   references:
-  - README.md#end-to-end-workflow
+  - README.md#6-end-to-end-workflow
   - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-b
   acceptance_criteria:
   - Primary and secondary standards are selected and versioned.
@@ -69,7 +69,7 @@ items:
   - BL-002
   references:
   - README.md#phase-1-mvp
-  - README.md#calculation-engine
+  - README.md#core-modules
   - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
   acceptance_criteria:
   - Deterministic sizing checks run for shell/head/nozzle and related checks.
@@ -107,7 +107,7 @@ items:
   depends_on:
   - BL-002
   references:
-  - README.md#standards-ingestion-new-codes-and-updates
+  - README.md#5-standards-ingestion-new-codes-and-updates
   - README.md#phase-2-production
   acceptance_criteria:
   - Ingestion supports source intake, parsing, normalization, semantic linking, validation, and release.
@@ -149,7 +149,7 @@ items:
   - BL-006
   references:
   - README.md#phase-2-production
-  - README.md#certification-readiness-features
+  - README.md#8-certification-readiness-features
   acceptance_criteria:
   - Export package includes PDF + machine-readable JSON.
   - Signed calculation snapshots and change impact report are included.
@@ -168,7 +168,7 @@ items:
   - BL-003
   - BL-006
   references:
-  - README.md#certification-readiness-features
+  - README.md#8-certification-readiness-features
   - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-f
   acceptance_criteria:
   - Requirement/code/model deltas are detected automatically.
@@ -208,7 +208,7 @@ items:
   - BL-003
   - BL-009
   references:
-  - README.md#optimization-agent-optional
+  - README.md#core-modules
   - README.md#phase-3-advanced
   acceptance_criteria:
   - Optimization objective supports weight/cost/manufacturability trade-offs.
@@ -228,7 +228,7 @@ items:
   - BL-007
   references:
   - README.md#phase-3-advanced
-  - README.md#suggested-tech-stack-example
+  - README.md#10-suggested-tech-stack-example
   acceptance_criteria:
   - Artifacts and approvals sync with configured enterprise systems.
   - Traceability links are preserved across system boundaries.
