@@ -88,6 +88,18 @@ from .traceability_pipeline import (
     write_traceability_graph_revision,
 )
 
+from .optimization_pipeline import (
+    CANDIDATE_RANKING_REPORT_VERSION,
+    OPTIMIZATION_SERVICE_VERSION,
+    CandidateRankingReport,
+    OptimizationCandidate,
+    OptimizationServiceArtifact,
+    OptimizationWeights,
+    RankedCandidate,
+    run_optimization_service,
+    write_optimization_artifacts,
+)
+
 from .requirements_pipeline import (
     Gap,
     RequirementSet,
@@ -151,6 +163,15 @@ __all__ = [
     "query_graph_by_revision",
     "with_additional_links",
     "write_traceability_graph_revision",
+    "CANDIDATE_RANKING_REPORT_VERSION",
+    "OPTIMIZATION_SERVICE_VERSION",
+    "CandidateRankingReport",
+    "OptimizationCandidate",
+    "OptimizationServiceArtifact",
+    "OptimizationWeights",
+    "RankedCandidate",
+    "run_optimization_service",
+    "write_optimization_artifacts",
     "build_design_basis",
     "generate_compliance_dossier",
     "parse_prompt_to_requirement_set",

@@ -133,6 +133,8 @@ The platform is split into independently deployable modules so teams can replace
 
    - Constrained by hard compliance rules.
 
+   - Exports `OptimizationService.v1` and `CandidateRankingReport.v1` artifacts with deterministic Pareto/ranking rationale.
+
 9. **Certification Dossier Generator**
 
    - Produces report packs for Authorized Inspector / Notified Body review.

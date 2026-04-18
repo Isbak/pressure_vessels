@@ -1,0 +1,35 @@
+{
+  "deterministic_hash": "ae1a5725bc8af61d0a8aab5ae330e1d3bafd63271c5dd7d3c805250ee9f5a712",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "ranking_rows": [
+    {
+      "candidate_id": "C-002",
+      "composite_score": 0.562,
+      "pareto_optimal": true,
+      "rank": 1,
+      "rationale": "Hard compliance gate passed.; Weighted objective contributions: weight=0.400000, cost=0.000000, manufacturability=0.162000; Pareto frontier status: on_frontier.; All mandatory UG-27/UG-32/UG-45 and route checks pass."
+    },
+    {
+      "candidate_id": "C-001",
+      "composite_score": 0.555487179,
+      "pareto_optimal": true,
+      "rank": 2,
+      "rationale": "Hard compliance gate passed.; Weighted objective contributions: weight=0.133333, cost=0.246154, manufacturability=0.176000; Pareto frontier status: on_frontier.; All mandatory UG-27/UG-32/UG-45 and route checks pass."
+    },
+    {
+      "candidate_id": "C-003",
+      "composite_score": 0.546,
+      "pareto_optimal": true,
+      "rank": 3,
+      "rationale": "Hard compliance gate passed.; Weighted objective contributions: weight=0.000000, cost=0.400000, manufacturability=0.146000; Pareto frontier status: on_frontier.; All mandatory UG-27/UG-32/UG-45 and route checks pass."
+    }
+  ],
+  "schema_version": "CandidateRankingReport.v1",
+  "source_optimization_hash": "59b23b3e15ba53e4adbfec73cab2e909b4c77ef19a0bede495f89ea54ee39c0b",
+  "summary_lines": [
+    "Compliant candidates ranked: 3",
+    "Rejected for hard compliance: 1",
+    "Pareto candidate count: 3",
+    "Objective weights: weight=0.400, cost=0.400, manufacturability=0.200"
+  ]
+}
