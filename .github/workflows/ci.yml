@@ -36,13 +36,22 @@ jobs:
       - name: Validate YAML syntax
         run: |
           ruby - <<'RUBY'
+          require "find"
           require "yaml"
 
-          Dir.glob("**/*.{yml,yaml}").sort.each do |path|
+          yaml_files = []
+          Find.find(".") do |path|
+            next if File.directory?(path)
+            next unless path.end_with?(".yml", ".yaml")
+
+            yaml_files << path
+          end
+
+          yaml_files.sort.each do |path|
             YAML.safe_load(File.read(path), permitted_classes: [], aliases: true)
           end
 
-          puts "YAML validation passed."
+          puts "YAML validation passed for #{yaml_files.length} files."
           RUBY
 
   markdown-links:
