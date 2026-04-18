@@ -1,8 +1,13 @@
 config:
-  default: true
-  MD013: false
-  MD033: false
-  MD041: false
+  default: false
+  MD009: true
+  MD010: true
+  MD012: true
+  MD022: true
+  MD031: true
+  MD032: true
+  MD040: true
+  MD047: true
 
 globs:
   - "**/*.md"
