@@ -4,7 +4,7 @@ This document defines the deterministic contract for the **Calculation Engine** 
 
 ## Entry Point
 
-- Python API: `pressure_vessels.calculation_pipeline.run_calculation_pipeline(requirement_set, design_basis, applicability_matrix, sizing_input=None, now_utc=None)`
+- Python API: `pressure_vessels.calculation_pipeline.run_calculation_pipeline(requirement_set, design_basis, applicability_matrix, sizing_input=None, now_utc=None, near_limit_threshold=0.9)`
 
 - Persistence helper: `pressure_vessels.calculation_pipeline.write_calculation_artifacts(calc_artifact, non_conformance_artifact, directory)`
 
@@ -65,6 +65,8 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
       "provided_thickness_m": 0.02,
       "margin_m": 0.001512132,
       "utilization_ratio": 0.9243934,
+      "near_limit_threshold": 0.9,
+      "is_near_limit": true,
       "parent_component": null,
       "parent_check_id": null,
       "design_pressure_pa": null,
@@ -115,6 +117,8 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
   - `inputs` snapshot in canonical SI units (`Pa`, `m`, dimensionless)
 
   - `required_thickness_m`, `provided_thickness_m`, `margin_m`, `utilization_ratio`
+  - `near_limit_threshold` (default `0.9`, configurable per pipeline invocation)
+  - `is_near_limit` (`true` only when `pass_status == true` and `utilization_ratio >= near_limit_threshold`)
   - `parent_component`, `parent_check_id` (set for routed checks such as nozzle reinforcement linked to shell/head parent checks)
 
   - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for pressure-capacity checks such as MAWP and UG-28 external-pressure)
@@ -208,8 +212,6 @@ Clause-coverage gate impact:
 ## Scope (MVP) and Deferred Items
 
 BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure, conditional UG-28 external-pressure checks for shell/head, and UG-37 nozzle reinforcement-area replacement with parent-route linkage. The following Workflow D items remain deferred and tracked as follow-up backlog entries:
-
-- BL-003d Margin / utilization near-limit reporting
 
 - BL-003e Model-domain / validity-envelope gating
 
