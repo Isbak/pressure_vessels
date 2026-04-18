@@ -18,6 +18,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `frontend-nextjs`
 - Component: `backend-nestjs`
 - Component: `iac-opentofu-or-terraform`
+- Component: `secrets-vault-or-sops-age`
 
 ## Planned
 
@@ -35,7 +36,6 @@ The technologies below are documented target-state components and are **not** cu
 - Component: `workflow-temporal`
 - Component: `auth-keycloak`
 - Component: `observability-prometheus-grafana-loki-tempo`
-- Component: `secrets-vault-or-sops-age`
 - Component: `runtime-docker-kubernetes`
 
 ### Runtime mapping source of truth
