@@ -1,0 +1,52 @@
+{
+  "schema_version": "ApplicabilityMatrix.v1",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+  "primary_standard": "ASME Section VIII Division 1",
+  "primary_standard_version": "ASME_BPVC_2023",
+  "records": [
+    {
+      "clause_id": "UG-16",
+      "applicable": true,
+      "justification": "Applicable because design pressure is defined for pressure boundary sizing.",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ]
+    },
+    {
+      "clause_id": "UG-20",
+      "applicable": true,
+      "justification": "Applicable because design temperature is defined for material selection limits.",
+      "evidence_fields": [
+        "design_temperature",
+        "code_standard"
+      ]
+    },
+    {
+      "clause_id": "UG-25",
+      "applicable": true,
+      "justification": "Applicable because corrosion allowance input is provided.",
+      "evidence_fields": [
+        "corrosion_allowance"
+      ]
+    },
+    {
+      "clause_id": "UG-28",
+      "applicable": false,
+      "justification": "Not applicable in MVP because external pressure service is not declared and internal pressure basis is assumed.",
+      "evidence_fields": [
+        "design_pressure"
+      ]
+    },
+    {
+      "clause_id": "UCS-66",
+      "applicable": false,
+      "justification": "Not applicable because design temperature is above low-temperature impact-test threshold.",
+      "evidence_fields": [
+        "design_temperature"
+      ]
+    }
+  ],
+  "deterministic_hash": "b90b03d393687c86a48c0df22512bc09b574e0e09b5905e1dc4a8f9f447b72cb"
+}
