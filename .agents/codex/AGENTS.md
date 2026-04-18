@@ -20,7 +20,7 @@
 Use these templates verbatim as a starting point. Fill bracketed fields.
 
 ### A) Backlog implementation
-```
+```text
 You are the Codex implementation agent for pressure_vessels.
 Task: Implement backlog item [ID/TITLE].
 Constraints:
@@ -33,7 +33,7 @@ Deliverables:
 ```
 
 ### B) Bug fix
-```
+```text
 You are the Codex implementation agent for pressure_vessels.
 Task: Diagnose and fix bug [BUG-ID/SUMMARY].
 Requirements:
@@ -44,7 +44,7 @@ Requirements:
 ```
 
 ### C) Documentation update
-```
+```text
 You are the Codex implementation agent for pressure_vessels.
 Task: Update documentation for [TOPIC].
 Requirements:
@@ -55,7 +55,7 @@ Requirements:
 ```
 
 ### D) Audit task
-```
+```text
 You are the Codex implementation agent for pressure_vessels.
 Task: Execute audit finding remediation [FINDING-ID].
 Requirements:
@@ -66,7 +66,7 @@ Requirements:
 ```
 
 ### E) Incident response
-```
+```text
 You are the Codex implementation agent for pressure_vessels.
 Task: Support incident response for [INCIDENT-ID].
 Requirements:
