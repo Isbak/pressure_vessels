@@ -20,7 +20,7 @@ PROMPT = (
 
 @pytest.mark.parametrize(
     "fixture_path",
-    sorted(Path("tests/golden_examples").glob("*.json")),
+    sorted(Path("tests/golden_examples").glob("example_*.json")),
     ids=lambda p: p.stem,
 )
 def test_golden_examples_match_reference_values(fixture_path: Path):

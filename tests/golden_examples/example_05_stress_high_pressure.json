@@ -1,0 +1,28 @@
+{
+  "id": "example_05_stress_high_pressure",
+  "description": "Stress case using high pressure and large diameters near model envelope maxima.",
+  "source": "ASME BPVC Section VIII, Division 1 stress envelope validation",
+  "tolerance": 1e-06,
+  "input": {
+    "internal_pressure_pa": 19000000.0,
+    "allowable_stress_pa": 50000000.0,
+    "joint_efficiency": 0.5,
+    "corrosion_allowance_m": 0.02,
+    "shell_inside_diameter_m": 8.0,
+    "shell_provided_thickness_m": 0.03,
+    "head_inside_diameter_m": 8.0,
+    "head_provided_thickness_m": 0.028,
+    "nozzle_inside_diameter_m": 2.0,
+    "nozzle_provided_thickness_m": 0.012
+  },
+  "expected": {
+    "UG-27-shell": {"required_thickness_m": 5.608235294117647, "pass_status": false},
+    "UG-32-head": {"required_thickness_m": 2.9316883116883117, "pass_status": false},
+    "UG-45-nozzle": {"required_thickness_m": 1.1119540229885058, "pass_status": false},
+    "UG-27-shell-mawp": {"computed_mawp_pa": 62406.39041437815, "pass_status": false},
+    "UG-32-head-mawp": {"computed_mawp_pa": 56484.41030275572, "pass_status": false},
+    "UG-45-nozzle-mawp": {"computed_mawp_pa": 0.0, "pass_status": false},
+    "UG-37-nozzle-shell-reinforcement": {"required_thickness_m": 11.216470588235294, "pass_status": false},
+    "UG-37-nozzle-head-reinforcement": {"required_thickness_m": 5.863376623376623, "pass_status": false}
+  }
+}

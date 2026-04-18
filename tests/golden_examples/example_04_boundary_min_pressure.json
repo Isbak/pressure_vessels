@@ -1,0 +1,28 @@
+{
+  "id": "example_04_boundary_min_pressure",
+  "description": "Boundary case at minimum internal pressure and geometric lower limits.",
+  "source": "ASME BPVC Section VIII, Division 1 envelope edge validation",
+  "tolerance": 1e-06,
+  "input": {
+    "internal_pressure_pa": 1.0,
+    "allowable_stress_pa": 500000000.0,
+    "joint_efficiency": 1.0,
+    "corrosion_allowance_m": 0.0,
+    "shell_inside_diameter_m": 0.25,
+    "shell_provided_thickness_m": 0.002,
+    "head_inside_diameter_m": 0.25,
+    "head_provided_thickness_m": 0.002,
+    "nozzle_inside_diameter_m": 0.05,
+    "nozzle_provided_thickness_m": 0.001
+  },
+  "expected": {
+    "UG-27-shell": {"required_thickness_m": 0.00000000025, "pass_status": true},
+    "UG-32-head": {"required_thickness_m": 0.000000000225, "pass_status": true},
+    "UG-45-nozzle": {"required_thickness_m": 0.00000000005, "pass_status": true},
+    "UG-27-shell-mawp": {"computed_mawp_pa": 7923930.269413629, "pass_status": true},
+    "UG-32-head-mawp": {"computed_mawp_pa": 9023234.829686442, "pass_status": true},
+    "UG-45-nozzle-mawp": {"computed_mawp_pa": 19685039.37007874, "pass_status": true},
+    "UG-37-nozzle-shell-reinforcement": {"required_thickness_m": 0.0000000000625, "pass_status": true},
+    "UG-37-nozzle-head-reinforcement": {"required_thickness_m": 0.00000000005625, "pass_status": true}
+  }
+}

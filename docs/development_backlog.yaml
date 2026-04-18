@@ -437,7 +437,7 @@ items:
   area: quality
   phase: 'Phase 4: Hardening'
   priority: P2
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-013
