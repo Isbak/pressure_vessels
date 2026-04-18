@@ -47,7 +47,6 @@ Primary concerns:
 - Cross-boundary traceability is preserved by emitting `IntegrationBoundaryMapping` rows with immutable, auditable `traceability_link_ids`.
 - Retry observability is explicit via per-attempt `IntegrationAttemptLog` rows and terminal `IntegrationFailureRecord` entries when retry budgets are exhausted.
 
-
 ## BL-012 Governance Gates in CI
 
 - Policy schema: `CIGovernancePolicy.v1` defines required CI gates and artifact retention windows.
