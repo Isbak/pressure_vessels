@@ -481,6 +481,6 @@ items:
   source: audit 2026-04-18, observation 1 and 3
 - id: BL-020
   title: Add README-anchor consistency check trigger
-  status: todo
+  status: done
   depends_on: []
   source: audit 2026-04-18, observation 2

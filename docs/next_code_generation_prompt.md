@@ -1,22 +1,24 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **current next roadmap item: BL-020**.
+All backlog items in `docs/development_backlog.yaml` are currently marked `done` (through **BL-020** as of 2026-04-18).
+
+Use this prompt for the **next newly-prioritized backlog item** once added to the backlog file.
 
 ```text
-You are implementing backlog item **BL-020: Add README-anchor consistency check trigger** for the `pressure_vessels` repository.
+You are implementing backlog item **<NEXT-ID>: <NEXT-TITLE>** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved from YAML on 2026-04-18):
-- `BL-020` status is `todo`.
-- `BL-020` dependencies: none.
-- This makes `BL-020` the first `todo`/`in_progress` item whose `depends_on` set is fully `done`.
+- `<NEXT-ID>` status is `todo` or `in_progress`.
+- `<NEXT-ID>` dependencies are fully `done`.
+- This makes `<NEXT-ID>` the first actionable item in backlog order.
 
 Restate before coding:
-- Item ID/title: BL-020 — Add README-anchor consistency check trigger
-- depends_on: []
-- source: audit 2026-04-18, observation 2
+- Item ID/title: <NEXT-ID> — <NEXT-TITLE>
+- depends_on: <LIST>
+- source: <SOURCE FIELD FROM YAML>
 
 Repository constraints:
 - Keep changes minimal and focused.
@@ -25,17 +27,14 @@ Repository constraints:
 - Prefer deterministic logic (no randomness/time-dependent values unless explicitly controlled).
 
 Likely relevant files:
-- `.github/workflows/ci.yml`
-- `README.md`
-- `scripts/` (consistency-check helper if needed)
-- `tests/` (workflow/anchor wiring tests)
+- Derive from the selected backlog item references and acceptance criteria.
 
 Task:
-1) Implement BL-020 behavior using existing repository patterns.
-2) Add automated README-anchor consistency checks in CI.
+1) Implement `<NEXT-ID>` behavior using existing repository patterns.
+2) Update or add automated checks in CI when required by the item.
 3) Add/extend tests under `tests/` for new behavior.
 4) Update related docs under `docs/` if contracts change.
-5) Update `docs/development_backlog.yaml` status for BL-020 when complete.
+5) Update `docs/development_backlog.yaml` status for `<NEXT-ID>` when complete.
 6) Update `docs/next_code_generation_prompt.md` so it points at the subsequent backlog item.
 
 Output format:

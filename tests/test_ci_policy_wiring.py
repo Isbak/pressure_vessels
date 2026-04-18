@@ -63,3 +63,16 @@ def test_governance_gate_needs_and_policy_required_gates_are_in_lockstep() -> No
 
     assert governance_needs == required_gates
     assert required_gates.issubset(defined_jobs)
+
+
+def test_readme_anchor_check_job_runs_consistency_script() -> None:
+    workflow = _load_workflow()
+    steps = workflow["jobs"]["readme-anchor-check"]["steps"]
+
+    check_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Validate backlog README anchor consistency"
+    ]
+    assert len(check_steps) == 1
+    assert "python scripts/check_readme_anchors.py" in check_steps[0]["run"]
