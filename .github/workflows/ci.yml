@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Lint Markdown
         run: |
-          ./markdownlint-cli2 "**/*.md"
+          npx --yes markdownlint-cli2@0.15.0 "**/*.md"
 
   yaml-validate:
     runs-on: ubuntu-latest
