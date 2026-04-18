@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003
-- Next item to implement: BL-004
-- BL-004 title: Generate basic compliance report
-- BL-004 depends_on: BL-003 (already done)
-- BL-004 acceptance criteria:
+- Current completed items: BL-001, BL-002
+- Next item to implement: BL-003
+- BL-003 title: Implement core ASME Div 1 sizing checks
+- BL-003 depends_on: BL-001, BL-002 (already done)
+- BL-003 acceptance criteria:
 
-  1) Clause-by-clause compliance matrix is produced.
-  2) Evidence links map requirement -> clause -> model -> result -> artifact.
-  3) Review checklist is included for human approvers.
+  1) Deterministic sizing checks run for shell/head/nozzle and related checks.
+  2) All calculations are unit-safe with reproducibility hashes.
+  3) Pass/fail records and non-conformance list are stored.
 
-- BL-004 deliverables:
+- BL-003 deliverables:
 
-  - ComplianceDossier (human-readable)
-  - ComplianceDossier (machine-readable)
+  - CalculationRecords
+  - Non-conformance list
 
 Repository constraints:
 
