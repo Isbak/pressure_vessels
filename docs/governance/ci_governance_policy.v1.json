@@ -6,6 +6,7 @@
     "markdown-lint",
     "yaml-validate",
     "python-tests",
+    "tech-stack-check",
     "markdown-links",
     "secret-scan"
   ]

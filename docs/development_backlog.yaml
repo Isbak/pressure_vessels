@@ -455,3 +455,23 @@ items:
   - QA benchmark dataset manifest
   - Cross-verification test harness
   - CI quality-gate report artifact
+- id: BL-018
+  title: Implement platform runtime stack foundations
+  area: platform
+  phase: 'Phase 4: Hardening'
+  priority: P2
+  status: todo
+  effort: L
+  depends_on:
+  - BL-012
+  references:
+  - docs/tech-stack.md
+  - README.md#10-suggested-tech-stack-example
+  acceptance_criteria:
+  - Frontend and backend service skeletons are created in-repo with documented ownership boundaries.
+  - Data, retrieval, observability, auth, secrets, and runtime platform choices are mapped to deployable infrastructure modules.
+  - CI includes environment checks proving declared stack components are either deployed or explicitly marked planned.
+  deliverables:
+  - Stack foundation implementation plan and bootstrap modules
+  - Environment provisioning manifests
+  - Updated operations runbook

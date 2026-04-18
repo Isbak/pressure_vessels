@@ -72,6 +72,18 @@ jobs:
           path: artifacts/ci/pytest-junit.xml
           retention-days: 30
 
+  tech-stack-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate tech stack documentation consistency
+        run: |
+          python scripts/check_tech_stack.py
+
   markdown-links:
     runs-on: ubuntu-latest
     steps:
@@ -105,6 +117,7 @@ jobs:
       - markdown-lint
       - yaml-validate
       - python-tests
+      - tech-stack-check
       - markdown-links
       - secret-scan
     runs-on: ubuntu-latest
