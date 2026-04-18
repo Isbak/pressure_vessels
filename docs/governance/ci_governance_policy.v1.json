@@ -1,0 +1,12 @@
+{
+  "schema_version": "CIGovernancePolicy.v1",
+  "artifact_retention_days": 30,
+  "required_gates": [
+    "docs-check",
+    "markdown-lint",
+    "yaml-validate",
+    "python-tests",
+    "markdown-links",
+    "secret-scan"
+  ]
+}
