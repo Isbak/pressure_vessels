@@ -1,0 +1,27 @@
+{
+  "schema_version": "RouteCompatibilityMatrix.v1",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "code_standard_input": "ASME VIII-1",
+  "selected_route_id": "route_asme_viii_div1",
+  "routes": [
+    {
+      "route_id": "route_asme_viii_div1",
+      "standard_name": "ASME Section VIII Division 1",
+      "standard_version": "ASME_BPVC_2023",
+      "route_priority": 100,
+      "matched_input": true,
+      "selected": true,
+      "selection_reason": "Selected: matched input and won deterministic priority/order tie-break."
+    },
+    {
+      "route_id": "route_ped_en13445",
+      "standard_name": "PED (EN 13445)",
+      "standard_version": "PED_2014_68_EU_EN13445_2021",
+      "route_priority": 200,
+      "matched_input": false,
+      "selected": false,
+      "selection_reason": "Configured route did not match canonical code_standard input."
+    }
+  ],
+  "deterministic_hash": "sample-only"
+}

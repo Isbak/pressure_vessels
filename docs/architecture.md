@@ -32,3 +32,11 @@ Primary concerns:
 - Minimal re-verification scope is computed from traceability graph link deltas and executed deterministically against current calculation records.
 - Every revision delta emits a signed `ImpactReport.v1` artifact with evidence links and an explicit baseline update decision.
 - Baseline decisions can also be persisted as standalone `BaselineUpdateStatus.v1` artifacts for release-gate consumption.
+
+## BL-009 Multi-Standard Design Routes
+
+- Design-basis routing now supports deterministic route configuration for ASME and PED defaults.
+- Route resolution is auditable through `route_selection_audit` with explicit match/selection reasons.
+- Applicability records remain clause-level and now include `standard_route_id` for cross-standard traceability integrity.
+- Additional standards can be added by injecting deterministic `StandardRouteConfig` entries.
+

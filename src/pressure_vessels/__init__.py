@@ -14,6 +14,8 @@ from .design_basis_pipeline import (
     ApplicabilityMatrix,
     ClauseApplicabilityRecord,
     DesignBasis,
+    RouteSelectionRecord,
+    StandardRouteConfig,
     build_design_basis,
 )
 from .calculation_pipeline import (
@@ -102,6 +104,8 @@ __all__ = [
     "ComplianceDossierHuman",
     "ComplianceDossierMachine",
     "DesignBasis",
+    "RouteSelectionRecord",
+    "StandardRouteConfig",
     "Gap",
     "EvidenceLink",
     "NonConformanceEntry",
