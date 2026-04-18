@@ -12,7 +12,6 @@ Primary concerns:
 
 - Human-in-the-loop governance and approvals
 
-
 ## BL-006 Traceability Graph
 
 - Schema: `TraceabilityGraphRevision.v1` with immutable, revision-scoped link snapshots.
