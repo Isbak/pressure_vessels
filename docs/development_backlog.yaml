@@ -484,3 +484,134 @@ items:
   status: done
   depends_on: []
   source: audit 2026-04-18, observation 2
+- id: BL-021
+  title: Deliver IaC foundation module for platform runtime stack
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-018
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - IaC module under infra/platform/iac defines reusable environment provisioning primitives.
+  - Module is referenced from environment.bootstrap.yaml and recognized by scripts/check_tech_stack.py.
+  - Registry entry for iac-opentofu-or-terraform transitions deterministically from planned to deployed when module path is populated.
+  deliverables:
+  - infra/platform/iac module skeleton with documented boundaries
+  - Updated platform_runtime_stack_registry.yaml status hooks
+  - Runbook update describing IaC foundation ownership
+- id: BL-022
+  title: Deliver secrets management module for platform runtime stack
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P1
+  status: blocked
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - AGENT_GOVERNANCE.md
+  acceptance_criteria:
+  - Secrets module under infra/platform/secrets declares issuance and encryption boundaries.
+  - Module is wired into environment.bootstrap.yaml staging definitions.
+  - Governance references reflect secrets provider without leaking provider-specific secrets.
+  deliverables:
+  - infra/platform/secrets module skeleton
+  - Documentation of secret issuance/encryption policy
+  - Stack registry status update for secrets-vault-or-sops-age
+- id: BL-023
+  title: Deliver observability module for platform runtime stack
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P2
+  status: blocked
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  acceptance_criteria:
+  - Observability module under infra/platform/observability declares metrics/logs/traces/dashboards boundaries.
+  - Module is referenced from environment.bootstrap.yaml for dev and staging environments.
+  - Runbook describes incident signals the stack must expose for governance and CI gates.
+  deliverables:
+  - infra/platform/observability module skeleton
+  - Signal and dashboard inventory documentation
+  - Stack registry status update for observability-prometheus-grafana-loki-tempo
+- id: BL-024
+  title: Deliver datastore (PostgreSQL) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P1
+  status: blocked
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  - BL-022
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Datastore module under infra/platform/postgresql documents schema ownership and lifecycle.
+  - Module is referenced from environment.bootstrap.yaml dev and staging environments.
+  - Stack registry entry for datastore-postgresql reflects deployment status accurately.
+  deliverables:
+  - infra/platform/postgresql module skeleton
+  - Data plane ownership documentation
+  - Stack registry status update for datastore-postgresql
+- id: BL-025
+  title: Deliver cache/queue (Redis) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P2
+  status: blocked
+  effort: S
+  depends_on:
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  acceptance_criteria:
+  - Cache module under infra/platform/redis documents queue/cache ownership boundaries.
+  - Module is referenced from environment.bootstrap.yaml dev and staging environments.
+  - Stack registry entry for cache-redis reflects deployment status accurately.
+  deliverables:
+  - infra/platform/redis module skeleton
+  - Cache/queue usage guidance for backend service
+  - Stack registry status update for cache-redis
+- id: BL-026
+  title: Deliver runtime platform (Docker/Kubernetes) deployment module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P1
+  status: blocked
+  effort: L
+  depends_on:
+  - BL-018
+  - BL-021
+  - BL-022
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Runtime module under infra/platform/runtime declares deploy target primitives for platform services.
+  - Module is referenced from environment.bootstrap.yaml dev and staging environments.
+  - Stack registry entry for runtime-docker-kubernetes reflects deployment status accurately.
+  deliverables:
+  - infra/platform/runtime module skeleton
+  - Deployment target documentation for platform services
+  - Stack registry status update for runtime-docker-kubernetes
