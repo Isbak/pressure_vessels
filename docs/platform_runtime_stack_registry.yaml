@@ -74,10 +74,10 @@ components:
     notes: Metrics, logs, traces, dashboards.
   - key: secrets-vault-or-sops-age
     capability: secrets
-    status: planned
+    status: deployed
     owner: security-platform
     module_path: infra/platform/secrets
-    notes: Secret issuance and encryption.
+    notes: Secret issuance/encryption boundary module skeleton committed in-repo.
   - key: iac-opentofu-or-terraform
     capability: infrastructure-as-code
     status: deployed
