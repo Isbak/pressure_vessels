@@ -35,6 +35,7 @@ def _build_revision(revision_id: str):
         design_basis,
         matrix,
         now_utc=FIXED_NOW,
+        use_mvp_defaults=True,
     )
     _, machine = generate_compliance_dossier(
         requirement_set,

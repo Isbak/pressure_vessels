@@ -40,6 +40,7 @@ def _build_export_inputs(prompt: str):
         design_basis,
         matrix,
         now_utc=FIXED_NOW,
+        use_mvp_defaults=True,
     )
     compliance_human, compliance_machine = generate_compliance_dossier(
         requirement_set,

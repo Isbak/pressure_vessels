@@ -5,8 +5,10 @@ from datetime import datetime, timezone
 import pytest
 
 from pressure_vessels.calculation_pipeline import (
+    MissingGeometryInputError,
     Quantity,
     SizingCheckInput,
+    _MVP_DEFAULTS,
     run_calculation_pipeline,
     write_calculation_artifacts,
 )
@@ -50,8 +52,12 @@ def test_calculation_pipeline_is_deterministic_with_fixed_timestamp():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc_a, nc_a = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
-    calc_b, nc_b = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_a, nc_a = run_calculation_pipeline(
+        req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
+    )
+    calc_b, nc_b = run_calculation_pipeline(
+        req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
+    )
 
     assert calc_a.to_json_dict() == calc_b.to_json_dict()
     assert nc_a.to_json_dict() == nc_b.to_json_dict()
@@ -67,7 +73,9 @@ def test_calculation_pipeline_generates_expected_pass_fail_and_non_conformance()
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, non_conformance = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, non_conformance = run_calculation_pipeline(
+        req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
+    )
 
     assert [record.component for record in calc.checks] == [
         "shell",
@@ -115,7 +123,7 @@ def test_artifact_links_requirement_design_basis_and_applicability_matrix():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
 
     assert calc.source_requirement_set_hash == req.deterministic_hash
     assert calc.source_design_basis_signature == design_basis.deterministic_signature
@@ -130,7 +138,10 @@ def test_applied_defaults_are_surfaced_when_sizing_input_is_absent():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    with pytest.warns(UserWarning, match="MVP geometry defaults for missing fields"):
+        calc, _ = run_calculation_pipeline(
+            req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
+        )
 
     assert calc.applied_defaults["applied_mvp_defaults"] is True
     assert calc.applied_defaults["applied_geometry_defaults"] is True
@@ -143,6 +154,35 @@ def test_applied_defaults_are_surfaced_when_sizing_input_is_absent():
     assert calc.material_basis["allowable_stress_pa"] == 138_000_000.0
     assert calc.material_basis["joint_efficiency"] == 0.85
     assert calc.material_basis["standards_package_ref"] == "ASME Section VIII Division 1:ASME_BPVC_2023"
+
+
+def test_missing_geometry_input_raises_without_explicit_opt_in():
+    req, design_basis, matrix = _build_inputs(
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    with pytest.raises(MissingGeometryInputError, match="missing fields: shell_inside_diameter_m"):
+        run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+
+
+def test_explicit_mvp_defaults_opt_in_uses_expected_values_and_emits_warning():
+    req, design_basis, matrix = _build_inputs(
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    with pytest.warns(UserWarning, match="MVP geometry defaults for missing fields"):
+        calc, _ = run_calculation_pipeline(
+            req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
+        )
+
+    assert calc.applied_defaults["values"]["shell_inside_diameter_m"] == _MVP_DEFAULTS["shell_inside_diameter_m"]
+    assert calc.applied_defaults["values"]["shell_provided_thickness_m"] == _MVP_DEFAULTS["shell_provided_thickness_m"]
+    assert calc.applied_defaults["values"]["head_inside_diameter_m"] == _MVP_DEFAULTS["head_inside_diameter_m"]
+    assert calc.applied_defaults["values"]["head_provided_thickness_m"] == _MVP_DEFAULTS["head_provided_thickness_m"]
+    assert calc.applied_defaults["values"]["nozzle_inside_diameter_m"] == _MVP_DEFAULTS["nozzle_inside_diameter_m"]
+    assert calc.applied_defaults["values"]["nozzle_provided_thickness_m"] == _MVP_DEFAULTS["nozzle_provided_thickness_m"]
 
 
 def test_applied_defaults_are_not_flagged_when_caller_supplies_sizing_input():
@@ -236,7 +276,7 @@ def test_corrosion_policy_fallback_is_explicit_when_requirement_is_absent():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
 
     assert calc.material_basis["corrosion_allowance_policy"]["policy_id"] == "CA-DEFAULT-MM"
     assert calc.material_basis["corrosion_allowance_m"] == 0.0015
@@ -280,7 +320,7 @@ def test_check_reproducibility_hashes_are_stable_for_canonical_payload():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
 
     hashes = [record.reproducibility.canonical_payload_sha256 for record in calc.checks]
     assert len(set(hashes)) == len(hashes)
@@ -296,8 +336,8 @@ def test_validity_envelope_metadata_is_deterministic_and_model_declared():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
-    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
+    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     assert calc_a.to_json_dict() == calc_b.to_json_dict()
 
     shell = next(record for record in calc_a.checks if record.check_id == "UG-27-shell")
@@ -329,8 +369,8 @@ def test_margin_utilization_outputs_are_deterministic():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
-    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
+    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     assert calc_a.to_json_dict() == calc_b.to_json_dict()
 
     shell = next(record for record in calc_a.checks if record.check_id == "UG-27-shell")
@@ -354,6 +394,7 @@ def test_near_limit_threshold_is_configurable_and_persisted_on_records():
         matrix,
         now_utc=FIXED_NOW,
         near_limit_threshold=0.95,
+        use_mvp_defaults=True,
     )
     shell = next(record for record in calc.checks if record.check_id == "UG-27-shell")
     assert shell.near_limit_threshold == 0.95
@@ -367,9 +408,9 @@ def test_near_limit_fields_are_clause_linked_and_hashed_in_reproducibility_metad
         "ASME Section VIII Div 1, corrosion allowance 3 mm."
     )
     req, design_basis, matrix = _build_inputs(prompt)
-    calc_default, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_default, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     calc_tuned, _ = run_calculation_pipeline(
-        req, design_basis, matrix, now_utc=FIXED_NOW, near_limit_threshold=0.95
+        req, design_basis, matrix, now_utc=FIXED_NOW, near_limit_threshold=0.95, use_mvp_defaults=True
     )
 
     shell_default = next(record for record in calc_default.checks if record.check_id == "UG-27-shell")
@@ -390,7 +431,7 @@ def test_mawp_outputs_are_deterministic_and_clause_linked():
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     mawp_checks = [record for record in calc.checks if record.check_id.endswith("-mawp")]
 
     assert [record.check_id for record in mawp_checks] == [
@@ -422,7 +463,7 @@ def test_external_pressure_checks_run_only_when_external_pressure_is_declared():
     )
 
     req, design_basis, matrix = _build_inputs(prompt)
-    calc_no_external, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_no_external, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     assert [record.check_id for record in calc_no_external.checks if record.check_id.startswith("UG-28")] == []
 
     req_ext, design_basis_ext, matrix_ext = _build_inputs_with_external_pressure(
@@ -433,6 +474,7 @@ def test_external_pressure_checks_run_only_when_external_pressure_is_declared():
         design_basis_ext,
         matrix_ext,
         now_utc=FIXED_NOW,
+        use_mvp_defaults=True,
     )
     assert [record.check_id for record in calc_with_external.checks if record.check_id.startswith("UG-28")] == [
         "UG-28-shell-external",
@@ -448,8 +490,8 @@ def test_reinforcement_outputs_are_deterministic_clause_linked_and_parent_linked
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
-    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
+    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     assert calc_a.to_json_dict() == calc_b.to_json_dict()
 
     reinforcement_checks = [record for record in calc_a.checks if record.check_id.startswith("UG-37-")]
@@ -474,8 +516,12 @@ def test_external_pressure_outputs_are_deterministic_and_clause_linked():
         prompt, pressure_pa=5_000.0
     )
 
-    calc_a, nc_a = run_calculation_pipeline(req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW)
-    calc_b, nc_b = run_calculation_pipeline(req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW)
+    calc_a, nc_a = run_calculation_pipeline(
+        req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW, use_mvp_defaults=True
+    )
+    calc_b, nc_b = run_calculation_pipeline(
+        req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW, use_mvp_defaults=True
+    )
     assert calc_a.to_json_dict() == calc_b.to_json_dict()
     assert nc_a.to_json_dict() == nc_b.to_json_dict()
 
@@ -499,7 +545,7 @@ def test_external_pressure_failures_feed_non_conformance_with_clause_linkage():
     )
     req_ext, design_basis_ext, matrix_ext = _build_inputs_with_external_pressure(prompt, pressure_pa=50_000.0)
     calc, non_conformance = run_calculation_pipeline(
-        req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW
+        req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW, use_mvp_defaults=True
     )
 
     ug28_failures = [record for record in calc.checks if record.check_id.startswith("UG-28")]
@@ -530,7 +576,7 @@ def test_handoff_gate_rejects_non_canonical_unit():
     corrupted = replace(req, requirements=corrupted_requirements)
 
     with pytest.raises(ValueError, match="design_temperature"):
-        run_calculation_pipeline(corrupted, design_basis, matrix, now_utc=FIXED_NOW)
+        run_calculation_pipeline(corrupted, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
 
 
 def test_handoff_gate_rejects_mismatched_applicability_matrix():
@@ -548,7 +594,7 @@ def test_handoff_gate_rejects_mismatched_applicability_matrix():
     _, _, matrix_b = _build_inputs(prompt_b)
 
     with pytest.raises(ValueError, match="applicability_matrix"):
-        run_calculation_pipeline(req_a, design_basis_a, matrix_b, now_utc=FIXED_NOW)
+        run_calculation_pipeline(req_a, design_basis_a, matrix_b, now_utc=FIXED_NOW, use_mvp_defaults=True)
 
 
 def test_model_domain_gate_rejects_out_of_range_joint_efficiency():
@@ -620,7 +666,9 @@ def test_clause_linkage_and_non_conformance_behavior_remain_compatible_with_vali
         "ASME Section VIII Div 1, corrosion allowance 3 mm."
     )
     req, design_basis, matrix = _build_inputs(prompt)
-    calc, non_conformance = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, non_conformance = run_calculation_pipeline(
+        req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
+    )
 
     failed_check = next(record for record in calc.checks if record.check_id == "UG-45-nozzle")
     failed_entry = next(entry for entry in non_conformance.entries if entry.check_id == "UG-45-nozzle")
@@ -644,6 +692,7 @@ def test_model_domain_gate_rejects_invalid_near_limit_threshold():
             matrix,
             now_utc=FIXED_NOW,
             near_limit_threshold=1.2,
+            use_mvp_defaults=True,
         )
 
 
@@ -655,7 +704,7 @@ def test_write_calculation_artifacts_persists_canonical_json(tmp_path):
     )
     req, design_basis, matrix = _build_inputs(prompt)
 
-    calc, nc = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc, nc = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True)
     calc_path, nc_path = write_calculation_artifacts(calc, nc, tmp_path)
 
     assert calc_path.exists()

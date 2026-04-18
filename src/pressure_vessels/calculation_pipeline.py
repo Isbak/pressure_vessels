@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+import warnings
 
 from .design_basis_pipeline import ApplicabilityMatrix, DesignBasis
 from .geometry_module import GeometryInput, adapt_geometry_input, build_cad_ready_parameter_export
@@ -29,6 +30,19 @@ _MVP_DEFAULTS = {
     "nozzle_provided_thickness_m": 0.004,
     "source": "BL-003 MVP geometry placeholder; replace with Geometry/CAD module outputs.",
 }
+
+_MVP_DEFAULT_FIELDS = (
+    "shell_inside_diameter_m",
+    "shell_provided_thickness_m",
+    "head_inside_diameter_m",
+    "head_provided_thickness_m",
+    "nozzle_inside_diameter_m",
+    "nozzle_provided_thickness_m",
+)
+
+
+class MissingGeometryInputError(ValueError):
+    """Raised when BL-003 geometry inputs are missing without explicit MVP-default opt-in."""
 
 # Maps each BL-003 check to the ApplicabilityMatrix clause it implements.
 _CHECK_CLAUSE_MAP: dict[str, str] = {
@@ -294,6 +308,7 @@ def run_calculation_pipeline(
     now_utc: datetime | None = None,
     near_limit_threshold: float = DEFAULT_NEAR_LIMIT_THRESHOLD,
     strict_sizing_input_gate: bool = False,
+    use_mvp_defaults: bool = False,
 ) -> tuple[CalculationRecordsArtifact, NonConformanceListArtifact]:
     """Run deterministic shell/head/nozzle sizing checks for BL-003 MVP."""
     _validate_handoff_gate(
@@ -310,6 +325,7 @@ def run_calculation_pipeline(
         geometry_input,
         material_basis,
         strict_sizing_input_gate,
+        use_mvp_defaults,
     )
     _validate_model_domain_gate(normalized_input, near_limit_threshold)
     _validate_validity_envelopes(normalized_input)
@@ -471,6 +487,7 @@ def _normalize_and_resolve_inputs(
     geometry_input: GeometryInput | None,
     material_basis: MaterialBasis,
     strict_sizing_input_gate: bool,
+    use_mvp_defaults: bool,
 ) -> tuple[SizingCheckInput, dict[str, Any], dict[str, Any]]:
     if sizing_input is not None:
         normalized = SizingCheckInput(
@@ -542,6 +559,20 @@ def _normalize_and_resolve_inputs(
         raise ValueError(
             "BL-014 strict sizing-input gate failed: sizing_input or geometry_input is required."
         )
+
+    if not use_mvp_defaults:
+        missing_fields = ", ".join(_MVP_DEFAULT_FIELDS)
+        raise MissingGeometryInputError(
+            "BL-003 geometry input required: missing sizing_input or geometry_input; "
+            f"missing fields: {missing_fields}."
+        )
+
+    warnings.warn(
+        "BL-003 using MVP geometry defaults for missing fields: "
+        + ", ".join(_MVP_DEFAULT_FIELDS),
+        UserWarning,
+        stacklevel=2,
+    )
 
     pressure_pa = float(requirement_set.requirements["design_pressure"].value)
     ca_m = material_basis.corrosion_allowance_m
