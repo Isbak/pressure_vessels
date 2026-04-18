@@ -22,6 +22,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `iac-opentofu-or-terraform`
 - Component: `secrets-vault-or-sops-age`
 - Component: `observability-prometheus-grafana-loki-tempo`
+- Component: `runtime-docker-kubernetes`
 
 ## Planned
 
@@ -36,7 +37,6 @@ The technologies below are documented target-state components and are **not** cu
 - Component: `search-opensearch`
 - Component: `workflow-temporal`
 - Component: `auth-keycloak`
-- Component: `runtime-docker-kubernetes`
 
 ### Runtime mapping source of truth
 

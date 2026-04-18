@@ -86,7 +86,7 @@ components:
     notes: IaC foundation module skeleton with reusable provisioning primitives.
   - key: runtime-docker-kubernetes
     capability: runtime-platform
-    status: planned
+    status: deployed
     owner: platform-runtime
     module_path: infra/platform/runtime
-    notes: Deploy target for platform services.
+    notes: Docker/Kubernetes runtime deployment module skeleton with ownership and lifecycle boundaries committed in-repo.

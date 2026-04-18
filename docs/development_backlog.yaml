@@ -597,7 +597,7 @@ items:
   area: platform
   phase: 'Phase 5: Runtime Deployment'
   priority: P1
-  status: blocked
+  status: done
   effort: L
   depends_on:
   - BL-018

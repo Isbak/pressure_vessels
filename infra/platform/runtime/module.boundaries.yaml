@@ -1,0 +1,42 @@
+version: 1
+kind: PlatformRuntimeDeploymentModule
+metadata:
+  name: platform-runtime-docker-kubernetes-boundaries
+spec:
+  owner: platform-runtime
+  deploy_targets:
+    container_runtime:
+      engine: docker
+      image_naming:
+        pattern: ghcr.io/pressure-vessels/{service}:{git_sha}
+        immutable_tags_required: true
+    orchestrator:
+      engine: kubernetes
+      api_version: v1
+      namespace_pattern: pv-{environment}
+  service_ownership:
+    - service: services/frontend
+      owning_team: platform-experience
+      deploy_path:
+        - runtime-docker-kubernetes
+      lifecycle: stateless-rollout
+    - service: services/backend
+      owning_team: platform-runtime
+      deploy_path:
+        - runtime-docker-kubernetes
+      lifecycle: api-contract-versioned
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    rollout_execution_owner: platform-runtime
+    rollback_owner: platform-runtime
+    environment_promotion_policy:
+      dev: continuous
+      staging: approval-required
+  governance:
+    direct_kubernetes_access:
+      allowed: false
+      path: ci-cd-controlled
+    required_release_evidence:
+      - image-digest
+      - deployment-manifest-revision
+      - rollback-plan-id
