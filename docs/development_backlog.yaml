@@ -80,12 +80,12 @@ items:
   deliverables:
   - CalculationRecords
   - Non-conformance list
-  deferred_scope:
-  - BL-003a MAWP check (deferred to follow-up item)
-  - BL-003b External-pressure / buckling check (deferred to follow-up item)
-  - BL-003c Reinforcement-area replacement (UG-37/UG-45 full) (deferred)
-  - BL-003d Margin/utilization ratio reporting (deferred)
-  - BL-003e Model-domain / validity-envelope gating (deferred)
+  follow_on_items:
+  - BL-003a MAWP check (implemented)
+  - BL-003b External-pressure / buckling check (implemented)
+  - BL-003c Reinforcement-area replacement (UG-37/UG-45 full) (implemented)
+  - BL-003d Margin/utilization ratio reporting (implemented)
+  - BL-003e Model-domain / validity-envelope gating (implemented)
 - id: BL-003a
   title: Implement MAWP check
   area: calculation
@@ -343,3 +343,114 @@ items:
   deliverables:
   - CI policy checks
   - Artifact retention configuration
+- id: BL-013
+  title: Implement materials and corrosion module integration
+  area: materials
+  phase: 'Phase 4: Hardening'
+  priority: P0
+  status: todo
+  effort: L
+  depends_on:
+  - BL-003
+  - BL-004
+  references:
+  - README.md#core-modules
+  - docs/interfaces/compliance_pipeline_contract.md
+  - docs/decision-log/ADR-0005-bl-003-sizing-check-scope-and-defaults.md
+  acceptance_criteria:
+  - Placeholder allowable-stress and joint-efficiency defaults are replaced by materials-module outputs.
+  - Material allowables are versioned and traceable to standards package references.
+  - Corrosion allowance policy is explicit and persisted into calculation and compliance artifacts.
+  deliverables:
+  - Material compatibility/allowables provider
+  - Calculation pipeline integration without placeholder stress defaults
+  - Artifact trace fields for material basis
+- id: BL-014
+  title: Add geometry/CAD interface and strict sizing-input gate
+  area: geometry
+  phase: 'Phase 4: Hardening'
+  priority: P1
+  status: todo
+  effort: L
+  depends_on:
+  - BL-003
+  - BL-013
+  references:
+  - README.md#core-modules
+  - docs/interfaces/calculation_pipeline_contract.md
+  - docs/decision-log/ADR-0005-bl-003-sizing-check-scope-and-defaults.md
+  acceptance_criteria:
+  - Geometry/CAD module provides deterministic sizing inputs for shell/head/nozzle routes.
+  - Calculation pipeline can run fail-closed when required geometry/material inputs are missing.
+  - Exported geometry parameters are traceable by revision and linked to calculation evidence.
+  deliverables:
+  - Geometry input schema and adapters
+  - Calculation handoff-gate update for strict sizing-input mode
+  - CAD-ready parameter export artifact
+- id: BL-015
+  title: Replace dossier placeholders with signed change-impact and PDF rendering
+  area: reporting
+  phase: 'Phase 4: Hardening'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-007
+  - BL-008
+  references:
+  - README.md#8-certification-readiness-features
+  - docs/interfaces/dossier_export_pipeline_contract.md
+  - docs/architecture.md
+  acceptance_criteria:
+  - BL-007 export embeds signed BL-008 impact report instead of placeholder payloads.
+  - Canonical dossier PDF is rendered from deterministic payload templates.
+  - Inspector/regulator workflow artifacts include sign-off state transitions and evidence refs.
+  deliverables:
+  - Dossier export integration with BL-008 artifacts
+  - Deterministic PDF renderer path
+  - Updated dossier export contract and runbook
+- id: BL-016
+  title: Implement workflow orchestrator with human-in-the-loop approval gates
+  area: orchestration
+  phase: 'Phase 4: Hardening'
+  priority: P1
+  status: todo
+  effort: L
+  depends_on:
+  - BL-004
+  - BL-007
+  - BL-012
+  references:
+  - README.md#core-modules
+  - README.md#6-end-to-end-workflow
+  - AGENT_GOVERNANCE.md
+  acceptance_criteria:
+  - End-to-end stage orchestration is deterministic with explicit gate states.
+  - Human approvals are captured as immutable events with role and timestamp metadata.
+  - Retry/escalation logic is observable and produces audit-ready execution traces.
+  deliverables:
+  - Orchestrator state model and execution API
+  - Approval-gate event schema
+  - Operational runbook for retries/escalations
+- id: BL-017
+  title: Build QA benchmark and cross-verification harness
+  area: quality
+  phase: 'Phase 4: Hardening'
+  priority: P2
+  status: todo
+  effort: M
+  depends_on:
+  - BL-013
+  - BL-014
+  - BL-016
+  references:
+  - README.md#11-validation-strategy
+  - docs/system_engineering_model_modular_scalable_pressure_tank.md
+  acceptance_criteria:
+  - Golden benchmark cases are versioned and runnable in CI.
+  - Cross-verification against reference calculations produces deterministic pass/fail reports.
+  - Boundary/stress tests are captured with reproducible fixtures and retained artifacts.
+  deliverables:
+  - QA benchmark dataset manifest
+  - Cross-verification test harness
+  - CI quality-gate report artifact

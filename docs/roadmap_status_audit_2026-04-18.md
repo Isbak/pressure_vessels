@@ -35,7 +35,17 @@ The following backlog items were changed from `todo` to `done` based on implemen
 - **BL-007** certification dossier export
 - **BL-009** multi-standard design routes
 
-After this correction, all backlog entries are now in `done` state.
+After this correction, all baseline BL-001..BL-012 entries are in `done` state.
+
+### New roadmap items added after cross-check
+
+To keep roadmap-driven planning active, the backlog now includes a new hardening tranche:
+
+- **BL-013** materials and corrosion module integration
+- **BL-014** geometry/CAD interface + strict sizing-input gate
+- **BL-015** dossier placeholder replacement with signed BL-008 report + deterministic PDF rendering
+- **BL-016** workflow orchestrator with human-in-the-loop approval gates
+- **BL-017** QA benchmark and cross-verification harness
 
 ## Evidence Summary by Corrected Item
 
@@ -61,4 +71,4 @@ After this correction, all backlog entries are now in `done` state.
 
 ## Conclusion
 
-Roadmap status and documentation are now synchronized with repository reality for all BL items as of **April 18, 2026**.
+Roadmap status and documentation are synchronized with current implementation, and a new `todo` queue (BL-013..BL-017) has been added for the next development wave as of **April 18, 2026**.
