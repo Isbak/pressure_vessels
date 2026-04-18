@@ -37,7 +37,9 @@ If any field is missing or empty, ingestion raises `ValueError`.
 Release is blocked unless all conditions are true:
 
 - At least one source document exists.
+- Every non-empty source line must match clause syntax: `CLAUSE-ID: clause body`.
 - At least one clause is parsed from source text.
+- Clause IDs must be unique across all source inputs.
 - Parsed and normalized clause IDs match exactly.
 - Every semantic link references known clause IDs.
 - At least one regression example is provided.

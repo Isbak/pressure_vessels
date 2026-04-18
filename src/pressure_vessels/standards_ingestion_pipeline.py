@@ -210,15 +210,28 @@ def _parse_sources(source_documents: list[StandardSource]) -> list[ParsedClause]
     parsed: dict[str, ParsedClause] = {}
 
     for source in source_documents:
-        for line in source.content_text.splitlines():
+        for line_number, line in enumerate(source.content_text.splitlines(), start=1):
             normalized_line = " ".join(line.strip().split())
             if not normalized_line:
                 continue
+            if ":" not in normalized_line:
+                raise ValueError(
+                    "BL-005 parsing failed: malformed clause line "
+                    f"in source {source.source_id} at line {line_number}."
+                )
             match = pattern.match(normalized_line)
             if not match:
-                continue
+                raise ValueError(
+                    "BL-005 parsing failed: malformed clause line "
+                    f"in source {source.source_id} at line {line_number}."
+                )
 
             clause_id = match.group("clause")
+            if clause_id in parsed:
+                raise ValueError(
+                    "BL-005 parsing failed: duplicate clause_id "
+                    f"{clause_id} encountered in source {source.source_id}."
+                )
             body = match.group("body")
             equation = _extract_equation(body)
             cross_refs = sorted(set(re.findall(r"([A-Z]{2,4}-\d+[A-Z0-9\-]*)", body)))

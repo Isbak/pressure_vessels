@@ -31,6 +31,8 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 ## Failure Modes (Fail Closed)
 
 - Missing source metadata or source text.
+- Malformed source lines that do not match `CLAUSE-ID: clause body`.
+- Duplicate clause IDs in source content.
 - No parseable clause rows found in source text.
 - Parsed/normalized mismatch.
 - Semantic links to unknown clauses.

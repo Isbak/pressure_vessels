@@ -85,6 +85,54 @@ def test_ingestion_fails_closed_for_incomplete_source_metadata_and_content():
         )
 
 
+def test_ingestion_fails_closed_for_malformed_clause_line():
+    malformed_source = StandardSource(
+        source_id="SOURCE-1",
+        title="Malformed sample",
+        publisher="ASME",
+        edition="2025",
+        revision="2025.2",
+        content_text=(
+            "UG-16: Minimum thickness requirements for pressure parts.\n"
+            "This line is not parseable as a clause.\n"
+        ),
+    )
+
+    with pytest.raises(ValueError, match="parsing failed: malformed clause line"):
+        run_standards_ingestion(
+            source_documents=[malformed_source],
+            standard_key="ASME_VIII_1",
+            standard_version="2025.2",
+            release_label="r1",
+            regression_examples=_regression_examples(),
+            now_utc=FIXED_NOW,
+        )
+
+
+def test_ingestion_fails_closed_for_duplicate_clause_ids():
+    duplicate_clause_source = StandardSource(
+        source_id="SOURCE-1",
+        title="Duplicate clauses sample",
+        publisher="ASME",
+        edition="2025",
+        revision="2025.2",
+        content_text=(
+            "UG-16: Minimum thickness requirements for pressure parts.\n"
+            "UG-16: Duplicate row that should fail release.\n"
+        ),
+    )
+
+    with pytest.raises(ValueError, match="parsing failed: duplicate clause_id UG-16"):
+        run_standards_ingestion(
+            source_documents=[duplicate_clause_source],
+            standard_key="ASME_VIII_1",
+            standard_version="2025.2",
+            release_label="r1",
+            regression_examples=_regression_examples(),
+            now_utc=FIXED_NOW,
+        )
+
+
 def test_ingestion_release_gate_requires_regression_examples_to_pass():
     failing_regression = [
         RegressionExample(
