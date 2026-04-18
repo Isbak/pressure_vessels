@@ -1,0 +1,213 @@
+{
+  "applied_defaults": {
+    "applied_mvp_defaults": true,
+    "source": "BL-003 MVP placeholder; replace with Materials Module outputs.",
+    "values": {
+      "allowable_stress_Pa": 138000000.0,
+      "corrosion_allowance_fallback_mm": 1.5,
+      "head_inside_diameter_m": 2.0,
+      "head_provided_thickness_m": 0.018,
+      "joint_efficiency": 0.85,
+      "nozzle_inside_diameter_m": 0.35,
+      "nozzle_provided_thickness_m": 0.004,
+      "shell_inside_diameter_m": 2.0,
+      "shell_provided_thickness_m": 0.02,
+      "source": "BL-003 MVP placeholder; replace with Materials Module outputs."
+    }
+  },
+  "compliance_matrix": [
+    {
+      "applicable": true,
+      "check_ids": [],
+      "clause_id": "UG-16",
+      "justification": "Applicable because design pressure is defined for pressure boundary sizing.",
+      "status": "not_evaluated"
+    },
+    {
+      "applicable": true,
+      "check_ids": [],
+      "clause_id": "UG-20",
+      "justification": "Applicable because design temperature is defined for material selection limits.",
+      "status": "not_evaluated"
+    },
+    {
+      "applicable": true,
+      "check_ids": [],
+      "clause_id": "UG-25",
+      "justification": "Applicable because corrosion allowance input is provided.",
+      "status": "not_evaluated"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-27-shell"
+      ],
+      "clause_id": "UG-27",
+      "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified.",
+      "status": "pass"
+    },
+    {
+      "applicable": false,
+      "check_ids": [],
+      "clause_id": "UG-28",
+      "justification": "Not applicable in MVP because external pressure service is not declared and internal pressure basis is assumed.",
+      "status": "not_applicable"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-32-head"
+      ],
+      "clause_id": "UG-32",
+      "justification": "Applicable because head thickness under internal pressure must be verified.",
+      "status": "pass"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-45-nozzle"
+      ],
+      "clause_id": "UG-45",
+      "justification": "Applicable because nozzle neck minimum thickness must be verified.",
+      "status": "fail"
+    },
+    {
+      "applicable": false,
+      "check_ids": [],
+      "clause_id": "UCS-66",
+      "justification": "Not applicable because design temperature is above low-temperature impact-test threshold.",
+      "status": "not_applicable"
+    }
+  ],
+  "compliance_matrix_schema_version": "ComplianceMatrix.v1",
+  "deterministic_hash": "c595a8c9a0bda1967927853d48c29230686d381f5b1b49f7d432cd436f1f98d2",
+  "evidence_link_set_schema_version": "EvidenceLinkSet.v1",
+  "evidence_links": [
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-16",
+      "clause_id": "UG-16",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "code_standard",
+      "result_id": "UG-16:applicable=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-20",
+      "clause_id": "UG-20",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "code_standard",
+      "result_id": "UG-20:applicable=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-27-shell",
+      "clause_id": "UG-27",
+      "model_id": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "requirement_field": "code_standard",
+      "result_id": "UG-27-shell:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-32-head",
+      "clause_id": "UG-32",
+      "model_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "requirement_field": "code_standard",
+      "result_id": "UG-32-head:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-45-nozzle",
+      "clause_id": "UG-45",
+      "model_id": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "requirement_field": "code_standard",
+      "result_id": "UG-45-nozzle:pass=false"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-25",
+      "clause_id": "UG-25",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "corrosion_allowance",
+      "result_id": "UG-25:applicable=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-16",
+      "clause_id": "UG-16",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-16:applicable=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-27-shell",
+      "clause_id": "UG-27",
+      "model_id": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-27-shell:pass=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-28",
+      "clause_id": "UG-28",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-28:applicable=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-32-head",
+      "clause_id": "UG-32",
+      "model_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-32-head:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-45-nozzle",
+      "clause_id": "UG-45",
+      "model_id": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-45-nozzle:pass=false"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UCS-66",
+      "clause_id": "UCS-66",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_temperature",
+      "result_id": "UCS-66:applicable=false"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-20",
+      "clause_id": "UG-20",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_temperature",
+      "result_id": "UG-20:applicable=true"
+    }
+  ],
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "review_checklist": [
+    {
+      "evidence_refs": [
+        "evidence_links"
+      ],
+      "item_id": "CHK-001",
+      "prompt": "Confirm requirement-to-clause evidence links cover all applicable clauses.",
+      "required": true
+    },
+    {
+      "evidence_refs": [
+        "compliance_matrix",
+        "non_conformance_list"
+      ],
+      "item_id": "CHK-002",
+      "prompt": "Review all failed clause checks and verify non-conformance severity assignments.",
+      "required": true
+    },
+    {
+      "evidence_refs": [
+        "applied_defaults"
+      ],
+      "item_id": "CHK-003",
+      "prompt": "Confirm applied default assumptions are acceptable for release.",
+      "required": true
+    }
+  ],
+  "review_checklist_schema_version": "ReviewChecklist.v1",
+  "schema_version": "ComplianceDossierMachine.v1",
+  "source_applicability_matrix_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8",
+  "source_calculation_records_hash": "21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822",
+  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
+  "source_non_conformance_hash": "be07b2ee50b74ff8e2ec2012de4f345980df898d62588fbc80b4e3226604943f",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
+}
