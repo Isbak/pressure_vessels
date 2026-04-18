@@ -331,7 +331,7 @@ items:
   area: governance
   phase: Cross-cutting
   priority: P1
-  status: todo
+  status: done
   effort: S
   depends_on: []
   references:

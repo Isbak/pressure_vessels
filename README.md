@@ -36,6 +36,7 @@ Related repository docs:
 
 - `docs/interfaces/traceability_pipeline_contract.md`
 - `docs/interfaces/change_impact_pipeline_contract.md`
+- `docs/interfaces/ci_governance_pipeline_contract.md`
 
 ---
 

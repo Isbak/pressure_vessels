@@ -46,3 +46,11 @@ Primary concerns:
 - Sync scope includes both certification artifacts and approval records so release evidence remains aligned with enterprise workflows.
 - Cross-boundary traceability is preserved by emitting `IntegrationBoundaryMapping` rows with immutable, auditable `traceability_link_ids`.
 - Retry observability is explicit via per-attempt `IntegrationAttemptLog` rows and terminal `IntegrationFailureRecord` entries when retry budgets are exhausted.
+
+
+## BL-012 Governance Gates in CI
+
+- Policy schema: `CIGovernancePolicy.v1` defines required CI gates and artifact retention windows.
+- Exception schema: `PolicyExceptions.v1` requires explicit approval metadata (`approved_by`, `approved_on`, `approval_record_ref`) for every gate waiver.
+- Runtime report: `GovernanceGateReport.v1` records pass/fail status per gate plus any applied exceptions.
+- CI enforces governance policy from `docs/governance/ci_governance_policy.v1.json`, fails closed on missing/failed gates without approved exceptions, and uploads audit artifacts with retention configuration.

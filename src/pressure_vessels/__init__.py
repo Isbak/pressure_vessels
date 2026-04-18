@@ -113,6 +113,16 @@ from .enterprise_integration_pipeline import (
     write_enterprise_integration_batch,
 )
 
+from .governance_pipeline import (
+    GOVERNANCE_GATE_REPORT_SCHEMA_VERSION,
+    GOVERNANCE_POLICY_SCHEMA_VERSION,
+    GovernanceGateReport,
+    GovernancePolicy,
+    PolicyExceptionApproval,
+    build_governance_policy,
+    evaluate_governance_gates,
+)
+
 from .requirements_pipeline import (
     Gap,
     RequirementSet,
@@ -195,6 +205,13 @@ __all__ = [
     "IntegrationFailureRecord",
     "run_enterprise_integration_batch",
     "write_enterprise_integration_batch",
+    "GOVERNANCE_GATE_REPORT_SCHEMA_VERSION",
+    "GOVERNANCE_POLICY_SCHEMA_VERSION",
+    "GovernanceGateReport",
+    "GovernancePolicy",
+    "PolicyExceptionApproval",
+    "build_governance_policy",
+    "evaluate_governance_gates",
     "build_design_basis",
     "generate_compliance_dossier",
     "parse_prompt_to_requirement_set",
