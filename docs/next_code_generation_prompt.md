@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005
-- Next item to implement: BL-006
-- BL-006 title: Implement full traceability graph
-- BL-006 depends_on: BL-003, BL-004 (already done)
-- BL-006 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006
+- Next item to implement: BL-007
+- BL-007 title: Certification dossier export
+- BL-007 depends_on: BL-004, BL-006 (already done)
+- BL-007 acceptance criteria:
 
-  1) Traceability graph stores requirement, clause, model, calculation, artifact, and approval links.
-  2) Graph supports audit queries by revision and clause.
-  3) All graph writes are revisioned and immutable by default.
+  1) Export package includes PDF + machine-readable JSON.
+  2) Signed calculation snapshots and change impact report are included.
+  3) Package supports inspector/regulator review workflow.
 
-- BL-006 deliverables:
+- BL-007 deliverables:
 
-  - Traceability graph schema
-  - Query examples and audit report templates
+  - Exportable dossier package
+  - Template catalog for report sections
 
 Repository constraints:
 
@@ -40,12 +40,12 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-006 full traceability graph behavior using existing repository patterns.
-2) Add deterministic, revisioned graph writes with immutability guarantees.
-3) Expose audit query helpers for revision-scoped and clause-scoped evidence retrieval.
-4) Add/extend tests under `tests/` for graph writes, link integrity, query behavior, and immutability controls.
-5) Update related architecture/interface docs under `docs/` to describe graph schema and query usage.
-6) Persist/update BL-006 sample artifacts under `artifacts/` if introduced.
+1) Implement BL-007 certification dossier export behavior using existing repository patterns.
+2) Add deterministic export packaging for both machine-readable JSON and a PDF-oriented payload/template route.
+3) Include signed calculation snapshot references and a change-impact placeholder/report section suitable for future BL-008 integration.
+4) Add/extend tests under `tests/` for export structure, deterministic outputs, and required evidence links.
+5) Update related architecture/interface docs under `docs/` to describe export package schema and usage.
+6) Persist/update BL-007 sample artifacts under `artifacts/` if introduced.
 
 Output format:
 
