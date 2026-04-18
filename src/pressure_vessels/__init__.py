@@ -29,6 +29,14 @@ from .calculation_pipeline import (
     run_calculation_pipeline,
     write_calculation_artifacts,
 )
+from .geometry_module import (
+    CAD_PARAMETER_EXPORT_VERSION,
+    GEOMETRY_INPUT_VERSION,
+    CadReadyParameterExport,
+    GeometryInput,
+    adapt_geometry_input,
+    build_cad_ready_parameter_export,
+)
 from .standards_ingestion_pipeline import (
     ParsedClause,
     NormalizedClause,
@@ -161,6 +169,12 @@ __all__ = [
     "ReportSectionTemplate",
     "SignedCalculationSnapshotRef",
     "SizingCheckInput",
+    "CAD_PARAMETER_EXPORT_VERSION",
+    "GEOMETRY_INPUT_VERSION",
+    "CadReadyParameterExport",
+    "GeometryInput",
+    "adapt_geometry_input",
+    "build_cad_ready_parameter_export",
     "BASELINE_UPDATE_STATUS_VERSION",
     "IMPACT_REPORT_VERSION",
     "BaselineUpdateStatus",

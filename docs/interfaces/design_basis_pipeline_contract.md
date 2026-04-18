@@ -11,19 +11,12 @@ This document defines the deterministic contract for the **Design Basis Engine**
 BL-002 proceeds only if all are true:
 
 - `requirement_set.downstream_blocked == false`
-
 - `requirement_set.unresolved_gaps` is empty
-
 - Required normalized fields are present in `requirement_set.requirements`:
-
   - `fluid`
-
   - `design_pressure`
-
   - `design_temperature`
-
   - `capacity`
-
   - `code_standard`
 
 If any condition fails, the pipeline raises a deterministic `ValueError`.
@@ -43,7 +36,6 @@ If any condition fails, the pipeline raises a deterministic `ValueError`.
 `build_design_basis` returns a tuple:
 
 1. `DesignBasis.v1`
-
 2. `ApplicabilityMatrix.v1`
 
 ### Schema: `DesignBasis.v1`

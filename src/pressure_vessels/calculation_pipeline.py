@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from .design_basis_pipeline import ApplicabilityMatrix, DesignBasis
+from .geometry_module import GeometryInput, adapt_geometry_input, build_cad_ready_parameter_export
 from .materials_module import MaterialBasis, resolve_material_basis
 from .requirements_pipeline import CANONICAL_UNITS, RequirementSet
 
@@ -243,7 +244,9 @@ class CalculationRecordsArtifact:
     source_design_basis_signature: str
     source_applicability_matrix_hash: str
     material_basis: dict[str, Any]
+    geometry_basis: dict[str, Any]
     applied_defaults: dict[str, Any]
+    cad_ready_parameter_export: dict[str, Any] | None
     checks: list[CalculationRecord]
     deterministic_hash: str
 
@@ -255,7 +258,9 @@ class CalculationRecordsArtifact:
             "source_design_basis_signature": self.source_design_basis_signature,
             "source_applicability_matrix_hash": self.source_applicability_matrix_hash,
             "material_basis": self.material_basis,
+            "geometry_basis": self.geometry_basis,
             "applied_defaults": self.applied_defaults,
+            "cad_ready_parameter_export": self.cad_ready_parameter_export,
             "checks": [record.to_json_dict() for record in self.checks],
             "deterministic_hash": self.deterministic_hash,
         }
@@ -284,9 +289,11 @@ def run_calculation_pipeline(
     design_basis: DesignBasis,
     applicability_matrix: ApplicabilityMatrix,
     sizing_input: SizingCheckInput | None = None,
+    geometry_input: GeometryInput | None = None,
     *,
     now_utc: datetime | None = None,
     near_limit_threshold: float = DEFAULT_NEAR_LIMIT_THRESHOLD,
+    strict_sizing_input_gate: bool = False,
 ) -> tuple[CalculationRecordsArtifact, NonConformanceListArtifact]:
     """Run deterministic shell/head/nozzle sizing checks for BL-003 MVP."""
     _validate_handoff_gate(
@@ -297,10 +304,12 @@ def run_calculation_pipeline(
 
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
     material_basis = resolve_material_basis(requirement_set, design_basis)
-    normalized_input, applied_defaults = _normalize_and_resolve_inputs(
+    normalized_input, applied_defaults, geometry_basis = _normalize_and_resolve_inputs(
         requirement_set,
         sizing_input,
+        geometry_input,
         material_basis,
+        strict_sizing_input_gate,
     )
     _validate_model_domain_gate(normalized_input, near_limit_threshold)
     _validate_validity_envelopes(normalized_input)
@@ -338,10 +347,18 @@ def run_calculation_pipeline(
         "source_design_basis_signature": design_basis.deterministic_signature,
         "source_applicability_matrix_hash": applicability_matrix.deterministic_hash,
         "material_basis": material_basis.to_json_dict(),
+        "geometry_basis": geometry_basis,
         "applied_defaults": applied_defaults,
         "checks": [record.to_json_dict() for record in checks],
     }
     calc_hash = _sha256_payload(calc_payload)
+
+    cad_export = None
+    if geometry_input is not None:
+        cad_export = build_cad_ready_parameter_export(
+            geometry_input,
+            calculation_records_hash=calc_hash,
+        ).to_json_dict()
 
     calc_artifact = CalculationRecordsArtifact(
         schema_version=CALCULATION_RECORDS_VERSION,
@@ -350,7 +367,9 @@ def run_calculation_pipeline(
         source_design_basis_signature=design_basis.deterministic_signature,
         source_applicability_matrix_hash=applicability_matrix.deterministic_hash,
         material_basis=material_basis.to_json_dict(),
+        geometry_basis=geometry_basis,
         applied_defaults=applied_defaults,
+        cad_ready_parameter_export=cad_export,
         checks=checks,
         deterministic_hash=calc_hash,
     )
@@ -449,8 +468,10 @@ def _validate_clause_coverage(
 def _normalize_and_resolve_inputs(
     requirement_set: RequirementSet,
     sizing_input: SizingCheckInput | None,
+    geometry_input: GeometryInput | None,
     material_basis: MaterialBasis,
-) -> tuple[SizingCheckInput, dict[str, Any]]:
+    strict_sizing_input_gate: bool,
+) -> tuple[SizingCheckInput, dict[str, Any], dict[str, Any]]:
     if sizing_input is not None:
         normalized = SizingCheckInput(
             internal_pressure=_to_si_pressure(sizing_input.internal_pressure),
@@ -470,7 +491,57 @@ def _normalize_and_resolve_inputs(
             ),
         )
         applied_defaults = {"applied_mvp_defaults": False, "values": {}, "source": "caller-provided"}
-        return normalized, applied_defaults
+        geometry_basis = {"source": "sizing_input", "geometry_revision_id": None}
+        return normalized, applied_defaults, geometry_basis
+
+    if geometry_input is not None:
+        geometry_payload = adapt_geometry_input(geometry_input)
+        normalized = SizingCheckInput(
+            internal_pressure=Quantity(value=float(requirement_set.requirements["design_pressure"].value), unit="Pa"),
+            allowable_stress=Quantity(value=material_basis.allowable_stress_pa, unit="Pa"),
+            joint_efficiency=material_basis.joint_efficiency,
+            corrosion_allowance=Quantity(value=material_basis.corrosion_allowance_m, unit="m"),
+            shell_inside_diameter=Quantity(value=float(geometry_payload["shell_inside_diameter_m"]), unit="m"),
+            shell_provided_thickness=Quantity(
+                value=float(geometry_payload["shell_provided_thickness_m"]),
+                unit="m",
+            ),
+            head_inside_diameter=Quantity(value=float(geometry_payload["head_inside_diameter_m"]), unit="m"),
+            head_provided_thickness=Quantity(
+                value=float(geometry_payload["head_provided_thickness_m"]),
+                unit="m",
+            ),
+            nozzle_inside_diameter=Quantity(value=float(geometry_payload["nozzle_inside_diameter_m"]), unit="m"),
+            nozzle_provided_thickness=Quantity(
+                value=float(geometry_payload["nozzle_provided_thickness_m"]),
+                unit="m",
+            ),
+            external_pressure=(
+                Quantity(value=float(geometry_payload["external_pressure_pa"]), unit="Pa")
+                if geometry_payload["external_pressure_pa"] is not None
+                else _external_pressure_from_requirements(requirement_set)
+            ),
+        )
+        applied_defaults = {
+            "applied_geometry_defaults": False,
+            "applied_mvp_defaults": False,
+            "values": {},
+            "source": "geometry-module+materials-module",
+            "material_source": "materials_module.resolve_material_basis",
+            "corrosion_allowance_policy": material_basis.corrosion_allowance_policy,
+        }
+        geometry_basis = {
+            "source": "geometry_module.GeometryInput.v1",
+            "geometry_revision_id": geometry_input.geometry_revision_id,
+            "source_system": geometry_input.source_system,
+            "source_model_sha256": geometry_input.source_model_sha256,
+        }
+        return normalized, applied_defaults, geometry_basis
+
+    if strict_sizing_input_gate:
+        raise ValueError(
+            "BL-014 strict sizing-input gate failed: sizing_input or geometry_input is required."
+        )
 
     pressure_pa = float(requirement_set.requirements["design_pressure"].value)
     ca_m = material_basis.corrosion_allowance_m
@@ -502,7 +573,13 @@ def _normalize_and_resolve_inputs(
         "material_source": "materials_module.resolve_material_basis",
         "corrosion_allowance_policy": material_basis.corrosion_allowance_policy,
     }
-    return normalized, applied_defaults
+    geometry_basis = {
+        "source": "BL-003 MVP geometry placeholder",
+        "geometry_revision_id": None,
+        "source_system": "placeholder",
+        "source_model_sha256": None,
+    }
+    return normalized, applied_defaults, geometry_basis
 
 
 def _build_shell_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:

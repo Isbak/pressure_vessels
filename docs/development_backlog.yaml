@@ -370,7 +370,7 @@ items:
   area: geometry
   phase: 'Phase 4: Hardening'
   priority: P1
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-003

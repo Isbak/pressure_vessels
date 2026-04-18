@@ -4,8 +4,7 @@ This document defines the deterministic contract for the **Calculation Engine** 
 
 ## Entry Point
 
-- Python API: `pressure_vessels.calculation_pipeline.run_calculation_pipeline(requirement_set, design_basis, applicability_matrix, sizing_input=None, now_utc=None, near_limit_threshold=0.9)`
-
+- Python API: `pressure_vessels.calculation_pipeline.run_calculation_pipeline(requirement_set, design_basis, applicability_matrix, sizing_input=None, geometry_input=None, now_utc=None, near_limit_threshold=0.9, strict_sizing_input_gate=False)`
 - Persistence helper: `pressure_vessels.calculation_pipeline.write_calculation_artifacts(calc_artifact, non_conformance_artifact, directory)`
 
 ## BL-002 Handoff Gate (Required)
@@ -13,13 +12,9 @@ This document defines the deterministic contract for the **Calculation Engine** 
 BL-003 proceeds only if all are true:
 
 - `requirement_set.downstream_blocked == false`
-
 - `requirement_set.unresolved_gaps` is empty
-
 - `design_basis.primary_standard == "ASME Section VIII Division 1"`
-
 - `applicability_matrix.source_requirement_set_hash == requirement_set.deterministic_hash`
-
 - For every canonical field listed in `pressure_vessels.requirements_pipeline.CANONICAL_UNITS` that is present in `requirement_set.requirements`, the stored unit matches the canonical unit.
 
 If any condition fails, BL-003 raises a deterministic `ValueError`.
@@ -42,12 +37,22 @@ BL-003 fails closed when caller inputs are outside deterministic engineering-mod
 
 When `sizing_input=None`, the pipeline now resolves allowable stress, joint efficiency, and corrosion policy from the deterministic materials module and only applies MVP placeholders for geometry. Material allowables are versioned and include standards-package trace fields. Corrosion allowance policy is explicit and persisted in both `material_basis` and `applied_defaults`.
 
+## Geometry/CAD Interface + Strict Sizing Gate (BL-014)
+
+- `pressure_vessels.geometry_module.GeometryInput` provides deterministic geometry revision metadata and canonical shell/head/nozzle dimensions.
+- When `geometry_input` is supplied, BL-003/BL-014 derives sizing routes from:
+  - pressure/material/corrosion from deterministic requirement + materials basis
+  - geometry dimensions from `GeometryInput`.
+- When `strict_sizing_input_gate=True`, the pipeline fails closed unless either:
+  - `sizing_input` is provided, or
+  - `geometry_input` is provided.
+- Fail-closed error string: `"BL-014 strict sizing-input gate failed: sizing_input or geometry_input is required."`
+
 ## Output Artifacts
 
 `run_calculation_pipeline` returns a tuple:
 
 1. `CalculationRecords.v1`
-
 2. `NonConformanceList.v1`
 
 ### Schema: `CalculationRecords.v1`
@@ -73,10 +78,28 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
       "value_mm": 3.0
     }
   },
+  "geometry_basis": {
+    "source": "geometry_module.GeometryInput.v1",
+    "geometry_revision_id": "REV-2026-04-18-A",
+    "source_system": "cad-system",
+    "source_model_sha256": "<sha256>"
+  },
   "applied_defaults": {
     "applied_mvp_defaults": false,
     "values": {},
     "source": "caller-provided"
+  },
+  "cad_ready_parameter_export": {
+    "schema_version": "CadReadyParameterExport.v1",
+    "geometry_revision_id": "REV-2026-04-18-A",
+    "source_system": "cad-system",
+    "source_model_sha256": "<sha256>",
+    "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>",
+    "parameters": {
+      "shell_inside_diameter_m": 2.4,
+      "shell_provided_thickness_m": 0.022
+    },
+    "deterministic_hash": "<sha256>"
   },
   "checks": [
     {
@@ -149,35 +172,24 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
 ## Deterministic Controls
 
 - `generated_at_utc` supports injection via `now_utc` for reproducible testing.
-
 - Every check record carries:
-
   - `check_id` (engine-internal key), `clause_id` (link to `ApplicabilityMatrix`)
-
   - `formula` string (human-readable)
-
   - `inputs` snapshot in canonical SI units (`Pa`, `m`, dimensionless)
-
   - `required_thickness_m`, `provided_thickness_m`, `margin_m`, `utilization_ratio`
   - `near_limit_threshold` (default `0.9`, configurable per pipeline invocation)
   - `is_near_limit` (`true` only when `pass_status == true` and `utilization_ratio >= near_limit_threshold`)
   - `parent_component`, `parent_check_id` (set for routed checks such as nozzle reinforcement linked to shell/head parent checks)
-
   - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for pressure-capacity checks such as MAWP and UG-28 external-pressure)
   - `validity_envelope` metadata:
     - `model_id` (deterministic model route identifier)
     - `status` (`"in_envelope"` for emitted checks)
     - `bounds` (declared domain limits used for fail-closed gating)
     - `evaluated_inputs` (normalized values checked against bounds)
-
   - `pass_status`
-
   - `reproducibility.canonical_payload_sha256` (sha256 over the canonical JSON of the check record, sorted-keys, compact separators)
-
 - `CalculationRecords.deterministic_hash` is sha256 over the canonical unsigned artifact (excluding the `deterministic_hash` field itself).
-
 - `NonConformanceList.deterministic_hash` is sha256 over the canonical unsigned NC artifact (excluding its own `deterministic_hash`).
-
 - All canonical hashing uses `json.dumps(..., sort_keys=True, separators=(",",":"))`.
 
 ## MAWP Check (BL-003a)
@@ -185,17 +197,13 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
 In addition to thickness checks, BL-003a adds MAWP checks for shell/head/nozzle under the same clause routes:
 
 - `UG-27-shell-mawp`
-
 - `UG-32-head-mawp`
-
 - `UG-45-nozzle-mawp`
 
 Each MAWP record is additive in `CalculationRecords.v1` and reuses existing fields for compatibility (`required_thickness_m` stores design pressure in Pa for MAWP records, `provided_thickness_m` stores provided thickness used in the MAWP equation). MAWP-specific typed fields are included on every record:
 
 - `design_pressure_pa` (`number | null`)
-
 - `computed_mawp_pa` (`number | null`)
-
 - `pressure_margin_pa` (`number | null`, computed as `computed_mawp_pa - design_pressure_pa`)
 
 For thickness checks these fields are `null`. For MAWP checks, `pass_status` is `computed_mawp_pa >= design_pressure_pa`.
@@ -240,7 +248,6 @@ Deterministic route (UG-37 area replacement with UG-45 nozzle-thickness linkage)
 - Uses required nozzle thickness from `UG-45-nozzle` (`t_r_nozzle`) and required parent thickness from the linked parent route (`UG-27-shell` or `UG-32-head`) as `t_r_parent`.
 - Computes required reinforcement area `A_req = d_opening * t_r_parent`.
 - Computes available reinforcement area `A_avail = d_opening*max(t_parent-t_r_parent,0) + 2*w*max(t_nozzle-t_r_nozzle,0)`.
-
 - Uses deterministic effective half-width `w = min(d_opening/2, sqrt(d_opening*D_parent))`.
 - Pass criterion: `A_avail >= A_req`.
 
@@ -265,7 +272,5 @@ BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32
 BL-004 (compliance report) may proceed only when:
 
 - `CalculationRecordsArtifact` and `NonConformanceListArtifact` are both produced from the same `run_calculation_pipeline` invocation (matching `generated_at_utc` and matching `source_calculation_records_hash`).
-
 - Every `CalculationRecord.clause_id` is present in the referenced `ApplicabilityMatrix`.
-
 - `applied_defaults.applied_mvp_defaults == false`, **or** the downstream dossier explicitly renders the `applied_defaults` block alongside the compliance matrix.

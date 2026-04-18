@@ -1,7 +1,6 @@
 # ADR-0002: LLM Serving Runtime (vLLM)
 
 - Status: Accepted
-
 - Date: 2026-04-17
 
 ## Context
@@ -15,15 +14,12 @@ Adopt **vLLM** as the primary production LLM serving runtime. Use Ollama for loc
 ## Alternatives Considered
 
 - Hugging Face TGI
-
 - Ollama-only
 
 ## Consequences
 
 - Improves production throughput and batching efficiency.
-
 - Adds operational complexity compared with developer-local runtimes.
-
 - Requires benchmark validation for model upgrades.
 
 ## Rollback / Migration Trigger
