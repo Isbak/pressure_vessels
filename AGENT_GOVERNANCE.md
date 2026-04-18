@@ -133,6 +133,7 @@ Classify every PR as one of:
 
 - Perform adversarial review for edge cases on medium/high risk PRs.
 - Explicitly call out uncertainty and required human validation.
+- Follow the procedure in [`.agents/claude/review-guidance.md`](.agents/claude/review-guidance.md) for the independent review (trigger, scope, output format, audit).
 
 ---
 

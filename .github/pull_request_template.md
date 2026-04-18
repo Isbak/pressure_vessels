@@ -14,7 +14,7 @@
 
 ## Governance Checklist
 
-- [ ] Independent cross-agent review complete (required for medium/high)
+- [ ] Independent cross-agent review complete (required for medium/high — see [`.agents/claude/review-guidance.md`](../.agents/claude/review-guidance.md))
 - [ ] Tests/lint/checks passed
 - [ ] Security/secret scan passed
 - [ ] Human approvals obtained per risk class
