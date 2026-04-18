@@ -89,6 +89,14 @@ jobs:
         run: |
           python scripts/check_tech_stack.py
 
+  readme-anchor-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate backlog README anchor consistency
+        run: |
+          python scripts/check_readme_anchors.py
+
   markdown-links:
     runs-on: ubuntu-latest
     steps:
@@ -123,6 +131,7 @@ jobs:
       - yaml-validate
       - python-tests
       - tech-stack-check
+      - readme-anchor-check
       - markdown-links
       - secret-scan
     runs-on: ubuntu-latest

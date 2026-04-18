@@ -57,7 +57,7 @@ Behavior:
 
 ## CI Operational Expectations
 
-- CI runs required gate jobs for docs checks, lint, tests, link reporting, and secret scanning.
+- CI runs required gate jobs for docs checks, lint, tests, README-anchor consistency, link reporting, and secret scanning.
 - CI converts upstream job results into deterministic gate result JSON.
 - CI invokes `scripts/check_ci_governance.py` to enforce policy and write `GovernanceGateReport.v1.json`.
 - CI uploads governance report plus test report artifacts with explicit retention (`30` days in BL-012 baseline policy).
