@@ -532,7 +532,7 @@ items:
   area: platform
   phase: 'Phase 5: Runtime Deployment'
   priority: P2
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-018
@@ -553,7 +553,7 @@ items:
   area: platform
   phase: 'Phase 5: Runtime Deployment'
   priority: P1
-  status: blocked
+  status: todo
   effort: M
   depends_on:
   - BL-018

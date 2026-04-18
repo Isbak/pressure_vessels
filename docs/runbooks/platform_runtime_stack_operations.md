@@ -16,8 +16,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 2. `infra/platform/environment.bootstrap.yaml` binds components to target environments.
 3. `infra/platform/iac/module.primitives.yaml` defines reusable IaC provisioning primitives shared across environments.
 4. `infra/platform/secrets/module.boundaries.yaml` defines issuance and encryption boundaries for provider-neutral secret handling.
-5. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-6. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+5. `infra/platform/observability/module.boundaries.yaml` defines metrics/logs/traces/dashboard boundaries and incident signal inventory.
+6. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+7. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -32,9 +33,17 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f infra/platform/iac/module.primitives.yaml`
 - Confirm secrets boundary module exists:
   - `test -f infra/platform/secrets/module.boundaries.yaml`
+- Confirm observability boundary module exists:
+  - `test -f infra/platform/observability/module.boundaries.yaml`
 
 ## Incident Operations
 
+- Required incident signals exposed by observability module:
+  - `service_error_rate_high`
+  - `api_latency_slo_breach`
+  - `workflow_backlog_growth`
+  - `secrets_resolution_failures`
+  - `deployment_rollout_failures`
 - If component state changes from `planned` to `deployed`, update both:
   - `docs/platform_runtime_stack_registry.yaml`
   - `docs/tech-stack.md`
