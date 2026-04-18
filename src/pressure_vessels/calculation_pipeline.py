@@ -36,6 +36,9 @@ _CHECK_CLAUSE_MAP: dict[str, str] = {
     "UG-27-shell": "UG-27",
     "UG-32-head": "UG-32",
     "UG-45-nozzle": "UG-45",
+    "UG-27-shell-mawp": "UG-27",
+    "UG-32-head-mawp": "UG-32",
+    "UG-45-nozzle-mawp": "UG-45",
 }
 
 
@@ -84,6 +87,9 @@ class CalculationRecord:
     utilization_ratio: float
     pass_status: bool
     reproducibility: ReproducibilityMetadata
+    design_pressure_pa: float | None = None
+    computed_mawp_pa: float | None = None
+    pressure_margin_pa: float | None = None
 
     def to_json_dict(self) -> dict[str, Any]:
         return {
@@ -96,6 +102,9 @@ class CalculationRecord:
             "provided_thickness_m": self.provided_thickness_m,
             "margin_m": self.margin_m,
             "utilization_ratio": self.utilization_ratio,
+            "design_pressure_pa": self.design_pressure_pa,
+            "computed_mawp_pa": self.computed_mawp_pa,
+            "pressure_margin_pa": self.pressure_margin_pa,
             "pass_status": self.pass_status,
             "reproducibility": self.reproducibility.to_json_dict(),
         }
@@ -178,6 +187,9 @@ def run_calculation_pipeline(
         _build_shell_check(normalized_input),
         _build_head_check(normalized_input),
         _build_nozzle_check(normalized_input),
+        _build_shell_mawp_check(normalized_input),
+        _build_head_mawp_check(normalized_input),
+        _build_nozzle_mawp_check(normalized_input),
     ]
 
     _validate_clause_coverage(checks, applicability_matrix)
@@ -406,6 +418,72 @@ def _build_nozzle_check(inputs: SizingCheckInput) -> CalculationRecord:
     )
 
 
+def _build_shell_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
+    s = inputs.allowable_stress.value
+    e = inputs.joint_efficiency
+    d = inputs.shell_inside_diameter.value
+    ca = inputs.corrosion_allowance.value
+    p_design = inputs.internal_pressure.value
+    provided = inputs.shell_provided_thickness.value
+    net = max(provided - ca, 0.0)
+    mawp = (2.0 * s * e * net) / (d + 1.2 * net) if net > 0.0 else 0.0
+
+    return _to_record(
+        check_id="UG-27-shell-mawp",
+        component="shell",
+        formula="MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+        inputs={"S_Pa": s, "E": e, "D_m": d, "CA_m": ca, "t_m": provided, "P_design_Pa": p_design},
+        required=p_design,
+        provided=provided,
+        design_pressure_pa=p_design,
+        computed_mawp_pa=mawp,
+    )
+
+
+def _build_head_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
+    s = inputs.allowable_stress.value
+    e = inputs.joint_efficiency
+    d = inputs.head_inside_diameter.value
+    ca = inputs.corrosion_allowance.value
+    p_design = inputs.internal_pressure.value
+    provided = inputs.head_provided_thickness.value
+    net = max(provided - ca, 0.0)
+    mawp = (2.0 * s * e * net) / ((0.885 * d) + (0.2 * net)) if net > 0.0 else 0.0
+
+    return _to_record(
+        check_id="UG-32-head-mawp",
+        component="head",
+        formula="MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+        inputs={"S_Pa": s, "E": e, "D_m": d, "CA_m": ca, "t_m": provided, "P_design_Pa": p_design},
+        required=p_design,
+        provided=provided,
+        design_pressure_pa=p_design,
+        computed_mawp_pa=mawp,
+    )
+
+
+def _build_nozzle_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
+    s = inputs.allowable_stress.value
+    e = inputs.joint_efficiency
+    d = inputs.nozzle_inside_diameter.value
+    ca = inputs.corrosion_allowance.value
+    p_design = inputs.internal_pressure.value
+    provided = inputs.nozzle_provided_thickness.value
+    net = max(provided - ca, 0.0)
+    mawp = (s * e * net) / ((0.5 * d) + (0.4 * net)) if net > 0.0 else 0.0
+
+    return _to_record(
+        check_id="UG-45-nozzle-mawp",
+        component="nozzle",
+        formula="MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+        inputs={"S_Pa": s, "E": e, "d_m": d, "CA_m": ca, "t_m": provided, "P_design_Pa": p_design},
+        required=p_design,
+        provided=provided,
+        design_pressure_pa=p_design,
+        computed_mawp_pa=mawp,
+    )
+
+
 def _to_record(
     *,
     check_id: str,
@@ -414,12 +492,19 @@ def _to_record(
     inputs: dict[str, float],
     required: float,
     provided: float,
+    design_pressure_pa: float | None = None,
+    computed_mawp_pa: float | None = None,
 ) -> CalculationRecord:
     required_rounded = round(required, 9)
     provided_rounded = round(provided, 9)
     margin = round(provided_rounded - required_rounded, 9)
     utilization = round(required_rounded / provided_rounded, 9) if provided_rounded > 0.0 else float("inf")
-    pass_status = provided_rounded >= required_rounded
+    pressure_margin_pa = None
+    if design_pressure_pa is None or computed_mawp_pa is None:
+        pass_status = provided_rounded >= required_rounded
+    else:
+        pressure_margin_pa = round(computed_mawp_pa - design_pressure_pa, 9)
+        pass_status = pressure_margin_pa >= 0.0
     clause_id = _CHECK_CLAUSE_MAP[check_id]
 
     canonical = {
@@ -432,6 +517,9 @@ def _to_record(
         "provided_thickness_m": provided_rounded,
         "margin_m": margin,
         "utilization_ratio": utilization,
+        "design_pressure_pa": design_pressure_pa,
+        "computed_mawp_pa": computed_mawp_pa,
+        "pressure_margin_pa": pressure_margin_pa,
         "pass_status": pass_status,
     }
     check_hash = _sha256_payload(canonical)
@@ -446,6 +534,9 @@ def _to_record(
         provided_thickness_m=provided_rounded,
         margin_m=margin,
         utilization_ratio=utilization,
+        design_pressure_pa=design_pressure_pa,
+        computed_mawp_pa=round(computed_mawp_pa, 9) if computed_mawp_pa is not None else None,
+        pressure_margin_pa=pressure_margin_pa,
         pass_status=pass_status,
         reproducibility=ReproducibilityMetadata(
             canonical_payload_sha256=check_hash,
@@ -455,18 +546,30 @@ def _to_record(
 
 
 def _build_non_conformances(checks: list[CalculationRecord]) -> list[NonConformanceEntry]:
-    return [
-        NonConformanceEntry(
-            check_id=record.check_id,
-            clause_id=record.clause_id,
-            component=record.component,
-            observed=f"provided={record.provided_thickness_m:.6f} m",
-            required=f"minimum={record.required_thickness_m:.6f} m",
-            severity="major",
+    entries: list[NonConformanceEntry] = []
+    for record in checks:
+        if record.pass_status:
+            continue
+
+        if record.design_pressure_pa is not None and record.computed_mawp_pa is not None:
+            observed = f"mawp={record.computed_mawp_pa:.3f} Pa"
+            required = f"minimum_design_pressure={record.design_pressure_pa:.3f} Pa"
+        else:
+            observed = f"provided={record.provided_thickness_m:.6f} m"
+            required = f"minimum={record.required_thickness_m:.6f} m"
+
+        entries.append(
+            NonConformanceEntry(
+                check_id=record.check_id,
+                clause_id=record.clause_id,
+                component=record.component,
+                observed=observed,
+                required=required,
+                severity="major",
+            )
         )
-        for record in checks
-        if not record.pass_status
-    ]
+
+    return entries
 
 
 def _to_si_pressure(quantity: Quantity) -> Quantity:

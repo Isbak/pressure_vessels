@@ -52,18 +52,32 @@ def test_calculation_pipeline_generates_expected_pass_fail_and_non_conformance()
 
     calc, non_conformance = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
 
-    assert [record.component for record in calc.checks] == ["shell", "head", "nozzle"]
-    assert [record.clause_id for record in calc.checks] == ["UG-27", "UG-32", "UG-45"]
-    assert [record.pass_status for record in calc.checks] == [True, True, False]
+    assert [record.component for record in calc.checks] == [
+        "shell",
+        "head",
+        "nozzle",
+        "shell",
+        "head",
+        "nozzle",
+    ]
+    assert [record.clause_id for record in calc.checks] == [
+        "UG-27",
+        "UG-32",
+        "UG-45",
+        "UG-27",
+        "UG-32",
+        "UG-45",
+    ]
+    assert [record.pass_status for record in calc.checks] == [True, True, False, True, True, False]
     for record in calc.checks:
         assert record.utilization_ratio > 0.0
 
-    assert len(non_conformance.entries) == 1
-    entry = non_conformance.entries[0]
-    assert entry.check_id == "UG-45-nozzle"
-    assert entry.clause_id == "UG-45"
-    assert entry.component == "nozzle"
-    assert "minimum=" in entry.required
+    assert len(non_conformance.entries) == 2
+    assert [entry.check_id for entry in non_conformance.entries] == ["UG-45-nozzle", "UG-45-nozzle-mawp"]
+    assert [entry.clause_id for entry in non_conformance.entries] == ["UG-45", "UG-45"]
+    assert [entry.component for entry in non_conformance.entries] == ["nozzle", "nozzle"]
+    assert non_conformance.entries[0].required.startswith("minimum=")
+    assert non_conformance.entries[1].required.startswith("minimum_design_pressure=")
 
 
 def test_artifact_links_requirement_design_basis_and_applicability_matrix():
@@ -170,6 +184,38 @@ def test_check_reproducibility_hashes_are_stable_for_canonical_payload():
     hashes = [record.reproducibility.canonical_payload_sha256 for record in calc.checks]
     assert len(set(hashes)) == len(hashes)
     assert all(len(value) == 64 for value in hashes)
+
+
+def test_mawp_outputs_are_deterministic_and_clause_linked():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    mawp_checks = [record for record in calc.checks if record.check_id.endswith("-mawp")]
+
+    assert [record.check_id for record in mawp_checks] == [
+        "UG-27-shell-mawp",
+        "UG-32-head-mawp",
+        "UG-45-nozzle-mawp",
+    ]
+    assert [record.clause_id for record in mawp_checks] == ["UG-27", "UG-32", "UG-45"]
+    assert [record.design_pressure_pa for record in mawp_checks] == [1_800_000.0, 1_800_000.0, 1_800_000.0]
+    assert [record.pass_status for record in mawp_checks] == [True, True, False]
+    assert [record.computed_mawp_pa for record in mawp_checks] == [
+        1973965.551375965,
+        1984771.573604061,
+        668757.126567845,
+    ]
+    assert [record.pressure_margin_pa for record in mawp_checks] == [
+        173965.551375965,
+        184771.573604061,
+        -1131242.873432155,
+    ]
+    assert all(record.reproducibility.hash_algorithm == "sha256" for record in mawp_checks)
 
 
 def test_handoff_gate_rejects_non_canonical_unit():

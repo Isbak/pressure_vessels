@@ -8,18 +8,18 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-004
-- Next item to implement: BL-003a
-- BL-003a title: Implement MAWP check
-- BL-003a depends_on: BL-003 (already done)
-- BL-003a acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a
+- Next item to implement: BL-003b
+- BL-003b title: Implement external-pressure / buckling check
+- BL-003b depends_on: BL-003 (already done)
+- BL-003b acceptance criteria:
 
-  1) MAWP is computed per applicable ASME Div 1 clauses for each sized component.
-  2) Result is stored in CalculationRecords with `clause_id` and reproducibility hash.
+  1) External-pressure check runs when external pressure is declared in RequirementSet.
+  2) Uses UG-28 chart/equation route deterministically.
 
-- BL-003a deliverables:
+- BL-003b deliverables:
 
-  - MAWP entries in `CalculationRecords.v1`
+  - External-pressure entries in `CalculationRecords.v1`
 
 Repository constraints:
 
@@ -49,18 +49,19 @@ Existing relevant files:
 
 Task:
 
-1) Extend BL-003 calculations to include deterministic MAWP checks per relevant component routes.
-2) Add typed MAWP record fields and preserve existing schema compatibility conventions.
-3) Ensure each MAWP result is linked to `clause_id`, includes reproducibility hash metadata, and is integrated into `CalculationRecords.v1` deterministically.
-4) Enforce/extend handoff and clause-coverage gates as needed without weakening current controls.
+1) Extend BL-003 calculations to include deterministic external-pressure / buckling checks per relevant component routes.
+2) Add deterministic external-pressure / buckling checks per UG-28 only when external pressure inputs are present.
+3) Ensure each external-pressure result is linked to `clause_id`, includes reproducibility hash metadata, and is integrated into `CalculationRecords.v1` deterministically.
+4) Enforce/extend handoff, model-domain, and clause-coverage gates as needed without weakening current controls.
 5) Persist updated sample BL-003 artifacts under `artifacts/bl-003/`.
 6) Add/extend tests in `tests/test_calculation_pipeline.py` for:
 
-   - deterministic MAWP outputs
+   - deterministic external-pressure outputs
    - clause linkage and reproducibility metadata
+   - conditional execution behavior (runs only when external pressure is declared)
    - interactions with existing pass/fail and non-conformance behavior
 
-7) Update `docs/interfaces/calculation_pipeline_contract.md` to document MAWP behavior and schema updates.
+7) Update `docs/interfaces/calculation_pipeline_contract.md` to document external-pressure behavior and schema updates.
 
 Output format:
 
