@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008
-- Next item to implement: BL-009
-- BL-009 title: Support multi-standard design routes
-- BL-009 depends_on: BL-005, BL-006 (already done)
-- BL-009 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008, BL-009
+- Next item to implement: BL-010
+- BL-010 title: Add optimization for cost and manufacturability
+- BL-010 depends_on: BL-003, BL-009 (already done)
+- BL-010 acceptance criteria:
 
-  1) System supports ASME + PED + additional standards as configured routes.
-  2) Applicability and evidence mapping remain clause-level and traceable.
-  3) Route selection logic is deterministic and auditable.
+  1) Optimization objective supports weight/cost/manufacturability trade-offs.
+  2) All optimization outputs remain inside hard compliance constraints.
+  3) Pareto candidate set is exported with justification metadata.
 
-- BL-009 deliverables:
+- BL-010 deliverables:
 
-  - Multi-standard routing engine
-  - Compatibility test matrix
+  - Optimization service
+  - Candidate ranking report
 
 Repository constraints:
 
@@ -40,11 +40,11 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-009 multi-standard design routing behavior using existing repository patterns.
-2) Add deterministic route selection for at least ASME and PED, and allow extension for additional standards.
-3) Preserve clause-level applicability and evidence traceability across selected standard routes.
-4) Add/extend tests under `tests/` for deterministic route selection, cross-standard traceability integrity, and compatibility matrix behavior.
-5) Update related architecture/interface docs under `docs/` to describe BL-009 schema and usage, and persist sample artifacts under `artifacts/` if introduced.
+1) Implement BL-010 optimization behavior using existing repository patterns.
+2) Add deterministic multi-objective trade-off scoring (weight/cost/manufacturability) guarded by compliance constraints.
+3) Export a deterministic Pareto candidate set with rationale metadata and stable ranking.
+4) Add/extend tests under `tests/` for objective calculations, compliance guardrails, and candidate ranking determinism.
+5) Update related architecture/interface docs under `docs/` to describe BL-010 schema and usage, and persist sample artifacts under `artifacts/` if introduced.
 
 Output format:
 
