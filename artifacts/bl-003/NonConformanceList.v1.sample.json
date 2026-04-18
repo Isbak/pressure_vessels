@@ -1,7 +1,5 @@
 {
-  "schema_version": "NonConformanceList.v1",
-  "generated_at_utc": "2026-04-18T00:00:00+00:00",
-  "source_calculation_records_hash": "21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822",
+  "deterministic_hash": "9f4e57dea330f4bbe7e4ed05dd1191719f031fefe7d707bbed19518fd4bb28da",
   "entries": [
     {
       "check_id": "UG-45-nozzle",
@@ -10,7 +8,17 @@
       "observed": "provided=0.004000 m",
       "required": "minimum=0.005702 m",
       "severity": "major"
+    },
+    {
+      "check_id": "UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "component": "nozzle",
+      "observed": "mawp=668757.127 Pa",
+      "required": "minimum_design_pressure=1800000.000 Pa",
+      "severity": "major"
     }
   ],
-  "deterministic_hash": "be07b2ee50b74ff8e2ec2012de4f345980df898d62588fbc80b4e3226604943f"
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "schema_version": "NonConformanceList.v1",
+  "source_calculation_records_hash": "cf2d9a4b41499eeef7db16bd73abc55707c793ea405dc7b3043bbbde4195a66b"
 }

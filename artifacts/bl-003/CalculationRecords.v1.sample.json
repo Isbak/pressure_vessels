@@ -1,92 +1,179 @@
 {
-  "schema_version": "CalculationRecords.v1",
-  "generated_at_utc": "2026-04-18T00:00:00+00:00",
-  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
-  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
-  "source_applicability_matrix_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8",
   "applied_defaults": {
     "applied_mvp_defaults": true,
+    "source": "BL-003 MVP placeholder; replace with Materials Module outputs.",
     "values": {
       "allowable_stress_Pa": 138000000.0,
-      "joint_efficiency": 0.85,
-      "shell_inside_diameter_m": 2.0,
-      "shell_provided_thickness_m": 0.02,
+      "corrosion_allowance_fallback_mm": 1.5,
       "head_inside_diameter_m": 2.0,
       "head_provided_thickness_m": 0.018,
+      "joint_efficiency": 0.85,
       "nozzle_inside_diameter_m": 0.35,
       "nozzle_provided_thickness_m": 0.004,
-      "corrosion_allowance_fallback_mm": 1.5,
+      "shell_inside_diameter_m": 2.0,
+      "shell_provided_thickness_m": 0.02,
       "source": "BL-003 MVP placeholder; replace with Materials Module outputs."
-    },
-    "source": "BL-003 MVP placeholder; replace with Materials Module outputs."
+    }
   },
   "checks": [
     {
       "check_id": "UG-27-shell",
       "clause_id": "UG-27",
       "component": "shell",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
       "formula": "t = (P*D)/(2*(S*E-0.6P)) + CA",
       "inputs": {
-        "P_Pa": 1800000.0,
-        "S_Pa": 138000000.0,
-        "E": 0.85,
+        "CA_m": 0.003,
         "D_m": 2.0,
-        "CA_m": 0.003
+        "E": 0.85,
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0
+      },
+      "margin_m": 0.001512132,
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.02,
+      "reproducibility": {
+        "canonical_payload_sha256": "295d54bf0a1a26eca5bf7a9173ab095a701c578c714a6cb0fa18a139555aaf58",
+        "hash_algorithm": "sha256"
       },
       "required_thickness_m": 0.018487868,
-      "provided_thickness_m": 0.02,
-      "margin_m": 0.001512132,
-      "utilization_ratio": 0.9243934,
-      "pass_status": true,
-      "reproducibility": {
-        "canonical_payload_sha256": "1f42c4b153dfbaf44252ab0ff847adc736f71c3e609fac8be44159b1a8b86b79",
-        "hash_algorithm": "sha256"
-      }
+      "utilization_ratio": 0.9243934
     },
     {
       "check_id": "UG-32-head",
       "clause_id": "UG-32",
       "component": "head",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
       "formula": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
       "inputs": {
-        "P_Pa": 1800000.0,
-        "S_Pa": 138000000.0,
-        "E": 0.85,
+        "CA_m": 0.003,
         "D_m": 2.0,
-        "CA_m": 0.003
+        "E": 0.85,
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0
+      },
+      "margin_m": 0.001398566,
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.018,
+      "reproducibility": {
+        "canonical_payload_sha256": "c7fcd8896be2e7836a1576369bf0e23d2657177f32629226e0631f7dce85068f",
+        "hash_algorithm": "sha256"
       },
       "required_thickness_m": 0.016601434,
-      "provided_thickness_m": 0.018,
-      "margin_m": 0.001398566,
-      "utilization_ratio": 0.922301889,
-      "pass_status": true,
-      "reproducibility": {
-        "canonical_payload_sha256": "e6fde14235aa28f5f23db51c093e789aad15fc1f31dc40552de21daec019ea6a",
-        "hash_algorithm": "sha256"
-      }
+      "utilization_ratio": 0.922301889
     },
     {
       "check_id": "UG-45-nozzle",
       "clause_id": "UG-45",
       "component": "nozzle",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
       "formula": "t = (0.5*P*d)/(S*E-0.4P) + CA",
       "inputs": {
+        "CA_m": 0.003,
+        "E": 0.85,
         "P_Pa": 1800000.0,
         "S_Pa": 138000000.0,
-        "E": 0.85,
-        "d_m": 0.35,
-        "CA_m": 0.003
+        "d_m": 0.35
+      },
+      "margin_m": -0.001702007,
+      "pass_status": false,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.004,
+      "reproducibility": {
+        "canonical_payload_sha256": "3bb241108dd63bac5374989b8ab879ce53477a0a7cd24b2af432697c1b33da79",
+        "hash_algorithm": "sha256"
       },
       "required_thickness_m": 0.005702007,
-      "provided_thickness_m": 0.004,
-      "margin_m": -0.001702007,
-      "utilization_ratio": 1.42550175,
-      "pass_status": false,
+      "utilization_ratio": 1.42550175
+    },
+    {
+      "check_id": "UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "component": "shell",
+      "computed_mawp_pa": 1973965.551375965,
+      "design_pressure_pa": 1800000.0,
+      "formula": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "inputs": {
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E": 0.85,
+        "P_design_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "t_m": 0.02
+      },
+      "margin_m": -1799999.98,
+      "pass_status": true,
+      "pressure_margin_pa": 173965.551375965,
+      "provided_thickness_m": 0.02,
       "reproducibility": {
-        "canonical_payload_sha256": "2349ac5452108f1bea797fdd3a277502a48d37bca91f93c61b37728bc49d45de",
+        "canonical_payload_sha256": "acef0981232a83e05082b2230067823bfcf491d1eb683eb2853d966b32e55405",
         "hash_algorithm": "sha256"
-      }
+      },
+      "required_thickness_m": 1800000.0,
+      "utilization_ratio": 90000000.0
+    },
+    {
+      "check_id": "UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "component": "head",
+      "computed_mawp_pa": 1984771.573604061,
+      "design_pressure_pa": 1800000.0,
+      "formula": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "inputs": {
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E": 0.85,
+        "P_design_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "t_m": 0.018
+      },
+      "margin_m": -1799999.982,
+      "pass_status": true,
+      "pressure_margin_pa": 184771.573604061,
+      "provided_thickness_m": 0.018,
+      "reproducibility": {
+        "canonical_payload_sha256": "76b01c9857f89860e0a919905387ab3d5b0fd7ffe214d34885fe548006464a5f",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 1800000.0,
+      "utilization_ratio": 100000000.00000001
+    },
+    {
+      "check_id": "UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "component": "nozzle",
+      "computed_mawp_pa": 668757.126567845,
+      "design_pressure_pa": 1800000.0,
+      "formula": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "inputs": {
+        "CA_m": 0.003,
+        "E": 0.85,
+        "P_design_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "d_m": 0.35,
+        "t_m": 0.004
+      },
+      "margin_m": -1799999.996,
+      "pass_status": false,
+      "pressure_margin_pa": -1131242.873432155,
+      "provided_thickness_m": 0.004,
+      "reproducibility": {
+        "canonical_payload_sha256": "02d1e2151e50baad765820bbc3f479efd85fa6a515ed378fc9daad148bfc9150",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 1800000.0,
+      "utilization_ratio": 450000000.0
     }
   ],
-  "deterministic_hash": "21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822"
+  "deterministic_hash": "cf2d9a4b41499eeef7db16bd73abc55707c793ea405dc7b3043bbbde4195a66b",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "schema_version": "CalculationRecords.v1",
+  "source_applicability_matrix_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8",
+  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
 }

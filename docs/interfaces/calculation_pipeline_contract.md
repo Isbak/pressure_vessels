@@ -65,6 +65,9 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
       "provided_thickness_m": 0.02,
       "margin_m": 0.001512132,
       "utilization_ratio": 0.9243934,
+      "design_pressure_pa": null,
+      "computed_mawp_pa": null,
+      "pressure_margin_pa": null,
       "pass_status": true,
       "reproducibility": {
         "canonical_payload_sha256": "<sha256 over canonical check payload>",
@@ -111,6 +114,8 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
 
   - `required_thickness_m`, `provided_thickness_m`, `margin_m`, `utilization_ratio`
 
+  - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for MAWP checks)
+
   - `pass_status`
 
   - `reproducibility.canonical_payload_sha256` (sha256 over the canonical JSON of the check record, sorted-keys, compact separators)
@@ -121,11 +126,29 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
 
 - All canonical hashing uses `json.dumps(..., sort_keys=True, separators=(",",":"))`.
 
+## MAWP Check (BL-003a)
+
+In addition to thickness checks, BL-003a adds MAWP checks for shell/head/nozzle under the same clause routes:
+
+- `UG-27-shell-mawp`
+
+- `UG-32-head-mawp`
+
+- `UG-45-nozzle-mawp`
+
+Each MAWP record is additive in `CalculationRecords.v1` and reuses existing fields for compatibility (`required_thickness_m` stores design pressure in Pa for MAWP records, `provided_thickness_m` stores provided thickness used in the MAWP equation). MAWP-specific typed fields are included on every record:
+
+- `design_pressure_pa` (`number | null`)
+
+- `computed_mawp_pa` (`number | null`)
+
+- `pressure_margin_pa` (`number | null`, computed as `computed_mawp_pa - design_pressure_pa`)
+
+For thickness checks these fields are `null`. For MAWP checks, `pass_status` is `computed_mawp_pa >= design_pressure_pa`.
+
 ## Scope (MVP) and Deferred Items
 
-BL-003 MVP implements thickness checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure. The following Workflow D items are deferred and tracked as follow-up backlog entries BL-003a..BL-003e:
-
-- BL-003a MAWP check
+BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure. The following Workflow D items remain deferred and tracked as follow-up backlog entries BL-003b..BL-003e:
 
 - BL-003b External-pressure / buckling check (UG-28)
 
