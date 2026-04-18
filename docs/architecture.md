@@ -50,3 +50,9 @@ Primary concerns:
 - Exception schema: `PolicyExceptions.v1` requires explicit approval metadata (`approved_by`, `approved_on`, `approval_record_ref`) for every gate waiver.
 - Runtime report: `GovernanceGateReport.v1` records pass/fail status per gate plus any applied exceptions.
 - CI enforces governance policy from `docs/governance/ci_governance_policy.v1.json`, fails closed on missing/failed gates without approved exceptions, and uploads audit artifacts with retention configuration.
+
+## Breaking changes (2026-04-18)
+
+- `run_calculation_pipeline` no longer silently applies BL-003 `_MVP_DEFAULTS` when both `sizing_input` and `geometry_input` are missing.
+- The pipeline now raises `MissingGeometryInputError` by default and names the required geometry fields in the exception message.
+- Callers that intentionally want placeholder geometry must opt in with `use_mvp_defaults=True`; this emits a `UserWarning` listing each defaulted geometry field.

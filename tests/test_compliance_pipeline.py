@@ -23,6 +23,7 @@ def _build_inputs(prompt: str):
         design_basis,
         matrix,
         now_utc=FIXED_NOW,
+        use_mvp_defaults=True,
     )
     return requirement_set, design_basis, matrix, calculation_records, non_conformance_list
 

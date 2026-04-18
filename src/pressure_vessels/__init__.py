@@ -21,6 +21,7 @@ from .design_basis_pipeline import (
 from .calculation_pipeline import (
     CalculationRecord,
     CalculationRecordsArtifact,
+    MissingGeometryInputError,
     NonConformanceEntry,
     NonConformanceListArtifact,
     Quantity,
@@ -155,6 +156,7 @@ __all__ = [
     "EvidenceLink",
     "NonConformanceEntry",
     "NonConformanceListArtifact",
+    "MissingGeometryInputError",
     "Quantity",
     "RequirementSet",
     "RequirementValue",
