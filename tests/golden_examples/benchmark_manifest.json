@@ -1,0 +1,38 @@
+{
+  "schema_version": "QABenchmarkDatasetManifest.v1",
+  "manifest_id": "bl017-qa-benchmark-manifest",
+  "deterministic_timestamp_utc": "2026-04-18T00:00:00Z",
+  "benchmark_prompt": "Design a horizontal pressure vessel for propane storage, 18 bar design pressure, 65°C design temperature, 30 m3 capacity, ASME Section VIII Div 1, corrosion allowance 3 mm.",
+  "cases": [
+    {
+      "case_id": "example_01_ug27_ug32_ug45",
+      "fixture_path": "tests/golden_examples/example_01_ug27_ug32_ug45.json",
+      "category": "golden",
+      "description": "Moderate pressure baseline reference case."
+    },
+    {
+      "case_id": "example_02_mawp_failures",
+      "fixture_path": "tests/golden_examples/example_02_mawp_failures.json",
+      "category": "golden",
+      "description": "Reference failure case for MAWP regression behavior."
+    },
+    {
+      "case_id": "example_03_small_diameter_case",
+      "fixture_path": "tests/golden_examples/example_03_small_diameter_case.json",
+      "category": "golden",
+      "description": "Small diameter reference case."
+    },
+    {
+      "case_id": "example_04_boundary_min_pressure",
+      "fixture_path": "tests/golden_examples/example_04_boundary_min_pressure.json",
+      "category": "boundary",
+      "description": "Lower-bound pressure and geometry envelope values."
+    },
+    {
+      "case_id": "example_05_stress_high_pressure",
+      "fixture_path": "tests/golden_examples/example_05_stress_high_pressure.json",
+      "category": "stress",
+      "description": "High-load stress case near validity envelope maxima."
+    }
+  ]
+}

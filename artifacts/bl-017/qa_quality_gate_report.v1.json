@@ -1,0 +1,479 @@
+{
+  "case_results": [
+    {
+      "calculation_hash": "8b26ffd9f95c076d3e84391fa5bace7398e69c9dd7c11207945901de782ee21e",
+      "case_id": "example_01_ug27_ug32_ug45",
+      "category": "golden",
+      "check_results": [
+        {
+          "check_id": "UG-27-shell",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.012743062,
+          "required_thickness_expected_m": 0.012743062
+        },
+        {
+          "check_id": "UG-32-head",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.011451201,
+          "required_thickness_expected_m": 0.011451201
+        },
+        {
+          "check_id": "UG-45-nozzle",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.003488538,
+          "required_thickness_expected_m": 0.003488538
+        },
+        {
+          "check_id": "UG-27-shell-mawp",
+          "computed_mawp_actual_pa": 2080581.241743725,
+          "computed_mawp_expected_pa": 2080581.241743725,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1600000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-32-head-mawp",
+          "computed_mawp_actual_pa": 2030838.661150809,
+          "computed_mawp_expected_pa": 2030838.661150809,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1600000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-45-nozzle-mawp",
+          "computed_mawp_actual_pa": 4265402.843601896,
+          "computed_mawp_expected_pa": 4265402.843601896,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1600000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-37-nozzle-shell-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.003185765,
+          "required_thickness_expected_m": 0.003185765
+        },
+        {
+          "check_id": "UG-37-nozzle-head-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.0028628,
+          "required_thickness_expected_m": 0.0028628
+        }
+      ],
+      "description": "Moderate pressure baseline reference case.",
+      "deterministic_hash": "2bb0c6c5f8d3266ffb9ce8e307cdb0a199759da1178bec6cdf9c339dfe1c5772",
+      "fixture_id": "example_01_ug27_ug32_ug45",
+      "fixture_path": "tests/golden_examples/example_01_ug27_ug32_ug45.json",
+      "status": "pass"
+    },
+    {
+      "calculation_hash": "c576b860ededaa8d7fdd82c32774ad81811520930f6d1bc4f45a6ac5f0fb98cb",
+      "case_id": "example_02_mawp_failures",
+      "category": "golden",
+      "check_results": [
+        {
+          "check_id": "UG-27-shell",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.023865666,
+          "required_thickness_expected_m": 0.023865666
+        },
+        {
+          "check_id": "UG-32-head",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.02129262,
+          "required_thickness_expected_m": 0.02129262
+        },
+        {
+          "check_id": "UG-45-nozzle",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.006306992,
+          "required_thickness_expected_m": 0.006306992
+        },
+        {
+          "check_id": "UG-27-shell-mawp",
+          "computed_mawp_actual_pa": 2005308.619758862,
+          "computed_mawp_expected_pa": 2005308.619758862,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 2200000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-32-head-mawp",
+          "computed_mawp_actual_pa": 1804615.384615385,
+          "computed_mawp_expected_pa": 1804615.384615385,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 2200000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-45-nozzle-mawp",
+          "computed_mawp_actual_pa": 3313559.322033898,
+          "computed_mawp_expected_pa": 3313559.322033898,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 2200000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-37-nozzle-shell-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.008352983,
+          "required_thickness_expected_m": 0.008352983
+        },
+        {
+          "check_id": "UG-37-nozzle-head-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.007452417,
+          "required_thickness_expected_m": 0.007452417
+        }
+      ],
+      "description": "Reference failure case for MAWP regression behavior.",
+      "deterministic_hash": "4e34310fd7d38b2094475f9e28457e9efb06adb194b5ea8213170d0a9c20e0fd",
+      "fixture_id": "example_02_mawp_failures",
+      "fixture_path": "tests/golden_examples/example_02_mawp_failures.json",
+      "status": "pass"
+    },
+    {
+      "calculation_hash": "cd71b793e8841a5730ee3a7cfd0160bda8abe894be94e64498e2e36dc0a9dac8",
+      "case_id": "example_03_small_diameter_case",
+      "category": "golden",
+      "check_results": [
+        {
+          "check_id": "UG-27-shell",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.008422593,
+          "required_thickness_expected_m": 0.008422593
+        },
+        {
+          "check_id": "UG-32-head",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.007591355,
+          "required_thickness_expected_m": 0.007591355
+        },
+        {
+          "check_id": "UG-45-nozzle",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.002190666,
+          "required_thickness_expected_m": 0.002190666
+        },
+        {
+          "check_id": "UG-27-shell-mawp",
+          "computed_mawp_actual_pa": 1662543.295398318,
+          "computed_mawp_expected_pa": 1662543.295398318,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1100000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-32-head-mawp",
+          "computed_mawp_actual_pa": 1714446.84650813,
+          "computed_mawp_expected_pa": 1714446.84650813,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1100000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-45-nozzle-mawp",
+          "computed_mawp_actual_pa": 3157894.736842105,
+          "computed_mawp_expected_pa": 3157894.736842105,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1100000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-37-nozzle-shell-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.001010711,
+          "required_thickness_expected_m": 0.001010711
+        },
+        {
+          "check_id": "UG-37-nozzle-head-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 0.000910963,
+          "required_thickness_expected_m": 0.000910963
+        }
+      ],
+      "description": "Small diameter reference case.",
+      "deterministic_hash": "5b8e801534dbe7039c68b23385954d9b68f1efa5878f551b837742aa9358368c",
+      "fixture_id": "example_03_small_diameter_case",
+      "fixture_path": "tests/golden_examples/example_03_small_diameter_case.json",
+      "status": "pass"
+    },
+    {
+      "calculation_hash": "f01b4d7e5da873e8f38039803cd0148fe03757fb603640351664c84e4023a778",
+      "case_id": "example_04_boundary_min_pressure",
+      "category": "boundary",
+      "check_results": [
+        {
+          "check_id": "UG-27-shell",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.0,
+          "required_thickness_expected_m": 2.5e-10
+        },
+        {
+          "check_id": "UG-32-head",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.0,
+          "required_thickness_expected_m": 2.25e-10
+        },
+        {
+          "check_id": "UG-45-nozzle",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.0,
+          "required_thickness_expected_m": 5e-11
+        },
+        {
+          "check_id": "UG-27-shell-mawp",
+          "computed_mawp_actual_pa": 7923930.269413629,
+          "computed_mawp_expected_pa": 7923930.269413629,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-32-head-mawp",
+          "computed_mawp_actual_pa": 9023234.829686442,
+          "computed_mawp_expected_pa": 9023234.829686442,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-45-nozzle-mawp",
+          "computed_mawp_actual_pa": 19685039.37007874,
+          "computed_mawp_expected_pa": 19685039.37007874,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 1.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-37-nozzle-shell-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.0,
+          "required_thickness_expected_m": 6.25e-11
+        },
+        {
+          "check_id": "UG-37-nozzle-head-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": true,
+          "pass_status_expected": true,
+          "required_thickness_actual_m": 0.0,
+          "required_thickness_expected_m": 5.625e-11
+        }
+      ],
+      "description": "Lower-bound pressure and geometry envelope values.",
+      "deterministic_hash": "e603a81e58afc7414a6801f4c06ca7d42b6197ad433f9cc4fd3280bb64cb6009",
+      "fixture_id": "example_04_boundary_min_pressure",
+      "fixture_path": "tests/golden_examples/example_04_boundary_min_pressure.json",
+      "status": "pass"
+    },
+    {
+      "calculation_hash": "187d693226c7b776127412c88d81a58d8b2b4341429658299b8de744821c7851",
+      "case_id": "example_05_stress_high_pressure",
+      "category": "stress",
+      "check_results": [
+        {
+          "check_id": "UG-27-shell",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 5.608235294,
+          "required_thickness_expected_m": 5.608235294117647
+        },
+        {
+          "check_id": "UG-32-head",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 2.931688312,
+          "required_thickness_expected_m": 2.931688311688312
+        },
+        {
+          "check_id": "UG-45-nozzle",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 1.111954023,
+          "required_thickness_expected_m": 1.1119540229885059
+        },
+        {
+          "check_id": "UG-27-shell-mawp",
+          "computed_mawp_actual_pa": 62406.390414378,
+          "computed_mawp_expected_pa": 62406.39041437815,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 19000000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-32-head-mawp",
+          "computed_mawp_actual_pa": 56484.410302756,
+          "computed_mawp_expected_pa": 56484.41030275572,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 19000000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-45-nozzle-mawp",
+          "computed_mawp_actual_pa": 0.0,
+          "computed_mawp_expected_pa": 0.0,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 19000000.0,
+          "required_thickness_expected_m": null
+        },
+        {
+          "check_id": "UG-37-nozzle-shell-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 11.216470588,
+          "required_thickness_expected_m": 11.216470588235294
+        },
+        {
+          "check_id": "UG-37-nozzle-head-reinforcement",
+          "computed_mawp_actual_pa": null,
+          "computed_mawp_expected_pa": null,
+          "matched": true,
+          "pass_status_actual": false,
+          "pass_status_expected": false,
+          "required_thickness_actual_m": 5.863376624,
+          "required_thickness_expected_m": 5.863376623376623
+        }
+      ],
+      "description": "High-load stress case near validity envelope maxima.",
+      "deterministic_hash": "df2723fee7b2b7b8c1ef0237e0fb0d4e4b65e8286209d7828927fe6797513d70",
+      "fixture_id": "example_05_stress_high_pressure",
+      "fixture_path": "tests/golden_examples/example_05_stress_high_pressure.json",
+      "status": "pass"
+    }
+  ],
+  "deterministic_hash": "02e334c1f3991a4fe794d0e2f05ddda00902bce51bfcdc3de2f69589da3967a0",
+  "manifest": {
+    "manifest_id": "bl017-qa-benchmark-manifest",
+    "manifest_path": "tests/golden_examples/benchmark_manifest.json",
+    "manifest_sha256": "11a2d399612fdd715047a907f5867e37ef7647371de4b4bde7a0305188c0c14f",
+    "schema_version": "QABenchmarkDatasetManifest.v1"
+  },
+  "overall_status": "pass",
+  "schema_version": "QABenchmarkQualityGateReport.v1",
+  "summary": {
+    "fail_cases": 0,
+    "pass_cases": 5,
+    "total_cases": 5,
+    "total_check_failures": 0
+  }
+}
