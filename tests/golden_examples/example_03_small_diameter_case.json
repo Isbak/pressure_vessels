@@ -1,0 +1,28 @@
+{
+  "id": "example_03_small_diameter_case",
+  "description": "Smaller-diameter vessel with low pressure and reinforcement shortfalls.",
+  "source": "Dennis Moss, Pressure Vessel Design Manual (4th ed.), ASME Div. 1 equation set aligned to UG-27/UG-32/UG-45",
+  "tolerance": 1e-06,
+  "input": {
+    "internal_pressure_pa": 1100000.0,
+    "allowable_stress_pa": 120000000.0,
+    "joint_efficiency": 0.8,
+    "corrosion_allowance_m": 0.0015,
+    "shell_inside_diameter_m": 1.2,
+    "shell_provided_thickness_m": 0.012,
+    "head_inside_diameter_m": 1.2,
+    "head_provided_thickness_m": 0.011,
+    "nozzle_inside_diameter_m": 0.12,
+    "nozzle_provided_thickness_m": 0.0035
+  },
+  "expected": {
+    "UG-27-shell": {"required_thickness_m": 0.008422593, "pass_status": true},
+    "UG-32-head": {"required_thickness_m": 0.007591355, "pass_status": true},
+    "UG-45-nozzle": {"required_thickness_m": 0.002190666, "pass_status": true},
+    "UG-27-shell-mawp": {"computed_mawp_pa": 1662543.295398318, "pass_status": true},
+    "UG-32-head-mawp": {"computed_mawp_pa": 1714446.84650813, "pass_status": true},
+    "UG-45-nozzle-mawp": {"computed_mawp_pa": 3157894.736842105, "pass_status": true},
+    "UG-37-nozzle-shell-reinforcement": {"required_thickness_m": 0.001010711, "pass_status": false},
+    "UG-37-nozzle-head-reinforcement": {"required_thickness_m": 0.000910963, "pass_status": false}
+  }
+}

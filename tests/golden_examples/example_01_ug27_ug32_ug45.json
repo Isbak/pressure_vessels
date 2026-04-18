@@ -1,0 +1,28 @@
+{
+  "id": "example_01_ug27_ug32_ug45",
+  "description": "Moderate-pressure vessel with all internal checks passing and UG-37 reinforcement deficiencies.",
+  "source": "ASME BPVC Section VIII, Division 1 (2023): UG-27(c)(1), UG-32, UG-45, UG-37",
+  "tolerance": 1e-06,
+  "input": {
+    "internal_pressure_pa": 1600000.0,
+    "allowable_stress_pa": 150000000.0,
+    "joint_efficiency": 0.9,
+    "corrosion_allowance_m": 0.002,
+    "shell_inside_diameter_m": 1.8,
+    "shell_provided_thickness_m": 0.016,
+    "head_inside_diameter_m": 1.8,
+    "head_provided_thickness_m": 0.014,
+    "nozzle_inside_diameter_m": 0.25,
+    "nozzle_provided_thickness_m": 0.006
+  },
+  "expected": {
+    "UG-27-shell": {"required_thickness_m": 0.012743062, "pass_status": true},
+    "UG-32-head": {"required_thickness_m": 0.011451201, "pass_status": true},
+    "UG-45-nozzle": {"required_thickness_m": 0.003488538, "pass_status": true},
+    "UG-27-shell-mawp": {"computed_mawp_pa": 2080581.241743725, "pass_status": true},
+    "UG-32-head-mawp": {"computed_mawp_pa": 2030838.661150809, "pass_status": true},
+    "UG-45-nozzle-mawp": {"computed_mawp_pa": 4265402.843601896, "pass_status": true},
+    "UG-37-nozzle-shell-reinforcement": {"required_thickness_m": 0.003185765, "pass_status": false},
+    "UG-37-nozzle-head-reinforcement": {"required_thickness_m": 0.0028628, "pass_status": false}
+  }
+}
