@@ -14,3 +14,48 @@ jobs:
         run: |
           test -f README.md
           test -f AGENT_GOVERNANCE.md
+          test -f docs/development_backlog.yaml
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          globs: "**/*.md"
+
+  yaml-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate YAML syntax
+        run: |
+          ruby - <<'RUBY'
+          require "yaml"
+
+          Dir.glob("**/*.{yml,yaml}").sort.each do |path|
+            YAML.safe_load(File.read(path), permitted_classes: [], aliases: true)
+          end
+
+          puts "YAML validation passed."
+          RUBY
+
+  markdown-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Markdown links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: true
+          args: --no-progress --verbose "./**/*.md"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
