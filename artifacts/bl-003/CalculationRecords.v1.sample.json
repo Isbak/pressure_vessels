@@ -1,0 +1,66 @@
+{
+  "schema_version": "CalculationRecords.v1",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
+  "checks": [
+    {
+      "check_id": "UG-27-shell",
+      "component": "shell",
+      "formula": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "inputs": {
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "E": 0.85,
+        "D_m": 2.0,
+        "CA_m": 0.003
+      },
+      "required_thickness_m": 0.018487868,
+      "provided_thickness_m": 0.02,
+      "pass_status": true,
+      "reproducibility": {
+        "canonical_payload_sha256": "91fd4517dfdfce21b89aa1b757050d174dea49e8056413e54267c4e2bbb9fc32",
+        "hash_algorithm": "sha256"
+      }
+    },
+    {
+      "check_id": "UG-32-head",
+      "component": "head",
+      "formula": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "inputs": {
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "E": 0.85,
+        "D_m": 2.0,
+        "CA_m": 0.003
+      },
+      "required_thickness_m": 0.016601434,
+      "provided_thickness_m": 0.018,
+      "pass_status": true,
+      "reproducibility": {
+        "canonical_payload_sha256": "a0a86a6f864108d7af94ed08b9dce5a4c1287699024d7860d455822cdf4738f0",
+        "hash_algorithm": "sha256"
+      }
+    },
+    {
+      "check_id": "UG-45-nozzle",
+      "component": "nozzle",
+      "formula": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "inputs": {
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "E": 0.85,
+        "d_m": 0.35,
+        "CA_m": 0.003
+      },
+      "required_thickness_m": 0.005702007,
+      "provided_thickness_m": 0.004,
+      "pass_status": false,
+      "reproducibility": {
+        "canonical_payload_sha256": "a620a5715d0a42ccef1fb567282abef71079cc613d4c19a320c4c0ac4e12aa6d",
+        "hash_algorithm": "sha256"
+      }
+    }
+  ],
+  "deterministic_hash": "0b5d0c04ca50604d4c5a4f1a54f10db745f394658f380be068d2ff4b2bdc8f4a"
+}
