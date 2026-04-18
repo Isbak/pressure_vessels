@@ -12,6 +12,7 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 - `release_label` (for example `r1`)
 - One or more `RegressionExample` records.
 
+
 ## Procedure
 
 1. Build source list from licensed standards content.
@@ -21,12 +22,14 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 5. Persist the package with `write_standards_package(...)`.
 6. Store output package under controlled artifact storage.
 
+
 ## Deterministic Controls
 
 - Inject `now_utc` for reproducible timestamps in tests.
 - Clauses are sorted by `clause_id`.
 - Semantic links are sorted by `(from_clause_id, to_clause_id, link_type)`.
 - Hashes use sha256 over canonical JSON (`sort_keys=True`, compact separators).
+
 
 ## Failure Modes (Fail Closed)
 
@@ -38,6 +41,7 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 - Semantic links to unknown clauses.
 - Missing/failed regression examples.
 - Duplicate package write path (immutable package overwrite attempt).
+
 
 ## Example Snippet
 

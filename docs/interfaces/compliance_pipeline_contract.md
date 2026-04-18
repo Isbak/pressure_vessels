@@ -8,6 +8,7 @@ This document defines the deterministic contract for the **Compliance Dossier** 
 
 - Persistence helper: `pressure_vessels.compliance_pipeline.write_compliance_artifacts(human_dossier, machine_dossier, directory)`
 
+
 ## BL-003 Handoff Gate (Required)
 
 BL-004 proceeds only if all are true:
@@ -28,6 +29,7 @@ BL-004 proceeds only if all are true:
 - Every `CalculationRecords.checks[].clause_id` exists in `ApplicabilityMatrix.records[].clause_id`
 - Every `NonConformanceList.entries[].check_id` references a **failed** `CalculationRecords.checks[].check_id`
 
+
 If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed).
 
 ## Output Artifacts
@@ -36,6 +38,7 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
 
 1. `ComplianceDossierHuman.v1`
 2. `ComplianceDossierMachine.v1`
+
 
 ### Schema: `ComplianceDossierMachine.v1`
 
@@ -137,6 +140,7 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
 - Each applicable clause must have at least one evidence link.
 - `review_checklist` is generated as deterministic fixed IDs (`CHK-001`..`CHK-003`).
 - Both dossier hashes are sha256 over canonical unsigned payloads (`json.dumps(..., sort_keys=True, separators=(",",":"))`).
+
 
 ## Acceptance-Criteria Mapping
 

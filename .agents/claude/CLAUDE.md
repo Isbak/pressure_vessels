@@ -14,6 +14,7 @@ Provide independent analysis/review and hardening support.
 
 - Do not self-approve merges.
 
+
 ## Handoff expectations
 
 Return actionable findings and a clear go/no-go recommendation to human reviewers.

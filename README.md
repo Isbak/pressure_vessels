@@ -16,6 +16,7 @@ This README describes a product blueprint for a modular toolchain that supports:
 
 - Certification-ready documentation and audit trails
 
+
 Related repository docs:
 
 - `docs/architecture.md`
@@ -36,6 +37,7 @@ Related repository docs:
 
 - `docs/interfaces/traceability_pipeline_contract.md`
 - `docs/interfaces/change_impact_pipeline_contract.md`
+
 
 ---
 
@@ -76,6 +78,7 @@ A complete package including:
 - Compliance matrix against applicable code clauses
 
 - Certification dossier with revision history
+
 
 ---
 
@@ -143,6 +146,7 @@ The platform is split into independently deployable modules so teams can replace
 
     - Manages agent sequencing, retries, approvals, and human-in-the-loop gates.
 
+
 ---
 
 ## 4. Agent Roles
@@ -162,6 +166,7 @@ A practical decomposition of autonomous/semi-autonomous agents:
 - **Documentation Agent** – Builds final report and certification package.
 
 - **QA Agent** – Runs consistency checks across all outputs.
+
 
 All agent actions should be logged with timestamps, model/version metadata, and source references.
 
@@ -201,6 +206,7 @@ A dedicated ingestion pipeline keeps the system current as standards evolve.
 
    - Identify projects affected by standards updates and trigger re-checks.
 
+
 ### Governance Recommendations
 
 - Require dual approval for standards package publication.
@@ -208,6 +214,7 @@ A dedicated ingestion pipeline keeps the system current as standards evolve.
 - Maintain provenance records for every parsed clause.
 
 - Keep backward-compatible execution for legacy certified projects.
+
 
 ---
 
@@ -233,6 +240,7 @@ A dedicated ingestion pipeline keeps the system current as standards evolve.
 
 10. Final human sign-off and release.
 
+
 ---
 
 ## 7. Data Model (Suggested)
@@ -250,6 +258,7 @@ A dedicated ingestion pipeline keeps the system current as standards evolve.
 - **Compliance Records**: clause mapping, evidence links, reviewer sign-off.
 
 - **Audit Log**: agent action history and approvals.
+
 
 ---
 
@@ -269,6 +278,7 @@ To support ASME/PED-style review workflows:
 
 - Exportable package (PDF + machine-readable JSON).
 
+
 ---
 
 ## 9. Non-Functional Requirements
@@ -282,6 +292,7 @@ To support ASME/PED-style review workflows:
 - **Performance:** Fast iteration for conceptual design loops.
 
 - **Extensibility:** Plugin interfaces for solvers, CAD, PLM, ERP.
+
 
 ---
 
@@ -299,6 +310,7 @@ To support ASME/PED-style review workflows:
 
 - **Reporting:** Template-driven PDF and JSON generation
 
+
 ---
 
 ## 11. Validation Strategy
@@ -310,6 +322,7 @@ To support ASME/PED-style review workflows:
 - Boundary testing for pressure/temperature/material extremes.
 
 - Independent engineer review before production release.
+
 
 ---
 
@@ -323,6 +336,7 @@ To support ASME/PED-style review workflows:
 
 - Basic compliance report
 
+
 ### Phase 2: Production
 
 - Standards ingestion pipeline
@@ -332,6 +346,7 @@ To support ASME/PED-style review workflows:
 
 - Certification dossier export
 
+
 ### Phase 3: Advanced
 
 - Multi-standard support (ASME + PED + AD 2000, etc.)
@@ -339,6 +354,7 @@ To support ASME/PED-style review workflows:
 - Cost/manufacturing optimization
 
 - Enterprise integrations (PLM/ERP/QMS)
+
 
 ---
 
@@ -353,6 +369,7 @@ A governance starter policy is available at **`AGENT_GOVERNANCE.md`**. It define
 - Required controls (branch protection, CI, secret scanning)
 
 - Audit logging expectations and rollout plan
+
 
 Adopt this as the baseline operating model for agent-assisted development in this project.
 

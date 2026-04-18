@@ -8,6 +8,7 @@ This document defines the deterministic contract for the **Calculation Engine** 
 
 - Persistence helper: `pressure_vessels.calculation_pipeline.write_calculation_artifacts(calc_artifact, non_conformance_artifact, directory)`
 
+
 ## BL-002 Handoff Gate (Required)
 
 BL-003 proceeds only if all are true:
@@ -21,6 +22,7 @@ BL-003 proceeds only if all are true:
 - `applicability_matrix.source_requirement_set_hash == requirement_set.deterministic_hash`
 
 - For every canonical field listed in `pressure_vessels.requirements_pipeline.CANONICAL_UNITS` that is present in `requirement_set.requirements`, the stored unit matches the canonical unit.
+
 
 If any condition fails, BL-003 raises a deterministic `ValueError`.
 
@@ -38,6 +40,7 @@ BL-003 fails closed when caller inputs are outside deterministic engineering-mod
   - `"BL-003 model-domain gate failed: <check_id> input <name>=<value> is outside validity envelope [<min>, <max>]."`
 - Envelope coverage is deterministic for conditional checks (UG-28 checks are validated only when `external_pressure` is declared).
 
+
 ## Applied Defaults
 
 When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable stress, joint efficiency, geometry) so smoke-tests against the canonical prompt remain runnable. Every default value is recorded verbatim in `CalculationRecordsArtifact.applied_defaults` so that pass/fail outcomes are fully traceable. Callers that want fail-closed behavior should pass a `SizingCheckInput` built from the Materials and Geometry modules.
@@ -49,6 +52,7 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
 1. `CalculationRecords.v1`
 
 2. `NonConformanceList.v1`
+
 
 ### Schema: `CalculationRecords.v1`
 
@@ -166,6 +170,7 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
 
 - All canonical hashing uses `json.dumps(..., sort_keys=True, separators=(",",":"))`.
 
+
 ## MAWP Check (BL-003a)
 
 In addition to thickness checks, BL-003a adds MAWP checks for shell/head/nozzle under the same clause routes:
@@ -176,6 +181,7 @@ In addition to thickness checks, BL-003a adds MAWP checks for shell/head/nozzle 
 
 - `UG-45-nozzle-mawp`
 
+
 Each MAWP record is additive in `CalculationRecords.v1` and reuses existing fields for compatibility (`required_thickness_m` stores design pressure in Pa for MAWP records, `provided_thickness_m` stores provided thickness used in the MAWP equation). MAWP-specific typed fields are included on every record:
 
 - `design_pressure_pa` (`number | null`)
@@ -183,6 +189,7 @@ Each MAWP record is additive in `CalculationRecords.v1` and reuses existing fiel
 - `computed_mawp_pa` (`number | null`)
 
 - `pressure_margin_pa` (`number | null`, computed as `computed_mawp_pa - design_pressure_pa`)
+
 
 For thickness checks these fields are `null`. For MAWP checks, `pass_status` is `computed_mawp_pa >= design_pressure_pa`.
 
@@ -192,6 +199,7 @@ When `RequirementSet.requirements["external_pressure"]` is present (canonical un
 
 - `UG-28-shell-external`
 - `UG-28-head-external`
+
 
 These checks are **conditional** and are omitted when external pressure is not declared.
 
@@ -203,6 +211,7 @@ Deterministic route:
 - Compute allowable external pressure `P_allow = (B * P_elastic) / SF` with fixed safety factor `SF=3`.
 - Pass criterion: `P_allow >= external_pressure`.
 
+
 Each UG-28 record includes:
 
 - `clause_id: "UG-28"` and per-check reproducibility hash metadata
@@ -210,9 +219,11 @@ Each UG-28 record includes:
 - `computed_mawp_pa = P_allow` (field retained for schema compatibility)
 - `pressure_margin_pa = computed_mawp_pa - design_pressure_pa`
 
+
 Clause-coverage gate impact:
 
 - If an external-pressure check is produced, `UG-28` **must** be marked applicable in `ApplicabilityMatrix`; otherwise BL-003 raises deterministic `ValueError`.
+
 
 ## Reinforcement-Area Replacement (BL-003c / UG-37 + UG-45 linkage)
 
@@ -220,6 +231,7 @@ BL-003c adds deterministic nozzle reinforcement-area replacement checks:
 
 - `UG-37-nozzle-shell-reinforcement`
 - `UG-37-nozzle-head-reinforcement`
+
 
 Deterministic route (UG-37 area replacement with UG-45 nozzle-thickness linkage):
 
@@ -230,6 +242,7 @@ Deterministic route (UG-37 area replacement with UG-45 nozzle-thickness linkage)
 - Uses deterministic effective half-width `w = min(d_opening/2, sqrt(d_opening*D_parent))`.
 - Pass criterion: `A_avail >= A_req`.
 
+
 Each reinforcement record includes:
 
 - `clause_id: "UG-37"`
@@ -238,9 +251,11 @@ Each reinforcement record includes:
 - `parent_check_id: "UG-27-shell" | "UG-32-head"`
 - per-check reproducibility metadata (`sha256`)
 
+
 Clause-coverage gate impact:
 
 - If reinforcement checks are produced, `UG-37` **must** be marked applicable in `ApplicabilityMatrix`; otherwise BL-003 raises deterministic `ValueError`.
+
 
 ## Scope (MVP) and Deferred Items
 
