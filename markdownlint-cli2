@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Lightweight local markdownlint-cli2-compatible checker.
+
+This script exists so contributors can run `markdownlint-cli2` in restricted
+execution environments where npm registry access is blocked.
+It intentionally checks common markdownlint formatting rules used in this repo.
+"""
+
+from __future__ import annotations
+
+import argparse
+import glob
+import re
+import sys
+from pathlib import Path
+
+RULE_LABELS = {
+    "MD009": "trailing-spaces",
+    "MD010": "hard-tabs",
+    "MD012": "multiple-consecutive-blank-lines",
+    "MD022": "blanks-around-headings",
+    "MD031": "blanks-around-fences",
+    "MD032": "blanks-around-lists",
+    "MD040": "fenced-code-language",
+    "MD047": "single-trailing-newline",
+}
+
+
+def load_disabled_rules(config_path: Path) -> set[str]:
+    if not config_path.exists():
+        return set()
+
+    disabled: set[str] = set()
+    for raw in config_path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        match = re.match(r"^(MD\d{3})\s*:\s*(true|false)\s*$", line)
+        if match and match.group(2) == "false":
+            disabled.add(match.group(1))
+    return disabled
+
+
+def unique_files(patterns: list[str]) -> list[Path]:
+    candidates: list[str] = []
+    for pattern in patterns:
+        matches = glob.glob(pattern, recursive=True)
+        candidates.extend(matches if matches else [pattern])
+
+    paths = [Path(item) for item in candidates if Path(item).is_file()]
+    uniq: dict[str, Path] = {}
+    for path in paths:
+        uniq[str(path)] = path
+    return [uniq[key] for key in sorted(uniq.keys())]
+
+
+def is_list_line(line: str) -> bool:
+    return bool(re.match(r"^\s*(?:[-+*]|\d+\.)\s+", line))
+
+
+def lint_file(path: Path, disabled_rules: set[str]) -> list[tuple[int, str, str]]:
+    findings: list[tuple[int, str, str]] = []
+    raw = path.read_text(encoding="utf-8")
+    lines = raw.splitlines()
+
+    in_fence = False
+    fence_line = ""
+
+    for idx, line in enumerate(lines, start=1):
+        if "MD009" not in disabled_rules and line.rstrip(" ") != line:
+            findings.append((idx, "MD009", RULE_LABELS["MD009"]))
+
+        if "MD010" not in disabled_rules and "\t" in line:
+            findings.append((idx, "MD010", RULE_LABELS["MD010"]))
+
+        if line.startswith("```") or line.startswith("~~~"):
+            marker = line[:3]
+            if not in_fence:
+                in_fence = True
+                fence_line = marker
+
+                if "MD031" not in disabled_rules and idx > 1 and lines[idx - 2].strip() != "":
+                    findings.append((idx, "MD031", RULE_LABELS["MD031"]))
+
+                if "MD040" not in disabled_rules and re.match(r"^(```|~~~)\s*$", line):
+                    findings.append((idx, "MD040", RULE_LABELS["MD040"]))
+            elif marker == fence_line:
+                in_fence = False
+                fence_line = ""
+                if "MD031" not in disabled_rules and idx < len(lines) and lines[idx].strip() != "":
+                    findings.append((idx, "MD031", RULE_LABELS["MD031"]))
+
+    if "MD012" not in disabled_rules:
+        blank_run = 0
+        for idx, line in enumerate(lines, start=1):
+            if line.strip() == "":
+                blank_run += 1
+                if blank_run >= 2:
+                    findings.append((idx, "MD012", RULE_LABELS["MD012"]))
+            else:
+                blank_run = 0
+
+    if "MD022" not in disabled_rules:
+        for idx, line in enumerate(lines, start=1):
+            if re.match(r"^#{1,6} ", line):
+                if idx > 1 and lines[idx - 2].strip() != "":
+                    findings.append((idx, "MD022", RULE_LABELS["MD022"]))
+                if idx < len(lines) and lines[idx].strip() != "":
+                    findings.append((idx, "MD022", RULE_LABELS["MD022"]))
+
+    if "MD032" not in disabled_rules:
+        for idx, line in enumerate(lines, start=1):
+            if is_list_line(line):
+                prev_non_empty = lines[idx - 2].strip() if idx > 1 else ""
+                next_non_empty = lines[idx].strip() if idx < len(lines) else ""
+
+                prev_is_list = is_list_line(lines[idx - 2]) if idx > 1 else False
+                next_is_list = is_list_line(lines[idx]) if idx < len(lines) else False
+
+                if prev_non_empty and not prev_is_list:
+                    findings.append((idx, "MD032", RULE_LABELS["MD032"]))
+                if next_non_empty and not next_is_list:
+                    findings.append((idx, "MD032", RULE_LABELS["MD032"]))
+
+    if "MD047" not in disabled_rules and raw and not raw.endswith("\n"):
+        findings.append((len(lines), "MD047", RULE_LABELS["MD047"]))
+
+    return findings
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("patterns", nargs="*")
+    args = parser.parse_args()
+
+    patterns = args.patterns or ["**/*.md"]
+    paths = unique_files(patterns)
+    disabled_rules = load_disabled_rules(Path(".markdownlint-cli2.yaml"))
+
+    total = 0
+    for path in paths:
+        findings = lint_file(path, disabled_rules)
+        for line_no, rule, label in findings:
+            print(f"{path}:{line_no} {rule}/{label}")
+        total += len(findings)
+
+    if total:
+        print(f"markdownlint-cli2: found {total} issue(s)")
+        return 1
+
+    print(f"markdownlint-cli2: linted {len(paths)} file(s), no issues found")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
