@@ -39,6 +39,8 @@ _CHECK_CLAUSE_MAP: dict[str, str] = {
     "UG-27-shell-mawp": "UG-27",
     "UG-32-head-mawp": "UG-32",
     "UG-45-nozzle-mawp": "UG-45",
+    "UG-28-shell-external": "UG-28",
+    "UG-28-head-external": "UG-28",
 }
 
 
@@ -72,6 +74,7 @@ class SizingCheckInput:
     head_provided_thickness: Quantity
     nozzle_inside_diameter: Quantity
     nozzle_provided_thickness: Quantity
+    external_pressure: Quantity | None = None
 
 
 @dataclass(frozen=True)
@@ -191,6 +194,7 @@ def run_calculation_pipeline(
         _build_head_mawp_check(normalized_input),
         _build_nozzle_mawp_check(normalized_input),
     ]
+    checks.extend(_build_external_pressure_checks(normalized_input))
 
     _validate_clause_coverage(checks, applicability_matrix)
 
@@ -323,6 +327,11 @@ def _normalize_and_resolve_inputs(
             head_provided_thickness=_to_si_length(sizing_input.head_provided_thickness),
             nozzle_inside_diameter=_to_si_length(sizing_input.nozzle_inside_diameter),
             nozzle_provided_thickness=_to_si_length(sizing_input.nozzle_provided_thickness),
+            external_pressure=(
+                _to_si_pressure(sizing_input.external_pressure)
+                if sizing_input.external_pressure is not None
+                else None
+            ),
         )
         applied_defaults = {"applied_mvp_defaults": False, "values": {}, "source": "caller-provided"}
         return normalized, applied_defaults
@@ -349,6 +358,7 @@ def _normalize_and_resolve_inputs(
         nozzle_provided_thickness=Quantity(
             value=_MVP_DEFAULTS["nozzle_provided_thickness_m"], unit="m"
         ),
+        external_pressure=_external_pressure_from_requirements(requirement_set),
     )
     applied_defaults = {
         "applied_mvp_defaults": True,
@@ -484,6 +494,81 @@ def _build_nozzle_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
     )
 
 
+def _build_external_pressure_checks(inputs: SizingCheckInput) -> list[CalculationRecord]:
+    if inputs.external_pressure is None:
+        return []
+
+    p_external = inputs.external_pressure.value
+    checks = [
+        _build_ug28_external_check(
+            check_id="UG-28-shell-external",
+            component="shell",
+            diameter_m=inputs.shell_inside_diameter.value,
+            provided_thickness_m=inputs.shell_provided_thickness.value,
+            corrosion_allowance_m=inputs.corrosion_allowance.value,
+            p_external_pa=p_external,
+        ),
+        _build_ug28_external_check(
+            check_id="UG-28-head-external",
+            component="head",
+            diameter_m=inputs.head_inside_diameter.value,
+            provided_thickness_m=inputs.head_provided_thickness.value,
+            corrosion_allowance_m=inputs.corrosion_allowance.value,
+            p_external_pa=p_external,
+        ),
+    ]
+    return checks
+
+
+def _build_ug28_external_check(
+    *,
+    check_id: str,
+    component: str,
+    diameter_m: float,
+    provided_thickness_m: float,
+    corrosion_allowance_m: float,
+    p_external_pa: float,
+) -> CalculationRecord:
+    # Deterministic UG-28 chart/equation route placeholder:
+    # A-factor is computed from geometry; B-factor is selected via a bounded
+    # monotonic interpolation to represent a chart lookup deterministically.
+    e_modulus_pa = 200_000_000_000.0
+    poisson_ratio = 0.3
+    safety_factor = 3.0
+    net_thickness_m = max(provided_thickness_m - corrosion_allowance_m, 0.0)
+    a_factor = net_thickness_m / diameter_m if diameter_m > 0.0 else 0.0
+    b_factor = min(0.95, max(0.2, 0.35 + (12.0 * a_factor)))
+    elastic_critical_pa = (
+        (2.0 * e_modulus_pa * (a_factor**3)) / (1.0 - (poisson_ratio**2)) if a_factor > 0.0 else 0.0
+    )
+    allowable_external_pa = (b_factor * elastic_critical_pa) / safety_factor
+
+    return _to_record(
+        check_id=check_id,
+        component=component,
+        formula=(
+            "UG-28 deterministic route: A=(t-CA)/D, B=clip(0.35+12A,0.2,0.95), "
+            "P_allow=(B*(2E*A^3/(1-nu^2)))/SF"
+        ),
+        inputs={
+            "P_external_Pa": p_external_pa,
+            "D_m": diameter_m,
+            "t_m": provided_thickness_m,
+            "CA_m": corrosion_allowance_m,
+            "t_net_m": net_thickness_m,
+            "A_factor": a_factor,
+            "B_factor": b_factor,
+            "E_modulus_Pa": e_modulus_pa,
+            "poisson_ratio": poisson_ratio,
+            "safety_factor": safety_factor,
+        },
+        required=p_external_pa,
+        provided=provided_thickness_m,
+        design_pressure_pa=p_external_pa,
+        computed_mawp_pa=allowable_external_pa,
+    )
+
+
 def _to_record(
     *,
     check_id: str,
@@ -552,7 +637,8 @@ def _build_non_conformances(checks: list[CalculationRecord]) -> list[NonConforma
             continue
 
         if record.design_pressure_pa is not None and record.computed_mawp_pa is not None:
-            observed = f"mawp={record.computed_mawp_pa:.3f} Pa"
+            pressure_key = "mawp" if record.check_id.endswith("-mawp") else "allowable_pressure"
+            observed = f"{pressure_key}={record.computed_mawp_pa:.3f} Pa"
             required = f"minimum_design_pressure={record.design_pressure_pa:.3f} Pa"
         else:
             observed = f"provided={record.provided_thickness_m:.6f} m"
@@ -600,3 +686,10 @@ def _to_si_length(quantity: Quantity) -> Quantity:
 def _sha256_payload(payload: dict[str, Any]) -> str:
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _external_pressure_from_requirements(requirement_set: RequirementSet) -> Quantity | None:
+    external_pressure = requirement_set.requirements.get("external_pressure")
+    if external_pressure is None:
+        return None
+    return Quantity(value=float(external_pressure.value), unit="Pa")

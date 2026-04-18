@@ -25,6 +25,22 @@ def _build_inputs(prompt: str):
     return req, design_basis, matrix
 
 
+def _build_inputs_with_external_pressure(prompt: str, pressure_pa: float):
+    req, _, _ = _build_inputs(prompt)
+    externalized_requirements = dict(req.requirements)
+    externalized_requirements["external_pressure"] = RequirementValue(
+        value=pressure_pa,
+        unit="Pa",
+        source_text=f"external pressure {pressure_pa} Pa",
+    )
+    req_with_external = replace(
+        req,
+        requirements=externalized_requirements,
+    )
+    design_basis, matrix = build_design_basis(req_with_external, now_utc=FIXED_NOW)
+    return req_with_external, design_basis, matrix
+
+
 def test_calculation_pipeline_is_deterministic_with_fixed_timestamp():
     prompt = (
         "Design a horizontal pressure vessel for propane storage, "
@@ -216,6 +232,78 @@ def test_mawp_outputs_are_deterministic_and_clause_linked():
         -1131242.873432155,
     ]
     assert all(record.reproducibility.hash_algorithm == "sha256" for record in mawp_checks)
+
+
+def test_external_pressure_checks_run_only_when_external_pressure_is_declared():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+
+    req, design_basis, matrix = _build_inputs(prompt)
+    calc_no_external, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    assert [record.check_id for record in calc_no_external.checks if record.check_id.startswith("UG-28")] == []
+
+    req_ext, design_basis_ext, matrix_ext = _build_inputs_with_external_pressure(
+        prompt, pressure_pa=5_000.0
+    )
+    calc_with_external, _ = run_calculation_pipeline(
+        req_ext,
+        design_basis_ext,
+        matrix_ext,
+        now_utc=FIXED_NOW,
+    )
+    assert [record.check_id for record in calc_with_external.checks if record.check_id.startswith("UG-28")] == [
+        "UG-28-shell-external",
+        "UG-28-head-external",
+    ]
+
+
+def test_external_pressure_outputs_are_deterministic_and_clause_linked():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req_ext, design_basis_ext, matrix_ext = _build_inputs_with_external_pressure(
+        prompt, pressure_pa=5_000.0
+    )
+
+    calc_a, nc_a = run_calculation_pipeline(req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW)
+    calc_b, nc_b = run_calculation_pipeline(req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW)
+    assert calc_a.to_json_dict() == calc_b.to_json_dict()
+    assert nc_a.to_json_dict() == nc_b.to_json_dict()
+
+    ug28 = [record for record in calc_a.checks if record.check_id.startswith("UG-28")]
+    assert [record.clause_id for record in ug28] == ["UG-28", "UG-28"]
+    assert all(record.reproducibility.hash_algorithm == "sha256" for record in ug28)
+    assert all(len(record.reproducibility.canonical_payload_sha256) == 64 for record in ug28)
+    assert [record.pass_status for record in ug28] == [True, True]
+    assert [record.design_pressure_pa for record in ug28] == [5_000.0, 5_000.0]
+    assert [record.pressure_margin_pa for record in ug28] == [
+        35671.721611722,
+        22197.802197802,
+    ]
+
+
+def test_external_pressure_failures_feed_non_conformance_with_clause_linkage():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req_ext, design_basis_ext, matrix_ext = _build_inputs_with_external_pressure(prompt, pressure_pa=50_000.0)
+    calc, non_conformance = run_calculation_pipeline(
+        req_ext, design_basis_ext, matrix_ext, now_utc=FIXED_NOW
+    )
+
+    ug28_failures = [record for record in calc.checks if record.check_id.startswith("UG-28")]
+    assert [record.pass_status for record in ug28_failures] == [False, False]
+    failed_entry = next(entry for entry in non_conformance.entries if entry.check_id == "UG-28-head-external")
+    assert failed_entry.clause_id == "UG-28"
+    assert failed_entry.observed.startswith("allowable_pressure=")
+    assert failed_entry.required == "minimum_design_pressure=50000.000 Pa"
 
 
 def test_handoff_gate_rejects_non_canonical_unit():
