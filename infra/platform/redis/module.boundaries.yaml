@@ -54,4 +54,4 @@ spec:
     direct_service_access:
       allowed: false
       path: backend-api-only
-    key_naming_prefix: pv:
+    key_naming_prefix: "pv:"
