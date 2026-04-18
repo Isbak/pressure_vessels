@@ -27,6 +27,18 @@ from .calculation_pipeline import (
     run_calculation_pipeline,
     write_calculation_artifacts,
 )
+from .standards_ingestion_pipeline import (
+    ParsedClause,
+    NormalizedClause,
+    RegressionExample,
+    RegressionResult,
+    SemanticLink,
+    StandardSource,
+    StandardsPackage,
+    run_standards_ingestion,
+    write_standards_package,
+)
+
 from .requirements_pipeline import (
     Gap,
     RequirementSet,
@@ -59,4 +71,13 @@ __all__ = [
     "run_calculation_pipeline",
     "write_calculation_artifacts",
     "write_compliance_artifacts",
+    "ParsedClause",
+    "NormalizedClause",
+    "RegressionExample",
+    "RegressionResult",
+    "SemanticLink",
+    "StandardSource",
+    "StandardsPackage",
+    "run_standards_ingestion",
+    "write_standards_package",
 ]
