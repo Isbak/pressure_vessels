@@ -77,6 +77,7 @@ class ComplianceDossierMachine:
     compliance_matrix_schema_version: str
     evidence_link_set_schema_version: str
     review_checklist_schema_version: str
+    reproducibility: dict[str, str]
     compliance_matrix: list[ClauseComplianceRecord]
     evidence_links: list[EvidenceLink]
     review_checklist: list[ReviewChecklistItem]
@@ -95,6 +96,7 @@ class ComplianceDossierMachine:
             "compliance_matrix_schema_version": self.compliance_matrix_schema_version,
             "evidence_link_set_schema_version": self.evidence_link_set_schema_version,
             "review_checklist_schema_version": self.review_checklist_schema_version,
+            "reproducibility": self.reproducibility,
             "compliance_matrix": [record.to_json_dict() for record in self.compliance_matrix],
             "evidence_links": [record.to_json_dict() for record in self.evidence_links],
             "review_checklist": [record.to_json_dict() for record in self.review_checklist],
@@ -113,6 +115,7 @@ class ComplianceDossierHuman:
     source_applicability_matrix_hash: str
     source_calculation_records_hash: str
     source_non_conformance_hash: str
+    reproducibility: dict[str, str]
     summary_lines: list[str]
     clause_matrix_rows: list[dict[str, str]]
     evidence_trace_lines: list[str]
@@ -129,6 +132,7 @@ class ComplianceDossierHuman:
             "source_applicability_matrix_hash": self.source_applicability_matrix_hash,
             "source_calculation_records_hash": self.source_calculation_records_hash,
             "source_non_conformance_hash": self.source_non_conformance_hash,
+            "reproducibility": self.reproducibility,
             "summary_lines": self.summary_lines,
             "clause_matrix_rows": self.clause_matrix_rows,
             "evidence_trace_lines": self.evidence_trace_lines,
@@ -161,6 +165,8 @@ def generate_compliance_dossier(
     evidence_links = _build_evidence_links(requirement_set, applicability_matrix, calculation_records)
     checklist = _build_review_checklist(calculation_records)
 
+    _validate_evidence_coverage(requirement_set, applicability_matrix, evidence_links)
+
     machine_payload = {
         "schema_version": COMPLIANCE_DOSSIER_MACHINE_VERSION,
         "generated_at_utc": generated_at,
@@ -172,6 +178,7 @@ def generate_compliance_dossier(
         "compliance_matrix_schema_version": COMPLIANCE_MATRIX_VERSION,
         "evidence_link_set_schema_version": EVIDENCE_LINK_SET_VERSION,
         "review_checklist_schema_version": REVIEW_CHECKLIST_VERSION,
+        "reproducibility": {"canonicalization": "json.sort_keys+compact", "hash_algorithm": "sha256"},
         "compliance_matrix": [record.to_json_dict() for record in clause_matrix],
         "evidence_links": [record.to_json_dict() for record in evidence_links],
         "review_checklist": [record.to_json_dict() for record in checklist],
@@ -190,6 +197,7 @@ def generate_compliance_dossier(
         compliance_matrix_schema_version=COMPLIANCE_MATRIX_VERSION,
         evidence_link_set_schema_version=EVIDENCE_LINK_SET_VERSION,
         review_checklist_schema_version=REVIEW_CHECKLIST_VERSION,
+        reproducibility=machine_payload["reproducibility"],
         compliance_matrix=clause_matrix,
         evidence_links=evidence_links,
         review_checklist=checklist,
@@ -200,6 +208,7 @@ def generate_compliance_dossier(
     passed = sum(1 for record in clause_matrix if record.status == "pass")
     failed = sum(1 for record in clause_matrix if record.status == "fail")
     not_applicable = sum(1 for record in clause_matrix if record.status == "not_applicable")
+    not_evaluated = sum(1 for record in clause_matrix if record.status == "not_evaluated")
 
     human_payload = {
         "schema_version": COMPLIANCE_DOSSIER_HUMAN_VERSION,
@@ -210,9 +219,13 @@ def generate_compliance_dossier(
         "source_applicability_matrix_hash": applicability_matrix.deterministic_hash,
         "source_calculation_records_hash": calculation_records.deterministic_hash,
         "source_non_conformance_hash": non_conformance_list.deterministic_hash,
+        "reproducibility": {"canonicalization": "json.sort_keys+compact", "hash_algorithm": "sha256"},
         "summary_lines": [
             f"Primary standard: {design_basis.primary_standard} ({design_basis.primary_standard_version})",
-            f"Clause outcomes: pass={passed}, fail={failed}, not_applicable={not_applicable}",
+            (
+                "Clause outcomes: "
+                f"pass={passed}, fail={failed}, not_applicable={not_applicable}, not_evaluated={not_evaluated}"
+            ),
         ],
         "clause_matrix_rows": [
             {
@@ -230,10 +243,7 @@ def generate_compliance_dossier(
             )
             for link in evidence_links
         ],
-        "review_checklist_lines": [
-            f"[{item.item_id}] {item.prompt}"
-            for item in checklist
-        ],
+        "review_checklist_lines": [f"[{item.item_id}] {item.prompt}" for item in checklist],
     }
     human_hash = _sha256_payload(human_payload)
 
@@ -246,6 +256,7 @@ def generate_compliance_dossier(
         source_applicability_matrix_hash=applicability_matrix.deterministic_hash,
         source_calculation_records_hash=calculation_records.deterministic_hash,
         source_non_conformance_hash=non_conformance_list.deterministic_hash,
+        reproducibility=human_payload["reproducibility"],
         summary_lines=human_payload["summary_lines"],
         clause_matrix_rows=human_payload["clause_matrix_rows"],
         evidence_trace_lines=human_payload["evidence_trace_lines"],
@@ -320,6 +331,20 @@ def _validate_handoff_gate(
     if non_conformance_list.source_calculation_records_hash != calculation_records.deterministic_hash:
         raise ValueError("BL-004 handoff gate failed: non_conformance_list hash link mismatch.")
 
+    known_clauses = {record.clause_id for record in applicability_matrix.records}
+    for check in calculation_records.checks:
+        if check.clause_id not in known_clauses:
+            raise ValueError(
+                f"BL-004 handoff gate failed: calculation check clause '{check.clause_id}' is unknown."
+            )
+
+    failed_checks = {check.check_id for check in calculation_records.checks if not check.pass_status}
+    for entry in non_conformance_list.entries:
+        if entry.check_id not in failed_checks:
+            raise ValueError(
+                "BL-004 handoff gate failed: non_conformance entry references non-failed or missing check."
+            )
+
 
 def _build_clause_matrix(
     applicability_matrix: ApplicabilityMatrix,
@@ -331,7 +356,10 @@ def _build_clause_matrix(
 
     matrix: list[ClauseComplianceRecord] = []
     for clause in applicability_matrix.records:
-        clause_checks = checks_by_clause.get(clause.clause_id, [])
+        clause_checks = sorted(
+            checks_by_clause.get(clause.clause_id, []),
+            key=lambda check: check.check_id,
+        )
         status = _resolve_status(clause.applicable, clause_checks)
         matrix.append(
             ClauseComplianceRecord(
@@ -362,39 +390,45 @@ def _build_evidence_links(
     calculation_records: CalculationRecordsArtifact,
 ) -> list[EvidenceLink]:
     requirement_fields = set(requirement_set.requirements.keys())
-    checks_by_clause = {check.clause_id: check for check in calculation_records.checks}
+    checks_by_clause: dict[str, list[Any]] = {}
+    for check in calculation_records.checks:
+        checks_by_clause.setdefault(check.clause_id, []).append(check)
 
     links: list[EvidenceLink] = []
     for clause in applicability_matrix.records:
-        for field in clause.evidence_fields:
+        for field in sorted(clause.evidence_fields):
             if field not in requirement_fields:
                 continue
 
-            check = checks_by_clause.get(clause.clause_id)
-            if check is None:
-                model_id = "ApplicabilityModel.v1"
-                result_id = f"{clause.clause_id}:applicable={str(clause.applicable).lower()}"
-                artifact_ref = (
-                    f"{APPLICABILITY_MATRIX_VERSION}#{applicability_matrix.deterministic_hash}:"
-                    f"{clause.clause_id}"
+            clause_checks = sorted(checks_by_clause.get(clause.clause_id, []), key=lambda check: check.check_id)
+            if not clause_checks:
+                links.append(
+                    EvidenceLink(
+                        requirement_field=field,
+                        clause_id=clause.clause_id,
+                        model_id="ApplicabilityModel.v1",
+                        result_id=f"{clause.clause_id}:applicable={str(clause.applicable).lower()}",
+                        artifact_ref=(
+                            f"{APPLICABILITY_MATRIX_VERSION}#{applicability_matrix.deterministic_hash}:"
+                            f"{clause.clause_id}"
+                        ),
+                    )
                 )
-            else:
-                model_id = check.formula
-                result_id = f"{check.check_id}:pass={str(check.pass_status).lower()}"
-                artifact_ref = (
-                    f"{CALCULATION_RECORDS_VERSION}#{calculation_records.deterministic_hash}:"
-                    f"{check.check_id}"
-                )
+                continue
 
-            links.append(
-                EvidenceLink(
-                    requirement_field=field,
-                    clause_id=clause.clause_id,
-                    model_id=model_id,
-                    result_id=result_id,
-                    artifact_ref=artifact_ref,
+            for check in clause_checks:
+                links.append(
+                    EvidenceLink(
+                        requirement_field=field,
+                        clause_id=clause.clause_id,
+                        model_id=check.formula,
+                        result_id=f"{check.check_id}:pass={str(check.pass_status).lower()}",
+                        artifact_ref=(
+                            f"{CALCULATION_RECORDS_VERSION}#{calculation_records.deterministic_hash}:"
+                            f"{check.check_id}"
+                        ),
+                    )
                 )
-            )
 
     links.sort(
         key=lambda link: (
@@ -406,6 +440,38 @@ def _build_evidence_links(
         )
     )
     return links
+
+
+def _validate_evidence_coverage(
+    requirement_set: RequirementSet,
+    applicability_matrix: ApplicabilityMatrix,
+    evidence_links: list[EvidenceLink],
+) -> None:
+    present_requirements = set(requirement_set.requirements.keys())
+    expected_pairs: set[tuple[str, str]] = set()
+    applicable_clauses: set[str] = set()
+
+    for clause in applicability_matrix.records:
+        if clause.applicable:
+            applicable_clauses.add(clause.clause_id)
+        for field in clause.evidence_fields:
+            if field in present_requirements:
+                expected_pairs.add((field, clause.clause_id))
+
+    linked_pairs = {(link.requirement_field, link.clause_id) for link in evidence_links}
+    missing_pairs = sorted(expected_pairs - linked_pairs)
+    if missing_pairs:
+        raise ValueError(
+            "BL-004 handoff gate failed: evidence links incomplete for expected requirement/clause pairs."
+        )
+
+    linked_clauses = {link.clause_id for link in evidence_links}
+    uncovered_clauses = sorted(applicable_clauses - linked_clauses)
+    if uncovered_clauses:
+        raise ValueError(
+            "BL-004 handoff gate failed: evidence links missing for applicable clause(s) "
+            f"{', '.join(uncovered_clauses)}."
+        )
 
 
 def _build_review_checklist(

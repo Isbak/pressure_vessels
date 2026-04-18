@@ -25,8 +25,10 @@ BL-004 proceeds only if all are true:
 - `calculation_records.source_design_basis_signature == design_basis.deterministic_signature`
 - `calculation_records.source_applicability_matrix_hash == applicability_matrix.deterministic_hash`
 - `non_conformance_list.source_calculation_records_hash == calculation_records.deterministic_hash`
+- Every `CalculationRecords.checks[].clause_id` exists in `ApplicabilityMatrix.records[].clause_id`
+- Every `NonConformanceList.entries[].check_id` references a **failed** `CalculationRecords.checks[].check_id`
 
-If any condition fails, BL-004 raises a deterministic `ValueError`.
+If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed).
 
 ## Output Artifacts
 
@@ -49,11 +51,15 @@ If any condition fails, BL-004 raises a deterministic `ValueError`.
   "compliance_matrix_schema_version": "ComplianceMatrix.v1",
   "evidence_link_set_schema_version": "EvidenceLinkSet.v1",
   "review_checklist_schema_version": "ReviewChecklist.v1",
+  "reproducibility": {
+    "canonicalization": "json.sort_keys+compact",
+    "hash_algorithm": "sha256"
+  },
   "compliance_matrix": [
     {
       "clause_id": "UG-27",
       "applicable": true,
-      "check_ids": ["UG-27-shell"],
+      "check_ids": ["UG-27-shell", "UG-27-shell-mawp"],
       "status": "pass",
       "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified."
     }
@@ -96,15 +102,19 @@ If any condition fails, BL-004 raises a deterministic `ValueError`.
   "source_applicability_matrix_hash": "<ApplicabilityMatrix.deterministic_hash>",
   "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>",
   "source_non_conformance_hash": "<NonConformanceList.deterministic_hash>",
+  "reproducibility": {
+    "canonicalization": "json.sort_keys+compact",
+    "hash_algorithm": "sha256"
+  },
   "summary_lines": [
     "Primary standard: ASME Section VIII Division 1 (ASME_BPVC_2023)",
-    "Clause outcomes: pass=4, fail=1, not_applicable=3"
+    "Clause outcomes: pass=4, fail=1, not_applicable=2, not_evaluated=2"
   ],
   "clause_matrix_rows": [
     {
       "clause_id": "UG-45",
       "status": "fail",
-      "check_ids": "UG-45-nozzle",
+      "check_ids": "UG-45-nozzle, UG-45-nozzle-mawp",
       "justification": "Applicable because nozzle neck minimum thickness must be verified."
     }
   ],
@@ -121,8 +131,10 @@ If any condition fails, BL-004 raises a deterministic `ValueError`.
 ## Deterministic Controls
 
 - `generated_at_utc` supports injection via `now_utc` for reproducible testing.
-- `compliance_matrix` is generated in applicability-matrix order.
+- `compliance_matrix` is generated in applicability-matrix order; `check_ids` are sorted by `check_id`.
 - `evidence_links` are sorted by `(requirement_field, clause_id, model_id, result_id, artifact_ref)`.
+- Each requirement-to-clause pair present in `ApplicabilityMatrix.evidence_fields` (where the requirement exists) must have at least one evidence link.
+- Each applicable clause must have at least one evidence link.
 - `review_checklist` is generated as deterministic fixed IDs (`CHK-001`..`CHK-003`).
 - Both dossier hashes are sha256 over canonical unsigned payloads (`json.dumps(..., sort_keys=True, separators=(",",":"))`).
 
