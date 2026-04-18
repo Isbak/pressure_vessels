@@ -1,0 +1,48 @@
+version: 1
+kind: PlatformObservabilityModule
+metadata:
+  name: platform-observability-boundaries
+spec:
+  owner: sre-platform
+  telemetry_domains:
+    metrics:
+      backend: prometheus
+      scope:
+        - platform-control-plane
+        - runtime-services
+      retention_days:
+        dev: 14
+        staging: 30
+    logs:
+      backend: loki
+      scope:
+        - service-application-logs
+        - infrastructure-audit-events
+      retention_days:
+        dev: 14
+        staging: 30
+    traces:
+      backend: tempo
+      scope:
+        - ingress-to-backend
+        - backend-to-dependency
+      retention_days:
+        dev: 7
+        staging: 14
+    dashboards:
+      backend: grafana
+      required_folders:
+        - platform-runtime-overview
+        - platform-incidents
+  incident_signals:
+    - service_error_rate_high
+    - api_latency_slo_breach
+    - workflow_backlog_growth
+    - secrets_resolution_failures
+    - deployment_rollout_failures
+  governance:
+    ci_gate_required_signals:
+      - service_error_rate_high
+      - api_latency_slo_breach
+      - deployment_rollout_failures
+    immutable_signal_keys: true

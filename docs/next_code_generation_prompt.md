@@ -1,23 +1,23 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-The next actionable backlog item in `docs/development_backlog.yaml` is **BL-023: Deliver observability module for platform runtime stack**.
+The next actionable backlog item in `docs/development_backlog.yaml` is **BL-024: Deliver datastore (PostgreSQL) runtime module**.
 
 Use this prompt to start the next implementation session.
 
 ```text
-You are implementing backlog item **BL-023: Deliver observability module for platform runtime stack** for the `pressure_vessels` repository.
+You are implementing backlog item **BL-024: Deliver datastore (PostgreSQL) runtime module** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved from YAML on 2026-04-18):
-- `BL-023` status is `todo`.
-- `BL-023` depends on: `BL-018` and `BL-021` (both status `done`).
-- This makes `BL-023` the first actionable item in backlog order.
+- `BL-024` status is `todo`.
+- `BL-024` depends on: `BL-018`, `BL-021`, and `BL-022` (all status `done`).
+- This makes `BL-024` the first actionable item in backlog order.
 
 Restate before coding:
-- Item ID/title: BL-023 — Deliver observability module for platform runtime stack
-- depends_on: [BL-018, BL-021]
+- Item ID/title: BL-024 — Deliver datastore (PostgreSQL) runtime module
+- depends_on: [BL-018, BL-021, BL-022]
 - source: Phase 5 Runtime Deployment roadmap item
 
 Repository constraints:
@@ -30,14 +30,14 @@ Likely relevant files:
 - `docs/platform_runtime_stack_registry.yaml`
 - `infra/platform/environment.bootstrap.yaml`
 - `docs/runbooks/platform_runtime_stack_operations.md`
-- `infra/platform/observability/`
+- `infra/platform/postgresql/`
 
 Task:
-1) Implement BL-023 behavior by populating `infra/platform/observability` with a module skeleton that declares metrics/logs/traces/dashboard boundaries.
-2) Wire the observability module into `infra/platform/environment.bootstrap.yaml` dev and staging definitions.
+1) Implement BL-024 behavior by populating `infra/platform/postgresql` with a module skeleton that declares schema ownership and lifecycle boundaries.
+2) Wire the datastore module into `infra/platform/environment.bootstrap.yaml` dev and staging definitions.
 3) Add/extend tests under `tests/` for new behavior.
 4) Update related docs under `docs/` when contracts change.
-5) Update `docs/development_backlog.yaml` status for `BL-023` when complete.
+5) Update `docs/development_backlog.yaml` status for `BL-024` when complete.
 6) Update `docs/next_code_generation_prompt.md` so it points at the subsequent backlog item.
 
 Output format:
@@ -49,10 +49,9 @@ Output format:
 Do not modify unrelated files.
 ```
 
-## Upcoming queue after BL-023
+## Upcoming queue after BL-024
 
 The following items are queued in dependency order:
 
-- BL-024 — Deliver datastore (PostgreSQL) runtime module (depends on BL-018, BL-021, BL-022)
 - BL-025 — Deliver cache/queue (Redis) runtime module (depends on BL-018, BL-021)
 - BL-026 — Deliver runtime platform (Docker/Kubernetes) deployment module (depends on BL-018, BL-021, BL-022)

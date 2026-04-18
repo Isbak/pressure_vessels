@@ -68,10 +68,10 @@ components:
     notes: Identity and access management.
   - key: observability-prometheus-grafana-loki-tempo
     capability: observability
-    status: planned
+    status: deployed
     owner: sre-platform
     module_path: infra/platform/observability
-    notes: Metrics, logs, traces, dashboards.
+    notes: Metrics, logs, traces, and dashboard boundary module skeleton committed in-repo.
   - key: secrets-vault-or-sops-age
     capability: secrets
     status: deployed
