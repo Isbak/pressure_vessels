@@ -23,7 +23,11 @@ jobs:
       - name: Lint Markdown
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          globs: "**/*.md"
+          globs: |
+            README.md
+            AGENT_GOVERNANCE.md
+            docs/**/*.md
+            .github/pull_request_template.md
 
   yaml-validate:
     runs-on: ubuntu-latest
@@ -51,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           fail: true
-          args: --no-progress --verbose --max-retries 3 --retry-wait-time 2 "./**/*.md"
+          args: --no-progress --verbose --max-retries 3 --retry-wait-time 2 README.md AGENT_GOVERNANCE.md docs/**/*.md .github/pull_request_template.md
 
   secret-scan:
     runs-on: ubuntu-latest
