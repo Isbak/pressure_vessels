@@ -166,7 +166,26 @@ def test_dossier_schema_shapes_include_required_sections():
     assert isinstance(machine_json["compliance_matrix"], list)
     assert isinstance(machine_json["evidence_links"], list)
     assert isinstance(machine_json["review_checklist"], list)
+    assert machine_json["material_basis"]["schema_version"] == "MaterialBasis.v1"
     assert "reproducibility" in machine_json
+    assert human_json["material_basis_ref"].startswith("MaterialBasis.v1:")
+
+
+def test_material_basis_and_corrosion_policy_are_persisted_to_compliance_artifacts():
+    req, design_basis, matrix, calc, nc = _build_inputs(_default_prompt())
+    human, machine = generate_compliance_dossier(
+        req,
+        design_basis,
+        matrix,
+        calc,
+        nc,
+        now_utc=FIXED_NOW,
+    )
+
+    assert machine.material_basis["material_spec"] == "SA-516 Gr.70"
+    assert machine.material_basis["allowables_version"] == "ASME_BPVC_2023.materials.2026-04"
+    assert machine.material_basis["corrosion_allowance_policy"]["policy_id"] == "CA-INPUT-REQUIREMENT"
+    assert "Material basis:" in human.summary_lines[1]
 
 
 def test_handoff_gate_rejects_hash_mismatch():

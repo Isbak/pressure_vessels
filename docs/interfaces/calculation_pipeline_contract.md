@@ -38,9 +38,9 @@ BL-003 fails closed when caller inputs are outside deterministic engineering-mod
   - `"BL-003 model-domain gate failed: <check_id> input <name>=<value> is outside validity envelope [<min>, <max>]."`
 - Envelope coverage is deterministic for conditional checks (UG-28 checks are validated only when `external_pressure` is declared).
 
-## Applied Defaults
+## Materials + Corrosion Integration (BL-013)
 
-When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable stress, joint efficiency, geometry) so smoke-tests against the canonical prompt remain runnable. Every default value is recorded verbatim in `CalculationRecordsArtifact.applied_defaults` so that pass/fail outcomes are fully traceable. Callers that want fail-closed behavior should pass a `SizingCheckInput` built from the Materials and Geometry modules.
+When `sizing_input=None`, the pipeline now resolves allowable stress, joint efficiency, and corrosion policy from the deterministic materials module and only applies MVP placeholders for geometry. Material allowables are versioned and include standards-package trace fields. Corrosion allowance policy is explicit and persisted in both `material_basis` and `applied_defaults`.
 
 ## Output Artifacts
 
@@ -59,6 +59,20 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
   "source_requirement_set_hash": "<RequirementSet.deterministic_hash>",
   "source_design_basis_signature": "<DesignBasis.deterministic_signature>",
   "source_applicability_matrix_hash": "<ApplicabilityMatrix.deterministic_hash>",
+  "material_basis": {
+    "schema_version": "MaterialBasis.v1",
+    "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023",
+    "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+    "material_spec": "SA-516 Gr.70",
+    "allowable_stress_pa": 138000000.0,
+    "joint_efficiency": 0.85,
+    "corrosion_allowance_m": 0.003,
+    "corrosion_allowance_policy": {
+      "policy_id": "CA-INPUT-REQUIREMENT",
+      "source": "requirement_set.corrosion_allowance",
+      "value_mm": 3.0
+    }
+  },
   "applied_defaults": {
     "applied_mvp_defaults": false,
     "values": {},
