@@ -1,0 +1,255 @@
+---
+version: 1.0.0
+generated_on: '2026-04-18'
+project: pressure_vessels
+description: Machine-readable development backlog derived from repository roadmap, architecture, and semantic workflow documents.
+status_values:
+- todo
+- in_progress
+- blocked
+- done
+priority_values:
+- P0
+- P1
+- P2
+- P3
+effort_values:
+- XS
+- S
+- M
+- L
+- XL
+items:
+- id: BL-001
+  title: Implement prompt parsing and requirement normalization pipeline
+  area: requirements
+  phase: 'Phase 1: MVP'
+  priority: P0
+  status: todo
+  effort: M
+  depends_on: []
+  references:
+  - README.md#phase-1-mvp
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-a
+  acceptance_criteria:
+  - Free-form prompt is converted to typed requirement fields.
+  - Units are normalized to canonical units.
+  - Missing mandatory fields produce a gap list and block downstream execution.
+  deliverables:
+  - RequirementSet.vX JSON artifact
+  - Unresolved gap list
+- id: BL-002
+  title: Build design basis and code applicability matrix
+  area: compliance
+  phase: 'Phase 1: MVP'
+  priority: P0
+  status: todo
+  effort: M
+  depends_on:
+  - BL-001
+  references:
+  - README.md#end-to-end-workflow
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-b
+  acceptance_criteria:
+  - Primary and secondary standards are selected and versioned.
+  - Clause applicability matrix is generated with justification for non-applicable clauses.
+  - Signed DesignBasis artifact is persisted.
+  deliverables:
+  - DesignBasis artifact
+  - ApplicabilityMatrix artifact
+- id: BL-003
+  title: Implement core ASME Div 1 sizing checks
+  area: calculation
+  phase: 'Phase 1: MVP'
+  priority: P0
+  status: todo
+  effort: L
+  depends_on:
+  - BL-001
+  - BL-002
+  references:
+  - README.md#phase-1-mvp
+  - README.md#calculation-engine
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-d
+  acceptance_criteria:
+  - Deterministic sizing checks run for shell/head/nozzle and related checks.
+  - All calculations are unit-safe with reproducibility hashes.
+  - Pass/fail records and non-conformance list are stored.
+  deliverables:
+  - CalculationRecords
+  - Non-conformance list
+- id: BL-004
+  title: Generate basic compliance report
+  area: reporting
+  phase: 'Phase 1: MVP'
+  priority: P0
+  status: todo
+  effort: M
+  depends_on:
+  - BL-003
+  references:
+  - README.md#phase-1-mvp
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-e
+  acceptance_criteria:
+  - Clause-by-clause compliance matrix is produced.
+  - Evidence links map requirement -> clause -> model -> result -> artifact.
+  - Review checklist is included for human approvers.
+  deliverables:
+  - ComplianceDossier (human-readable)
+  - ComplianceDossier (machine-readable)
+- id: BL-005
+  title: Standards ingestion pipeline
+  area: knowledge
+  phase: 'Phase 2: Production'
+  priority: P1
+  status: todo
+  effort: L
+  depends_on:
+  - BL-002
+  references:
+  - README.md#standards-ingestion-new-codes-and-updates
+  - README.md#phase-2-production
+  acceptance_criteria:
+  - Ingestion supports source intake, parsing, normalization, semantic linking, validation, and release.
+  - Standards packages are immutable and versioned.
+  - Regression examples pass before release.
+  deliverables:
+  - Versioned standards package
+  - Ingestion pipeline runbook
+- id: BL-006
+  title: Implement full traceability graph
+  area: traceability
+  phase: 'Phase 2: Production'
+  priority: P1
+  status: todo
+  effort: L
+  depends_on:
+  - BL-003
+  - BL-004
+  references:
+  - README.md#phase-2-production
+  - docs/architecture.md
+  - docs/modular_pressure_vessel_ontology_and_information_model.md
+  acceptance_criteria:
+  - Traceability graph stores requirement, clause, model, calculation, artifact, and approval links.
+  - Graph supports audit queries by revision and clause.
+  - All graph writes are revisioned and immutable by default.
+  deliverables:
+  - Traceability graph schema
+  - Query examples and audit report templates
+- id: BL-007
+  title: Certification dossier export
+  area: reporting
+  phase: 'Phase 2: Production'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-004
+  - BL-006
+  references:
+  - README.md#phase-2-production
+  - README.md#certification-readiness-features
+  acceptance_criteria:
+  - Export package includes PDF + machine-readable JSON.
+  - Signed calculation snapshots and change impact report are included.
+  - Package supports inspector/regulator review workflow.
+  deliverables:
+  - Exportable dossier package
+  - Template catalog for report sections
+- id: BL-008
+  title: Add change impact and selective re-verification
+  area: verification
+  phase: 'Phase 2: Production'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-003
+  - BL-006
+  references:
+  - README.md#certification-readiness-features
+  - docs/semantic_layer_workflows_for_requirements_verification.md#workflow-f
+  acceptance_criteria:
+  - Requirement/code/model deltas are detected automatically.
+  - Minimal re-verification set is computed and executed.
+  - Signed change impact report is generated for each revision delta.
+  deliverables:
+  - ImpactReport artifact
+  - Updated baseline status
+- id: BL-009
+  title: Support multi-standard design routes
+  area: standards
+  phase: 'Phase 3: Advanced'
+  priority: P2
+  status: todo
+  effort: XL
+  depends_on:
+  - BL-005
+  - BL-006
+  references:
+  - README.md#phase-3-advanced
+  - docs/semantic_layer_workflows_for_requirements_verification.md#primary-pressure-vessel-design-standards
+  acceptance_criteria:
+  - System supports ASME + PED + additional standards as configured routes.
+  - Applicability and evidence mapping remain clause-level and traceable.
+  - Route selection logic is deterministic and auditable.
+  deliverables:
+  - Multi-standard routing engine
+  - Compatibility test matrix
+- id: BL-010
+  title: Add optimization for cost and manufacturability
+  area: optimization
+  phase: 'Phase 3: Advanced'
+  priority: P3
+  status: todo
+  effort: L
+  depends_on:
+  - BL-003
+  - BL-009
+  references:
+  - README.md#optimization-agent-optional
+  - README.md#phase-3-advanced
+  acceptance_criteria:
+  - Optimization objective supports weight/cost/manufacturability trade-offs.
+  - All optimization outputs remain inside hard compliance constraints.
+  - Pareto candidate set is exported with justification metadata.
+  deliverables:
+  - Optimization service
+  - Candidate ranking report
+- id: BL-011
+  title: Integrate enterprise systems (PLM/ERP/QMS)
+  area: integration
+  phase: 'Phase 3: Advanced'
+  priority: P3
+  status: todo
+  effort: L
+  depends_on:
+  - BL-007
+  references:
+  - README.md#phase-3-advanced
+  - README.md#suggested-tech-stack-example
+  acceptance_criteria:
+  - Artifacts and approvals sync with configured enterprise systems.
+  - Traceability links are preserved across system boundaries.
+  - Integration retries and failure handling are observable.
+  deliverables:
+  - Integration adapters
+  - Operational runbooks
+- id: BL-012
+  title: Enforce governance gates in CI
+  area: governance
+  phase: Cross-cutting
+  priority: P1
+  status: todo
+  effort: S
+  depends_on: []
+  references:
+  - AGENT_GOVERNANCE.md
+  acceptance_criteria:
+  - CI enforces test/lint/security/reporting requirements from governance policy.
+  - Build/test artifacts are retained for auditability.
+  - Policy exceptions require explicit approval record.
+  deliverables:
+  - CI policy checks
+  - Artifact retention configuration
