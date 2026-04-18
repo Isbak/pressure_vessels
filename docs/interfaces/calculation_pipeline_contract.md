@@ -188,8 +188,8 @@ Deterministic route (UG-37 area replacement with UG-45 nozzle-thickness linkage)
 
 - Uses required nozzle thickness from `UG-45-nozzle` (`t_r_nozzle`) and required parent thickness from the linked parent route (`UG-27-shell` or `UG-32-head`) as `t_r_parent`.
 - Computes required reinforcement area `A_req = d_opening * t_r_parent`.
-- Computes available reinforcement area
-  `A_avail = d_opening*max(t_parent-t_r_parent,0) + 2*w*max(t_nozzle-t_r_nozzle,0)`.
+- Computes available reinforcement area `A_avail = d_opening*max(t_parent-t_r_parent,0) + 2*w*max(t_nozzle-t_r_nozzle,0)`.
+
 - Uses deterministic effective half-width `w = min(d_opening/2, sqrt(d_opening*D_parent))`.
 - Pass criterion: `A_avail >= A_req`.
 
