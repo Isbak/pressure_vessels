@@ -34,6 +34,7 @@ def test_build_design_basis_happy_path_generates_artifacts_and_standard_resoluti
     assert matrix.schema_version == "ApplicabilityMatrix.v1"
     assert matrix.primary_standard == "ASME Section VIII Division 1"
     assert any(record.clause_id == "UG-28" and record.applicable is False for record in matrix.records)
+    assert any(record.clause_id == "UG-37" and record.applicable is True for record in matrix.records)
 
 
 def test_build_design_basis_rejects_blocked_requirement_set():

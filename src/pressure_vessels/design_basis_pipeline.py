@@ -231,6 +231,15 @@ def _build_mvp_clause_records(requirement_set: RequirementSet) -> list[ClauseApp
             evidence_fields=["design_pressure", "code_standard"],
         ),
         ClauseApplicabilityRecord(
+            clause_id="UG-37",
+            applicable=True,
+            justification=(
+                "Applicable because nozzle openings require reinforcement-area replacement checks "
+                "against parent components."
+            ),
+            evidence_fields=["design_pressure", "code_standard"],
+        ),
+        ClauseApplicabilityRecord(
             clause_id="UG-45",
             applicable=True,
             justification="Applicable because nozzle neck minimum thickness must be verified.",
