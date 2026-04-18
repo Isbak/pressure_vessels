@@ -18,6 +18,7 @@ Related repository docs:
 - `docs/modular_pressure_vessel_ontology_and_information_model.md`
 - `docs/semantic_layer_workflows_for_requirements_verification.md`
 - `docs/decision-log/`
+- `docs/interfaces/requirements_pipeline_contract.md`
 
 ---
 
