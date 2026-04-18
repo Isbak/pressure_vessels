@@ -14,6 +14,10 @@ Workflow jobs that upload artifacts must read this value from the policy file an
 `actions/upload-artifact` rather than hard-coding retention values in workflow YAML.
 Any workflow update must preserve this linkage.
 
+`required_gates` in `ci_governance_policy.v1.json` is also enforced as the control-plane source of truth.
+`scripts/check_ci_governance.py` fails closed when CI emits gates not listed in policy or omits required
+policy gates, preventing silent governance/CI drift.
+
 ## Exception workflow
 
 Exception request, review, and expiration handling are defined in `AGENT_GOVERNANCE.md` §11 "Exception Request & Approval Workflow".

@@ -1,22 +1,22 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **current next roadmap item: BL-019**.
+Use this prompt to implement the **current next roadmap item: BL-020**.
 
 ```text
-You are implementing backlog item **BL-019: Automate governance and CI control drift review** for the `pressure_vessels` repository.
+You are implementing backlog item **BL-020: Add README-anchor consistency check trigger** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved from YAML on 2026-04-18):
-- `BL-019` status is `todo`.
-- `BL-019` dependencies: none.
-- This makes `BL-019` the first `todo`/`in_progress` item whose `depends_on` set is fully `done`.
+- `BL-020` status is `todo`.
+- `BL-020` dependencies: none.
+- This makes `BL-020` the first `todo`/`in_progress` item whose `depends_on` set is fully `done`.
 
 Restate before coding:
-- Item ID/title: BL-019 — Automate governance and CI control drift review
+- Item ID/title: BL-020 — Add README-anchor consistency check trigger
 - depends_on: []
-- source: audit 2026-04-18, observation 1 and 3
+- source: audit 2026-04-18, observation 2
 
 Repository constraints:
 - Keep changes minimal and focused.
@@ -25,17 +25,17 @@ Repository constraints:
 - Prefer deterministic logic (no randomness/time-dependent values unless explicitly controlled).
 
 Likely relevant files:
-- `docs/governance/ci_governance_policy.v1.json`
-- `scripts/check_ci_governance.py`
 - `.github/workflows/ci.yml`
-- `tests/test_ci_policy_wiring.py`
+- `README.md`
+- `scripts/` (consistency-check helper if needed)
+- `tests/` (workflow/anchor wiring tests)
 
 Task:
-1) Implement BL-019 behavior using existing repository patterns.
-2) Add or strengthen automated checks for governance/CI control drift.
+1) Implement BL-020 behavior using existing repository patterns.
+2) Add automated README-anchor consistency checks in CI.
 3) Add/extend tests under `tests/` for new behavior.
 4) Update related docs under `docs/` if contracts change.
-5) Update `docs/development_backlog.yaml` status for BL-019 when complete.
+5) Update `docs/development_backlog.yaml` status for BL-020 when complete.
 6) Update `docs/next_code_generation_prompt.md` so it points at the subsequent backlog item.
 
 Output format:

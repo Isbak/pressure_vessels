@@ -51,3 +51,15 @@ def test_ci_artifact_retention_is_sourced_from_policy_file() -> None:
         assert upload_steps
         for upload_step in upload_steps:
             assert upload_step["with"]["retention-days"] == RETENTION_EXPR
+
+
+def test_governance_gate_needs_and_policy_required_gates_are_in_lockstep() -> None:
+    workflow = _load_workflow()
+    policy = json.loads((REPO_ROOT / POLICY_PATH).read_text(encoding="utf-8"))
+
+    required_gates = set(policy["required_gates"])
+    governance_needs = set(workflow["jobs"]["governance-gate"]["needs"])
+    defined_jobs = set(workflow["jobs"].keys())
+
+    assert governance_needs == required_gates
+    assert required_gates.issubset(defined_jobs)

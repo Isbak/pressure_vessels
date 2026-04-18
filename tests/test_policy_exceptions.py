@@ -71,6 +71,20 @@ def test_policy_exception_expiry_and_scope_matching() -> None:
     assert governance_check._is_expired(exception=exception, now_utc=now_after_expiry)
 
 
+def test_control_drift_validation_rejects_unmanaged_or_missing_gates() -> None:
+    with pytest.raises(ValueError, match="missing required gates in CI results: markdown-lint"):
+        governance_check._validate_control_drift(
+            required_gates=["docs-check", "markdown-lint"],
+            gate_results={"docs-check": "success"},
+        )
+
+    with pytest.raises(ValueError, match="unmanaged CI gates absent from policy: markdown-links"):
+        governance_check._validate_control_drift(
+            required_gates=["docs-check"],
+            gate_results={"docs-check": "success", "markdown-links": "success"},
+        )
+
+
 def test_check_ci_governance_happy_path_with_matching_unexpired_exception(tmp_path: Path) -> None:
     policy_path = tmp_path / "policy.json"
     exceptions_path = tmp_path / "exceptions.json"

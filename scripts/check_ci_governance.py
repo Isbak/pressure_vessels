@@ -55,6 +55,10 @@ def main() -> int:
     all_exceptions = [_exception_from_json(item) for item in exceptions_payload.get("exceptions", [])]
     changed_paths = _extract_changed_paths(gate_results_payload)
     gate_results = _extract_gate_results(gate_results_payload)
+    _validate_control_drift(
+        required_gates=list(policy_payload["required_gates"]),
+        gate_results=gate_results,
+    )
 
     approved_exceptions = _eligible_exceptions(
         all_exceptions=all_exceptions,
@@ -240,6 +244,24 @@ def _extract_gate_results(gate_results_payload: dict[str, Any]) -> dict[str, str
         for gate, result in gate_results_payload.items()
         if not str(gate).startswith("_")
     }
+
+
+def _validate_control_drift(*, required_gates: list[str], gate_results: dict[str, str]) -> None:
+    required = set(required_gates)
+    observed = set(gate_results.keys())
+    missing = sorted(required - observed)
+    unmanaged = sorted(observed - required)
+
+    if not missing and not unmanaged:
+        return
+
+    details: list[str] = []
+    if missing:
+        details.append(f"missing required gates in CI results: {', '.join(missing)}")
+    if unmanaged:
+        details.append(f"unmanaged CI gates absent from policy: {', '.join(unmanaged)}")
+
+    raise ValueError("CI governance control drift detected: " + "; ".join(details))
 
 
 def _exception_from_json(payload: dict[str, Any]) -> PolicyException:
