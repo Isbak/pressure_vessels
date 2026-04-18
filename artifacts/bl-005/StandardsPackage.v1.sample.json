@@ -1,0 +1,97 @@
+{
+  "deterministic_hash": "365b7f1ea51709d1b1057d9091b8b8d178286e05162ceb86c91e4549cb5249a7",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "immutable": true,
+  "normalized_clauses": [
+    {
+      "canonical_equation": null,
+      "canonical_text": "minimum thickness requirements for pressure parts.",
+      "canonical_variables": [],
+      "clause_id": "UG-16"
+    },
+    {
+      "canonical_equation": "t=(P*R)/(S*E-0.6*P)",
+      "canonical_text": "cylindrical shell thickness for internal pressure; equation = t = (p*r)/(s*e-0.6*p); see ug-16.",
+      "canonical_variables": [
+        "E",
+        "P",
+        "R",
+        "S",
+        "t"
+      ],
+      "clause_id": "UG-27"
+    },
+    {
+      "canonical_equation": "t=(0.885*P*D)/(2*S*E-0.2*P)",
+      "canonical_text": "head thickness under internal pressure; equation = t = (0.885*p*d)/(2*s*e-0.2*p); see ug-27.",
+      "canonical_variables": [
+        "D",
+        "E",
+        "P",
+        "S",
+        "t"
+      ],
+      "clause_id": "UG-32"
+    }
+  ],
+  "package_id": "ASME_VIII_1_2025.2_sample",
+  "parsed_clauses": [
+    {
+      "clause_id": "UG-16",
+      "cross_references": [],
+      "equation": null,
+      "text": "Minimum thickness requirements for pressure parts."
+    },
+    {
+      "clause_id": "UG-27",
+      "cross_references": [
+        "UG-16"
+      ],
+      "equation": "t = (P*R)/(S*E-0.6*P)",
+      "text": "Cylindrical shell thickness for internal pressure; equation = t = (P*R)/(S*E-0.6*P); See UG-16."
+    },
+    {
+      "clause_id": "UG-32",
+      "cross_references": [
+        "UG-27"
+      ],
+      "equation": "t = (0.885*P*D)/(2*S*E-0.2*P)",
+      "text": "Head thickness under internal pressure; equation = t = (0.885*P*D)/(2*S*E-0.2*P); See UG-27."
+    }
+  ],
+  "regression_results": [
+    {
+      "details": "pass",
+      "example_id": "REG-001",
+      "passed": true
+    }
+  ],
+  "release_label": "sample",
+  "schema_version": "StandardsPackage.v1",
+  "semantic_links": [
+    {
+      "from_clause_id": "UG-27",
+      "link_type": "cross_reference",
+      "reason": "Cross-reference found in clause text.",
+      "to_clause_id": "UG-16"
+    },
+    {
+      "from_clause_id": "UG-32",
+      "link_type": "cross_reference",
+      "reason": "Cross-reference found in clause text.",
+      "to_clause_id": "UG-27"
+    }
+  ],
+  "source_fingerprints": [
+    {
+      "content_sha256": "56c9633f5fe14d6a215385a0ac2eea6da9fb448dc588390fb2cd67d8a9186d6c",
+      "edition": "2025",
+      "publisher": "ASME",
+      "revision": "2025.2",
+      "source_id": "ASME_BPVC_VIII_DIV1_2025_MAIN",
+      "title": "ASME BPVC Section VIII Division 1 (sample)"
+    }
+  ],
+  "standard_key": "ASME_VIII_1",
+  "standard_version": "2025.2"
+}
