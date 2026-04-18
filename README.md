@@ -32,11 +32,13 @@ Pressure vessel design is often split across spreadsheets, CAD files, code books
 ## 2. Scope: Prompt to Certification
 
 ### Input
+
 A user supplies a prompt such as:
 
 > "Design a horizontal pressure vessel for propane storage, 18 bar design pressure, 65°C design temperature, 30 m³ capacity, ASME Section VIII Div 1, corrosion allowance 3 mm, with full compliance report."
 
 ### Output
+
 A complete package including:
 
 - Requirement interpretation and assumptions
@@ -222,16 +224,19 @@ To support ASME/PED-style review workflows:
 ## 12. Roadmap
 
 ### Phase 1: MVP
+
 - Prompt parsing
 - Core ASME Div 1 sizing checks
 - Basic compliance report
 
 ### Phase 2: Production
+
 - Standards ingestion pipeline
 - Full traceability graph
 - Certification dossier export
 
 ### Phase 3: Advanced
+
 - Multi-standard support (ASME + PED + AD 2000, etc.)
 - Cost/manufacturing optimization
 - Enterprise integrations (PLM/ERP/QMS)

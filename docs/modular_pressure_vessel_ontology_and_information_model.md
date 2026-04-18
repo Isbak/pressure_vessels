@@ -139,6 +139,7 @@ Below is an implementation-friendly entity model.
 ## 3.1 Entities and Attributes
 
 ### `vessel_system`
+
 - `vessel_id` (PK)
 - `tag_number` (unique)
 - `service_description`
@@ -153,6 +154,7 @@ Below is an implementation-friendly entity model.
 - `created_at`, `updated_at`
 
 ### `requirement`
+
 - `requirement_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `source_type` (prompt/spec/regulatory/assumption)
@@ -165,6 +167,7 @@ Below is an implementation-friendly entity model.
 - `created_at`, `updated_at`
 
 ### `design_basis`
+
 - `design_basis_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `jurisdiction`
@@ -177,6 +180,7 @@ Below is an implementation-friendly entity model.
 - `baseline_configuration_id` (FK -> configuration_baseline, nullable)
 
 ### `standard_package`
+
 - `package_id` (PK)
 - `code_name`
 - `edition`
@@ -186,6 +190,7 @@ Below is an implementation-friendly entity model.
 - `status` (draft/released/deprecated)
 
 ### `applicability_rule`
+
 - `applicability_rule_id` (PK)
 - `package_id` (FK -> standard_package)
 - `rule_id` (FK -> code_rule)
@@ -196,6 +201,7 @@ Below is an implementation-friendly entity model.
 - `is_active` (bool)
 
 ### `engineering_model`
+
 - `model_id` (PK)
 - `model_name`
 - `model_family` (formula/chart/analysis_lookup/fea)
@@ -207,6 +213,7 @@ Below is an implementation-friendly entity model.
 - `version`
 
 ### `verification_task`
+
 - `task_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `requirement_id` (FK -> requirement)
@@ -219,6 +226,7 @@ Below is an implementation-friendly entity model.
 - `executed_at`
 
 ### `module`
+
 - `module_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `module_type` (shell_course, head_set, nozzle_bank, support_set, internals_set)
@@ -231,6 +239,7 @@ Below is an implementation-friendly entity model.
 - `effective_from`, `effective_to`
 
 ### `component`
+
 - `component_id` (PK)
 - `module_id` (FK -> module)
 - `component_type`
@@ -245,6 +254,7 @@ Below is an implementation-friendly entity model.
 - `revision`
 
 ### `joint`
+
 - `joint_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `joint_type`
@@ -255,6 +265,7 @@ Below is an implementation-friendly entity model.
 - `leak_tightness_class`
 
 ### `material_specification`
+
 - `material_spec_id` (PK)
 - `standard_name` (e.g., ASME SA-516)
 - `grade`
@@ -265,6 +276,7 @@ Below is an implementation-friendly entity model.
 - `traceability_required` (bool)
 
 ### `design_condition`
+
 - `design_condition_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `condition_name` (normal/upset/test/transport/seismic/fire)
@@ -276,6 +288,7 @@ Below is an implementation-friendly entity model.
 - `notes`
 
 ### `load_case`
+
 - `load_case_id` (PK)
 - `design_condition_id` (FK -> design_condition)
 - `name`
@@ -284,6 +297,7 @@ Below is an implementation-friendly entity model.
 - `acceptance_criteria_json`
 
 ### `code_rule`
+
 - `rule_id` (PK)
 - `code_name`
 - `edition`
@@ -293,6 +307,7 @@ Below is an implementation-friendly entity model.
 - `applicability_json`
 
 ### `calculation_record`
+
 - `calc_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `load_case_id` (FK -> load_case)
@@ -307,6 +322,7 @@ Below is an implementation-friendly entity model.
 - `reproducibility_hash`
 
 ### `inspection_test_record`
+
 - `test_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `component_id` (FK -> component, nullable)
@@ -320,6 +336,7 @@ Below is an implementation-friendly entity model.
 - `evidence_artifact_id` (FK -> digital_artifact)
 
 ### `compliance_evidence`
+
 - `evidence_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `rule_id` (FK -> code_rule)
@@ -332,6 +349,7 @@ Below is an implementation-friendly entity model.
 - `comments`
 
 ### `decision_record`
+
 - `decision_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `subject_type` (applicability/model/assumption/nonconformance)
@@ -343,6 +361,7 @@ Below is an implementation-friendly entity model.
 - `artifact_id` (FK -> digital_artifact, nullable)
 
 ### `configuration_baseline`
+
 - `configuration_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `name`
@@ -352,6 +371,7 @@ Below is an implementation-friendly entity model.
 - `released_at`
 
 ### `lifecycle_event`
+
 - `event_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `configuration_id` (FK -> configuration_baseline)
@@ -362,6 +382,7 @@ Below is an implementation-friendly entity model.
 - `artifact_id` (FK -> digital_artifact, nullable)
 
 ### `digital_artifact`
+
 - `artifact_id` (PK)
 - `vessel_id` (FK -> vessel_system)
 - `artifact_type` (drawing/report/certificate/mtr/wps/pqr/cad/model/file)
