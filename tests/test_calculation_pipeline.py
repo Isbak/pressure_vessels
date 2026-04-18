@@ -132,10 +132,16 @@ def test_applied_defaults_are_surfaced_when_sizing_input_is_absent():
     calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
 
     assert calc.applied_defaults["applied_mvp_defaults"] is True
+    assert calc.applied_defaults["applied_geometry_defaults"] is True
     values = calc.applied_defaults["values"]
-    assert values["allowable_stress_Pa"] == 138_000_000.0
-    assert values["joint_efficiency"] == 0.85
+    assert "allowable_stress_Pa" not in values
+    assert "joint_efficiency" not in values
     assert "source" in calc.applied_defaults
+    assert calc.applied_defaults["material_source"] == "materials_module.resolve_material_basis"
+    assert calc.applied_defaults["corrosion_allowance_policy"]["policy_id"] == "CA-INPUT-REQUIREMENT"
+    assert calc.material_basis["allowable_stress_pa"] == 138_000_000.0
+    assert calc.material_basis["joint_efficiency"] == 0.85
+    assert calc.material_basis["standards_package_ref"] == "ASME Section VIII Division 1:ASME_BPVC_2023"
 
 
 def test_applied_defaults_are_not_flagged_when_caller_supplies_sizing_input():
@@ -165,6 +171,21 @@ def test_applied_defaults_are_not_flagged_when_caller_supplies_sizing_input():
 
     assert calc.applied_defaults["applied_mvp_defaults"] is False
     assert calc.applied_defaults["values"] == {}
+    assert calc.material_basis["material_spec"] == "SA-516 Gr.70"
+
+
+def test_corrosion_policy_fallback_is_explicit_when_requirement_is_absent():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    calc, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+
+    assert calc.material_basis["corrosion_allowance_policy"]["policy_id"] == "CA-DEFAULT-MM"
+    assert calc.material_basis["corrosion_allowance_m"] == 0.0015
 
 
 def test_unit_normalization_supports_non_si_inputs():

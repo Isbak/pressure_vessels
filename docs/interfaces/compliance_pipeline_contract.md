@@ -81,6 +81,13 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
       "evidence_refs": ["evidence_links"]
     }
   ],
+  "material_basis": {
+    "schema_version": "MaterialBasis.v1",
+    "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023",
+    "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+    "material_spec": "SA-516 Gr.70",
+    "corrosion_allowance_policy": {"policy_id": "CA-INPUT-REQUIREMENT"}
+  },
   "applied_defaults": {
     "applied_mvp_defaults": true,
     "values": {"allowable_stress_Pa": 138000000.0},
@@ -102,6 +109,7 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
   "source_applicability_matrix_hash": "<ApplicabilityMatrix.deterministic_hash>",
   "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>",
   "source_non_conformance_hash": "<NonConformanceList.deterministic_hash>",
+  "material_basis_ref": "MaterialBasis.v1:ASME Section VIII Division 1:ASME_BPVC_2023:ASME_BPVC_2023.materials.2026-04",
   "reproducibility": {
     "canonicalization": "json.sort_keys+compact",
     "hash_algorithm": "sha256"

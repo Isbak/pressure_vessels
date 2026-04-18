@@ -1,29 +1,29 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **current next roadmap item: BL-013**.
+Use this prompt to implement the **current next roadmap item: BL-014**.
 
 ```text
-You are implementing backlog item **BL-013: Implement materials and corrosion module integration** for the `pressure_vessels` repository.
+You are implementing backlog item **BL-014: Add geometry/CAD interface and strict sizing-input gate** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved as of 2026-04-18):
-- `BL-013` status is `todo`.
-- `BL-013` dependencies are `BL-003` and `BL-004`, and both are `done`.
-- Therefore `BL-013` is the next eligible item.
+- `BL-014` status is `todo`.
+- `BL-014` dependencies are `BL-003` and `BL-013`, and both are `done`.
+- Therefore `BL-014` is the next eligible item.
 
 Restate before coding:
-- Item ID/title: BL-013 — Implement materials and corrosion module integration
-- depends_on: [BL-003, BL-004]
+- Item ID/title: BL-014 — Add geometry/CAD interface and strict sizing-input gate
+- depends_on: [BL-003, BL-013]
 - acceptance criteria:
-  1) Placeholder allowable-stress and joint-efficiency defaults are replaced by materials-module outputs.
-  2) Material allowables are versioned and traceable to standards package references.
-  3) Corrosion allowance policy is explicit and persisted into calculation and compliance artifacts.
+  1) Geometry/CAD module provides deterministic sizing inputs for shell/head/nozzle routes.
+  2) Calculation pipeline can run fail-closed when required geometry/material inputs are missing.
+  3) Exported geometry parameters are traceable by revision and linked to calculation evidence.
 - deliverables:
-  1) Material compatibility/allowables provider
-  2) Calculation pipeline integration without placeholder stress defaults
-  3) Artifact trace fields for material basis
+  1) Geometry input schema and adapters
+  2) Calculation handoff-gate update for strict sizing-input mode
+  3) CAD-ready parameter export artifact
 
 Repository constraints:
 - Keep changes minimal and focused.
@@ -41,8 +41,8 @@ Likely relevant files:
 
 Task:
 1) Implement BL-013 behavior using existing repository patterns.
-2) Satisfy each BL-013 acceptance criterion explicitly.
-3) Deliver each BL-013 deliverable with minimal, auditable changes.
+2) Satisfy each BL-014 acceptance criterion explicitly.
+3) Deliver each BL-014 deliverable with minimal, auditable changes.
 4) Add/extend tests under `tests/` for new behavior.
 5) Update related architecture/interface docs under `docs/`.
 6) Update `docs/development_backlog.yaml` status for BL-013 when complete.

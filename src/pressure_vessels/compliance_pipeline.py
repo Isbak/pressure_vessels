@@ -81,6 +81,7 @@ class ComplianceDossierMachine:
     compliance_matrix: list[ClauseComplianceRecord]
     evidence_links: list[EvidenceLink]
     review_checklist: list[ReviewChecklistItem]
+    material_basis: dict[str, Any]
     applied_defaults: dict[str, Any]
     deterministic_hash: str
 
@@ -100,6 +101,7 @@ class ComplianceDossierMachine:
             "compliance_matrix": [record.to_json_dict() for record in self.compliance_matrix],
             "evidence_links": [record.to_json_dict() for record in self.evidence_links],
             "review_checklist": [record.to_json_dict() for record in self.review_checklist],
+            "material_basis": self.material_basis,
             "applied_defaults": self.applied_defaults,
             "deterministic_hash": self.deterministic_hash,
         }
@@ -115,6 +117,7 @@ class ComplianceDossierHuman:
     source_applicability_matrix_hash: str
     source_calculation_records_hash: str
     source_non_conformance_hash: str
+    material_basis_ref: str
     reproducibility: dict[str, str]
     summary_lines: list[str]
     clause_matrix_rows: list[dict[str, str]]
@@ -132,6 +135,7 @@ class ComplianceDossierHuman:
             "source_applicability_matrix_hash": self.source_applicability_matrix_hash,
             "source_calculation_records_hash": self.source_calculation_records_hash,
             "source_non_conformance_hash": self.source_non_conformance_hash,
+            "material_basis_ref": self.material_basis_ref,
             "reproducibility": self.reproducibility,
             "summary_lines": self.summary_lines,
             "clause_matrix_rows": self.clause_matrix_rows,
@@ -182,6 +186,7 @@ def generate_compliance_dossier(
         "compliance_matrix": [record.to_json_dict() for record in clause_matrix],
         "evidence_links": [record.to_json_dict() for record in evidence_links],
         "review_checklist": [record.to_json_dict() for record in checklist],
+        "material_basis": calculation_records.material_basis,
         "applied_defaults": calculation_records.applied_defaults,
     }
     machine_hash = _sha256_payload(machine_payload)
@@ -201,6 +206,7 @@ def generate_compliance_dossier(
         compliance_matrix=clause_matrix,
         evidence_links=evidence_links,
         review_checklist=checklist,
+        material_basis=calculation_records.material_basis,
         applied_defaults=calculation_records.applied_defaults,
         deterministic_hash=machine_hash,
     )
@@ -219,9 +225,19 @@ def generate_compliance_dossier(
         "source_applicability_matrix_hash": applicability_matrix.deterministic_hash,
         "source_calculation_records_hash": calculation_records.deterministic_hash,
         "source_non_conformance_hash": non_conformance_list.deterministic_hash,
+        "material_basis_ref": (
+            f"{calculation_records.material_basis['schema_version']}:"
+            f"{calculation_records.material_basis['standards_package_ref']}:"
+            f"{calculation_records.material_basis['allowables_version']}"
+        ),
         "reproducibility": {"canonicalization": "json.sort_keys+compact", "hash_algorithm": "sha256"},
         "summary_lines": [
             f"Primary standard: {design_basis.primary_standard} ({design_basis.primary_standard_version})",
+            (
+                "Material basis: "
+                f"{calculation_records.material_basis['material_spec']} "
+                f"[{calculation_records.material_basis['allowables_version']}]"
+            ),
             (
                 "Clause outcomes: "
                 f"pass={passed}, fail={failed}, not_applicable={not_applicable}, not_evaluated={not_evaluated}"
@@ -256,6 +272,7 @@ def generate_compliance_dossier(
         source_applicability_matrix_hash=applicability_matrix.deterministic_hash,
         source_calculation_records_hash=calculation_records.deterministic_hash,
         source_non_conformance_hash=non_conformance_list.deterministic_hash,
+        material_basis_ref=human_payload["material_basis_ref"],
         reproducibility=human_payload["reproducibility"],
         summary_lines=human_payload["summary_lines"],
         clause_matrix_rows=human_payload["clause_matrix_rows"],

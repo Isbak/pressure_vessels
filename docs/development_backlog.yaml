@@ -348,7 +348,7 @@ items:
   area: materials
   phase: 'Phase 4: Hardening'
   priority: P0
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-003

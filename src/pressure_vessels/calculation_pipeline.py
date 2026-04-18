@@ -10,26 +10,23 @@ from pathlib import Path
 from typing import Any
 
 from .design_basis_pipeline import ApplicabilityMatrix, DesignBasis
+from .materials_module import MaterialBasis, resolve_material_basis
 from .requirements_pipeline import CANONICAL_UNITS, RequirementSet
 
 CALCULATION_RECORDS_VERSION = "CalculationRecords.v1"
 NON_CONFORMANCE_LIST_VERSION = "NonConformanceList.v1"
 DEFAULT_NEAR_LIMIT_THRESHOLD = 0.9
 
-# BL-003 MVP placeholder defaults used when sizing_input is not supplied.
-# These are surfaced in the CalculationRecordsArtifact.applied_defaults section
-# so that every pass/fail outcome is traceable to an explicit assumption.
+# BL-003 MVP geometry defaults used when sizing_input is not supplied.
+# Stress/joint-efficiency/corrosion policy are now resolved by BL-013 material basis.
 _MVP_DEFAULTS = {
-    "allowable_stress_Pa": 138_000_000.0,
-    "joint_efficiency": 0.85,
     "shell_inside_diameter_m": 2.0,
     "shell_provided_thickness_m": 0.020,
     "head_inside_diameter_m": 2.0,
     "head_provided_thickness_m": 0.018,
     "nozzle_inside_diameter_m": 0.35,
     "nozzle_provided_thickness_m": 0.004,
-    "corrosion_allowance_fallback_mm": 1.5,
-    "source": "BL-003 MVP placeholder; replace with Materials Module outputs.",
+    "source": "BL-003 MVP geometry placeholder; replace with Geometry/CAD module outputs.",
 }
 
 # Maps each BL-003 check to the ApplicabilityMatrix clause it implements.
@@ -245,6 +242,7 @@ class CalculationRecordsArtifact:
     source_requirement_set_hash: str
     source_design_basis_signature: str
     source_applicability_matrix_hash: str
+    material_basis: dict[str, Any]
     applied_defaults: dict[str, Any]
     checks: list[CalculationRecord]
     deterministic_hash: str
@@ -256,6 +254,7 @@ class CalculationRecordsArtifact:
             "source_requirement_set_hash": self.source_requirement_set_hash,
             "source_design_basis_signature": self.source_design_basis_signature,
             "source_applicability_matrix_hash": self.source_applicability_matrix_hash,
+            "material_basis": self.material_basis,
             "applied_defaults": self.applied_defaults,
             "checks": [record.to_json_dict() for record in self.checks],
             "deterministic_hash": self.deterministic_hash,
@@ -297,7 +296,12 @@ def run_calculation_pipeline(
     )
 
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
-    normalized_input, applied_defaults = _normalize_and_resolve_inputs(requirement_set, sizing_input)
+    material_basis = resolve_material_basis(requirement_set, design_basis)
+    normalized_input, applied_defaults = _normalize_and_resolve_inputs(
+        requirement_set,
+        sizing_input,
+        material_basis,
+    )
     _validate_model_domain_gate(normalized_input, near_limit_threshold)
     _validate_validity_envelopes(normalized_input)
 
@@ -333,6 +337,7 @@ def run_calculation_pipeline(
         "source_requirement_set_hash": requirement_set.deterministic_hash,
         "source_design_basis_signature": design_basis.deterministic_signature,
         "source_applicability_matrix_hash": applicability_matrix.deterministic_hash,
+        "material_basis": material_basis.to_json_dict(),
         "applied_defaults": applied_defaults,
         "checks": [record.to_json_dict() for record in checks],
     }
@@ -344,6 +349,7 @@ def run_calculation_pipeline(
         source_requirement_set_hash=requirement_set.deterministic_hash,
         source_design_basis_signature=design_basis.deterministic_signature,
         source_applicability_matrix_hash=applicability_matrix.deterministic_hash,
+        material_basis=material_basis.to_json_dict(),
         applied_defaults=applied_defaults,
         checks=checks,
         deterministic_hash=calc_hash,
@@ -443,6 +449,7 @@ def _validate_clause_coverage(
 def _normalize_and_resolve_inputs(
     requirement_set: RequirementSet,
     sizing_input: SizingCheckInput | None,
+    material_basis: MaterialBasis,
 ) -> tuple[SizingCheckInput, dict[str, Any]]:
     if sizing_input is not None:
         normalized = SizingCheckInput(
@@ -466,14 +473,12 @@ def _normalize_and_resolve_inputs(
         return normalized, applied_defaults
 
     pressure_pa = float(requirement_set.requirements["design_pressure"].value)
-    corrosion = requirement_set.requirements.get("corrosion_allowance")
-    ca_mm = float(corrosion.value) if corrosion else _MVP_DEFAULTS["corrosion_allowance_fallback_mm"]
-    ca_m = round(ca_mm / 1000.0, 9)
+    ca_m = material_basis.corrosion_allowance_m
 
     normalized = SizingCheckInput(
         internal_pressure=Quantity(value=pressure_pa, unit="Pa"),
-        allowable_stress=Quantity(value=_MVP_DEFAULTS["allowable_stress_Pa"], unit="Pa"),
-        joint_efficiency=_MVP_DEFAULTS["joint_efficiency"],
+        allowable_stress=Quantity(value=material_basis.allowable_stress_pa, unit="Pa"),
+        joint_efficiency=material_basis.joint_efficiency,
         corrosion_allowance=Quantity(value=ca_m, unit="m"),
         shell_inside_diameter=Quantity(value=_MVP_DEFAULTS["shell_inside_diameter_m"], unit="m"),
         shell_provided_thickness=Quantity(
@@ -490,9 +495,12 @@ def _normalize_and_resolve_inputs(
         external_pressure=_external_pressure_from_requirements(requirement_set),
     )
     applied_defaults = {
+        "applied_geometry_defaults": True,
         "applied_mvp_defaults": True,
         "values": dict(_MVP_DEFAULTS),
         "source": _MVP_DEFAULTS["source"],
+        "material_source": "materials_module.resolve_material_basis",
+        "corrosion_allowance_policy": material_basis.corrosion_allowance_policy,
     }
     return normalized, applied_defaults
 
