@@ -100,6 +100,19 @@ from .optimization_pipeline import (
     write_optimization_artifacts,
 )
 
+from .enterprise_integration_pipeline import (
+    ENTERPRISE_INTEGRATION_BATCH_VERSION,
+    ApprovalSyncRecord,
+    ArtifactSyncRecord,
+    EnterpriseIntegrationBatch,
+    EnterpriseSystemTarget,
+    IntegrationAttemptLog,
+    IntegrationBoundaryMapping,
+    IntegrationFailureRecord,
+    run_enterprise_integration_batch,
+    write_enterprise_integration_batch,
+)
+
 from .requirements_pipeline import (
     Gap,
     RequirementSet,
@@ -172,6 +185,16 @@ __all__ = [
     "RankedCandidate",
     "run_optimization_service",
     "write_optimization_artifacts",
+    "ENTERPRISE_INTEGRATION_BATCH_VERSION",
+    "ApprovalSyncRecord",
+    "ArtifactSyncRecord",
+    "EnterpriseIntegrationBatch",
+    "EnterpriseSystemTarget",
+    "IntegrationAttemptLog",
+    "IntegrationBoundaryMapping",
+    "IntegrationFailureRecord",
+    "run_enterprise_integration_batch",
+    "write_enterprise_integration_batch",
     "build_design_basis",
     "generate_compliance_dossier",
     "parse_prompt_to_requirement_set",

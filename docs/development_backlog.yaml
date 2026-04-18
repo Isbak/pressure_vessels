@@ -312,7 +312,7 @@ items:
   area: integration
   phase: 'Phase 3: Advanced'
   priority: P3
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-007

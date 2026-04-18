@@ -40,3 +40,9 @@ Primary concerns:
 - Applicability records remain clause-level and now include `standard_route_id` for cross-standard traceability integrity.
 - Additional standards can be added by injecting deterministic `StandardRouteConfig` entries.
 
+## BL-011 Enterprise Integrations (PLM / ERP / QMS)
+
+- Schema: `EnterpriseIntegrationBatch.v1` with deterministic adapters for configured PLM/ERP/QMS targets.
+- Sync scope includes both certification artifacts and approval records so release evidence remains aligned with enterprise workflows.
+- Cross-boundary traceability is preserved by emitting `IntegrationBoundaryMapping` rows with immutable, auditable `traceability_link_ids`.
+- Retry observability is explicit via per-attempt `IntegrationAttemptLog` rows and terminal `IntegrationFailureRecord` entries when retry budgets are exhausted.
