@@ -52,18 +52,22 @@ Existing relevant files:
 Task:
 
 1) Implement deterministic BL-004 dossier generation in `src/pressure_vessels/compliance_pipeline.py` to produce:
+
    - clause-by-clause compliance matrix
    - requirement -> clause -> model -> result -> artifact evidence links
    - human-review checklist entries
+
 2) Ensure handoff gates validate consistency across RequirementSet, DesignBasis, ApplicabilityMatrix, CalculationRecords, and NonConformanceList artifacts (fail closed on mismatch).
 3) Keep outputs deterministic and hash-stable (including canonical JSON serialization and reproducibility metadata fields).
 4) Preserve compatibility with existing BL-003 artifacts and clause linkage assumptions.
 5) Persist/update BL-004 sample artifacts under `artifacts/bl-004/` as needed.
 6) Add/extend tests in `tests/test_compliance_pipeline.py` for:
+
    - deterministic dossier outputs
    - clause matrix and evidence-link completeness
    - checklist generation and required flags
    - handoff-gate failure behavior and hash-link validation
+
 7) Update `docs/interfaces/compliance_pipeline_contract.md` to document BL-004 behavior and schema updates.
 
 Output format:
