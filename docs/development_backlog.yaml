@@ -91,7 +91,7 @@ items:
   area: calculation
   phase: 'Phase 1: MVP'
   priority: P1
-  status: todo
+  status: done
   effort: S
   depends_on:
   - BL-003
@@ -108,7 +108,7 @@ items:
   area: calculation
   phase: 'Phase 1: MVP'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-003
@@ -124,7 +124,7 @@ items:
   area: calculation
   phase: 'Phase 1: MVP'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-003
@@ -140,7 +140,7 @@ items:
   area: calculation
   phase: 'Phase 1: MVP'
   priority: P2
-  status: todo
+  status: done
   effort: S
   depends_on:
   - BL-003
@@ -156,7 +156,7 @@ items:
   area: calculation
   phase: 'Phase 1: MVP'
   priority: P2
-  status: todo
+  status: done
   effort: S
   depends_on:
   - BL-003
@@ -173,7 +173,7 @@ items:
   area: reporting
   phase: 'Phase 1: MVP'
   priority: P0
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-003
@@ -192,7 +192,7 @@ items:
   area: knowledge
   phase: 'Phase 2: Production'
   priority: P1
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-002
@@ -232,7 +232,7 @@ items:
   area: reporting
   phase: 'Phase 2: Production'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-004
@@ -272,7 +272,7 @@ items:
   area: standards
   phase: 'Phase 3: Advanced'
   priority: P2
-  status: todo
+  status: done
   effort: XL
   depends_on:
   - BL-005
