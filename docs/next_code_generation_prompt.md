@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008, BL-009, BL-010
-- Next item to implement: BL-011
-- BL-011 title: Integrate enterprise systems (PLM/ERP/QMS)
-- BL-011 depends_on: BL-007 (already done)
-- BL-011 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008, BL-009, BL-010, BL-011
+- Next item to implement: BL-012
+- BL-012 title: Enforce governance gates in CI
+- BL-012 depends_on: none
+- BL-012 acceptance criteria:
 
-  1) Artifacts and approvals sync with configured enterprise systems.
-  2) Traceability links are preserved across system boundaries.
-  3) Integration retries and failure handling are observable.
+  1) CI enforces test/lint/security/reporting requirements from governance policy.
+  2) Build/test artifacts are retained for auditability.
+  3) Policy exceptions require explicit approval record.
 
-- BL-011 deliverables:
+- BL-012 deliverables:
 
-  - Integration adapters
-  - Operational runbooks
+  - CI policy checks
+  - Artifact retention configuration
 
 Repository constraints:
 
@@ -40,11 +40,11 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-011 enterprise integration behavior using existing repository patterns.
-2) Add deterministic adapters for syncing certification artifacts and approvals to configurable PLM/ERP/QMS targets.
-3) Preserve and validate traceability links across integration boundaries with auditable mappings.
-4) Add/extend tests under `tests/` for sync flows, retry/failure observability, and traceability preservation.
-5) Update related architecture/interface docs under `docs/` to describe BL-011 schemas, integration configuration, and operational runbook expectations.
+1) Implement BL-012 CI governance gating behavior using existing repository patterns.
+2) Add policy enforcement checks for test/lint/security/reporting requirements.
+3) Add artifact retention configuration and explicit policy exception approval recording.
+4) Add/extend tests under `tests/` for CI gate evaluation and policy exception handling logic.
+5) Update related architecture/interface docs under `docs/` to describe BL-012 governance schemas and CI operational expectations.
 
 Output format:
 
