@@ -576,7 +576,7 @@ items:
   area: platform
   phase: 'Phase 5: Runtime Deployment'
   priority: P2
-  status: todo
+  status: done
   effort: S
   depends_on:
   - BL-018

@@ -1,0 +1,57 @@
+version: 1
+kind: PlatformCacheRedisModule
+metadata:
+  name: platform-cache-redis-boundaries
+spec:
+  owner: data-platform
+  engine:
+    family: redis
+    major_version: "7"
+    deployment_mode:
+      dev: single-node
+      staging: replicated
+  workload_ownership:
+    cache_namespaces:
+      - name: backend-response-cache
+        owner: platform-runtime
+        access_path:
+          - services/backend
+        lifecycle: ttl-managed-ephemeral
+      - name: standards-read-model-cache
+        owner: knowledge-platform
+        access_path:
+          - services/backend
+        lifecycle: warm-on-demand
+    queue_streams:
+      - name: workflow-task-queue
+        owner: orchestration-platform
+        producers:
+          - services/backend
+        consumers:
+          - services/backend
+        delivery_semantics: at-least-once
+      - name: notification-dispatch-queue
+        owner: platform-runtime
+        producers:
+          - services/backend
+        consumers:
+          - services/backend
+        delivery_semantics: at-least-once
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    scaling_owner: platform-runtime
+    persistence_mode:
+      dev: cache-only-no-aof
+      staging: aof-with-rdb-snapshots
+    retention_defaults:
+      cache_ttl_seconds:
+        dev: 3600
+        staging: 14400
+      queue_message_ttl_seconds:
+        dev: 86400
+        staging: 259200
+  governance:
+    direct_service_access:
+      allowed: false
+      path: backend-api-only
+    key_naming_prefix: pv:

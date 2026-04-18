@@ -20,10 +20,10 @@ components:
     notes: PostgreSQL datastore module skeleton with schema ownership and lifecycle boundaries committed in-repo.
   - key: cache-redis
     capability: cache-and-queue
-    status: planned
+    status: deployed
     owner: data-platform
     module_path: infra/platform/redis
-    notes: Ephemeral queue/cache runtime.
+    notes: Redis module skeleton with queue/cache ownership and lifecycle boundaries committed in-repo.
   - key: graph-neo4j
     capability: knowledge-graph
     status: planned
