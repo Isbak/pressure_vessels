@@ -11,12 +11,19 @@ This document defines the deterministic contract for the **Design Basis Engine**
 BL-002 proceeds only if all are true:
 
 - `requirement_set.downstream_blocked == false`
+
 - `requirement_set.unresolved_gaps` is empty
+
 - Required normalized fields are present in `requirement_set.requirements`:
+
   - `fluid`
+
   - `design_pressure`
+
   - `design_temperature`
+
   - `capacity`
+
   - `code_standard`
 
 If any condition fails, BL-002 raises a deterministic `ValueError`.
@@ -26,6 +33,7 @@ If any condition fails, BL-002 raises a deterministic `ValueError`.
 `build_design_basis` returns a tuple:
 
 1. `DesignBasis.v1`
+
 2. `ApplicabilityMatrix.v1`
 
 ### Schema: `DesignBasis.v1`
@@ -69,12 +77,21 @@ If any condition fails, BL-002 raises a deterministic `ValueError`.
 ## Deterministic Controls
 
 - Standards selection uses deterministic lookup from normalized `code_standard`.
+
 - Clause set is deterministic MVP subset for ASME Section VIII Div 1.
+
 - Every clause record contains:
+
   - `clause_id`
+
   - `applicable`
+
   - `justification` (required for both applicable/non-applicable)
+
   - `evidence_fields` used in the decision
+
 - `generated_at_utc` supports injection via `now_utc` for reproducible testing.
+
 - `DesignBasis` includes deterministic SHA-256 signature over canonicalized unsigned payload.
+
 - `ApplicabilityMatrix` includes deterministic SHA-256 hash over canonicalized payload.

@@ -1,6 +1,7 @@
 # ADR-0003: Knowledge Graph Store (Neo4j Community)
 
 - Status: Accepted
+
 - Date: 2026-04-17
 
 ## Context
@@ -14,12 +15,15 @@ Adopt **Neo4j Community** as the primary knowledge graph store.
 ## Alternatives Considered
 
 - JanusGraph
+
 - ArangoDB
 
 ## Consequences
 
 - Enables expressive graph traversal and lineage queries.
+
 - Introduces dedicated graph schema and backup lifecycle to operations.
+
 - Requires integration guidance for graph + vector hybrid retrieval.
 
 ## Rollback / Migration Trigger

@@ -5,7 +5,9 @@ This document is the repository source of truth for selected implementation tech
 ## Purpose
 
 - Provide one canonical, reviewable stack selection for humans and agents.
+
 - Reduce stack drift across features and pull requests.
+
 - Require evidence-based change control for medium/high-risk technology decisions.
 
 ## Selection Matrix
@@ -33,14 +35,19 @@ This document is the repository source of truth for selected implementation tech
 Any pull request that changes selected technologies must include:
 
 1. An ADR in `docs/decision-log/`.
+
 2. Benchmark or operational evidence for the change.
+
 3. Security and compliance impact statement.
+
 4. Migration and rollback plan.
 
 ## Validation Requirements for Stack Changes
 
 - Functional: existing workflows remain operational.
+
 - Non-functional: latency, throughput, and cost impact measured.
+
 - Governance: approvals follow risk class and merge gates.
 
 ## Exit Strategy Requirements
@@ -48,6 +55,9 @@ Any pull request that changes selected technologies must include:
 For each selected component, maintain:
 
 - data export strategy,
+
 - replacement candidate,
+
 - migration runbook link,
+
 - maximum tolerated lock-in boundary.

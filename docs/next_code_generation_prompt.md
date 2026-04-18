@@ -40,6 +40,7 @@ Existing relevant files:
 - `artifacts/bl-002/`
 
 Task:
+
 1) Implement a new calculation pipeline module for BL-003 (e.g., `src/pressure_vessels/calculation_pipeline.py`).
 2) Define typed input/output structures and artifact schema for:
 
