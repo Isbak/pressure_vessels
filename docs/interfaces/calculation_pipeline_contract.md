@@ -114,7 +114,7 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
 
   - `required_thickness_m`, `provided_thickness_m`, `margin_m`, `utilization_ratio`
 
-  - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for MAWP checks)
+  - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for pressure-capacity checks such as MAWP and UG-28 external-pressure)
 
   - `pass_status`
 
@@ -146,11 +146,37 @@ Each MAWP record is additive in `CalculationRecords.v1` and reuses existing fiel
 
 For thickness checks these fields are `null`. For MAWP checks, `pass_status` is `computed_mawp_pa >= design_pressure_pa`.
 
+## External-Pressure Buckling Check (BL-003b / UG-28)
+
+When `RequirementSet.requirements["external_pressure"]` is present (canonical unit `Pa`), BL-003b adds deterministic UG-28 external-pressure records:
+
+- `UG-28-shell-external`
+- `UG-28-head-external`
+
+These checks are **conditional** and are omitted when external pressure is not declared.
+
+Deterministic route:
+
+- Compute `A = (t - CA) / D` with floor at zero for `t-CA`.
+- Deterministically map to a pseudo-chart factor `B = clip(0.35 + 12*A, 0.2, 0.95)`.
+- Compute elastic critical pressure surrogate `P_elastic = 2E*A^3/(1-ν^2)` with fixed constants `E=200 GPa`, `ν=0.3`.
+- Compute allowable external pressure `P_allow = (B * P_elastic) / SF` with fixed safety factor `SF=3`.
+- Pass criterion: `P_allow >= external_pressure`.
+
+Each UG-28 record includes:
+
+- `clause_id: "UG-28"` and per-check reproducibility hash metadata
+- `design_pressure_pa = external_pressure`
+- `computed_mawp_pa = P_allow` (field retained for schema compatibility)
+- `pressure_margin_pa = computed_mawp_pa - design_pressure_pa`
+
+Clause-coverage gate impact:
+
+- If an external-pressure check is produced, `UG-28` **must** be marked applicable in `ApplicabilityMatrix`; otherwise BL-003 raises deterministic `ValueError`.
+
 ## Scope (MVP) and Deferred Items
 
-BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure. The following Workflow D items remain deferred and tracked as follow-up backlog entries BL-003b..BL-003e:
-
-- BL-003b External-pressure / buckling check (UG-28)
+BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure, plus conditional UG-28 external-pressure checks for shell/head. The following Workflow D items remain deferred and tracked as follow-up backlog entries BL-003c..BL-003e:
 
 - BL-003c Reinforcement-area replacement (UG-37 / UG-45 full)
 

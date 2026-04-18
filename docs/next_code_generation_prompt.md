@@ -8,18 +8,18 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a
-- Next item to implement: BL-003b
-- BL-003b title: Implement external-pressure / buckling check
-- BL-003b depends_on: BL-003 (already done)
-- BL-003b acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b
+- Next item to implement: BL-003c
+- BL-003c title: Implement reinforcement-area replacement (UG-37/UG-45 full)
+- BL-003c depends_on: BL-003 (already done)
+- BL-003c acceptance criteria:
 
-  1) External-pressure check runs when external pressure is declared in RequirementSet.
-  2) Uses UG-28 chart/equation route deterministically.
+  1) Reinforcement-area replacement is computed per UG-37/UG-45 for each nozzle.
+  2) Records reference both nozzle and parent shell/head.
 
-- BL-003b deliverables:
+- BL-003c deliverables:
 
-  - External-pressure entries in `CalculationRecords.v1`
+  - Reinforcement entries in `CalculationRecords.v1`
 
 Repository constraints:
 
@@ -49,19 +49,19 @@ Existing relevant files:
 
 Task:
 
-1) Extend BL-003 calculations to include deterministic external-pressure / buckling checks per relevant component routes.
-2) Add deterministic external-pressure / buckling checks per UG-28 only when external pressure inputs are present.
-3) Ensure each external-pressure result is linked to `clause_id`, includes reproducibility hash metadata, and is integrated into `CalculationRecords.v1` deterministically.
+1) Extend BL-003 calculations to include deterministic reinforcement-area replacement checks for nozzles per UG-37/UG-45.
+2) Ensure reinforcement checks connect nozzle calculations to parent shell/head routes where applicable.
+3) Ensure each reinforcement result is linked to `clause_id`, includes reproducibility hash metadata, and is integrated into `CalculationRecords.v1` deterministically.
 4) Enforce/extend handoff, model-domain, and clause-coverage gates as needed without weakening current controls.
 5) Persist updated sample BL-003 artifacts under `artifacts/bl-003/`.
 6) Add/extend tests in `tests/test_calculation_pipeline.py` for:
 
-   - deterministic external-pressure outputs
+   - deterministic reinforcement outputs
    - clause linkage and reproducibility metadata
-   - conditional execution behavior (runs only when external pressure is declared)
+   - parent-component linkage behavior for nozzle reinforcement checks
    - interactions with existing pass/fail and non-conformance behavior
 
-7) Update `docs/interfaces/calculation_pipeline_contract.md` to document external-pressure behavior and schema updates.
+7) Update `docs/interfaces/calculation_pipeline_contract.md` to document reinforcement behavior and schema updates.
 
 Output format:
 

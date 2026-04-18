@@ -168,12 +168,72 @@
       },
       "required_thickness_m": 1800000.0,
       "utilization_ratio": 450000000.0
+    },
+    {
+      "check_id": "UG-28-shell-external",
+      "clause_id": "UG-28",
+      "component": "shell",
+      "computed_mawp_pa": 40671.721611722,
+      "design_pressure_pa": 50000.0,
+      "formula": "UG-28 deterministic route: A=(t-CA)/D, B=clip(0.35+12A,0.2,0.95), P_allow=(B*(2E*A^3/(1-nu^2)))/SF",
+      "inputs": {
+        "A_factor": 0.0085,
+        "B_factor": 0.45199999999999996,
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E_modulus_Pa": 200000000000.0,
+        "P_external_Pa": 50000.0,
+        "poisson_ratio": 0.3,
+        "safety_factor": 3.0,
+        "t_m": 0.02,
+        "t_net_m": 0.017
+      },
+      "margin_m": -49999.98,
+      "pass_status": false,
+      "pressure_margin_pa": -9328.278388278,
+      "provided_thickness_m": 0.02,
+      "reproducibility": {
+        "canonical_payload_sha256": "636183cc77cc461cd62e0bc00ab07f52866b5a82e092a6fc9057dae1f89de20b",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 50000.0,
+      "utilization_ratio": 2500000.0
+    },
+    {
+      "check_id": "UG-28-head-external",
+      "clause_id": "UG-28",
+      "component": "head",
+      "computed_mawp_pa": 27197.802197802,
+      "design_pressure_pa": 50000.0,
+      "formula": "UG-28 deterministic route: A=(t-CA)/D, B=clip(0.35+12A,0.2,0.95), P_allow=(B*(2E*A^3/(1-nu^2)))/SF",
+      "inputs": {
+        "A_factor": 0.0075,
+        "B_factor": 0.43999999999999995,
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E_modulus_Pa": 200000000000.0,
+        "P_external_Pa": 50000.0,
+        "poisson_ratio": 0.3,
+        "safety_factor": 3.0,
+        "t_m": 0.018,
+        "t_net_m": 0.015
+      },
+      "margin_m": -49999.982,
+      "pass_status": false,
+      "pressure_margin_pa": -22802.197802198,
+      "provided_thickness_m": 0.018,
+      "reproducibility": {
+        "canonical_payload_sha256": "76ab1caba981f174080204593c6046d1f5120b38e733a7dfa8a907946afd5af1",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 50000.0,
+      "utilization_ratio": 2777777.777777778
     }
   ],
-  "deterministic_hash": "cf2d9a4b41499eeef7db16bd73abc55707c793ea405dc7b3043bbbde4195a66b",
+  "deterministic_hash": "f635a125c8979634ad9150bd03986a4449211f11565ab39de36fc0652eb2514e",
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
   "schema_version": "CalculationRecords.v1",
-  "source_applicability_matrix_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8",
+  "source_applicability_matrix_hash": "d489877471a3073e7505121ecc4b7a8a996cb0f3e92890f11580bfc6ff89193e",
   "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
   "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
 }

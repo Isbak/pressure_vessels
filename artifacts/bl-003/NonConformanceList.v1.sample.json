@@ -1,5 +1,5 @@
 {
-  "deterministic_hash": "9f4e57dea330f4bbe7e4ed05dd1191719f031fefe7d707bbed19518fd4bb28da",
+  "deterministic_hash": "8a81359bc4347d83ee0802efcf0394fda2f128ee67e4a2bd790e5fb184838d5d",
   "entries": [
     {
       "check_id": "UG-45-nozzle",
@@ -16,9 +16,25 @@
       "observed": "mawp=668757.127 Pa",
       "required": "minimum_design_pressure=1800000.000 Pa",
       "severity": "major"
+    },
+    {
+      "check_id": "UG-28-shell-external",
+      "clause_id": "UG-28",
+      "component": "shell",
+      "observed": "allowable_pressure=40671.722 Pa",
+      "required": "minimum_design_pressure=50000.000 Pa",
+      "severity": "major"
+    },
+    {
+      "check_id": "UG-28-head-external",
+      "clause_id": "UG-28",
+      "component": "head",
+      "observed": "allowable_pressure=27197.802 Pa",
+      "required": "minimum_design_pressure=50000.000 Pa",
+      "severity": "major"
     }
   ],
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
   "schema_version": "NonConformanceList.v1",
-  "source_calculation_records_hash": "cf2d9a4b41499eeef7db16bd73abc55707c793ea405dc7b3043bbbde4195a66b"
+  "source_calculation_records_hash": "f635a125c8979634ad9150bd03986a4449211f11565ab39de36fc0652eb2514e"
 }

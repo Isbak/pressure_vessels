@@ -182,6 +182,7 @@ def _build_mvp_clause_records(requirement_set: RequirementSet) -> list[ClauseApp
     pressure = float(requirement_set.requirements["design_pressure"].value)
     temperature = float(requirement_set.requirements["design_temperature"].value)
     has_corrosion_allowance = "corrosion_allowance" in requirement_set.requirements
+    has_external_pressure = "external_pressure" in requirement_set.requirements
 
     records = [
         ClauseApplicabilityRecord(
@@ -214,12 +215,14 @@ def _build_mvp_clause_records(requirement_set: RequirementSet) -> list[ClauseApp
         ),
         ClauseApplicabilityRecord(
             clause_id="UG-28",
-            applicable=False,
+            applicable=has_external_pressure,
             justification=(
-                "Not applicable in MVP because external pressure service is not declared "
+                "Applicable because external pressure service is declared."
+                if has_external_pressure
+                else "Not applicable in MVP because external pressure service is not declared "
                 "and internal pressure basis is assumed."
             ),
-            evidence_fields=["design_pressure"],
+            evidence_fields=["external_pressure"] if has_external_pressure else ["design_pressure"],
         ),
         ClauseApplicabilityRecord(
             clause_id="UG-32",
