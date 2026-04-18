@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004
-- Next item to implement: BL-005
-- BL-005 title: Standards ingestion pipeline
-- BL-005 depends_on: BL-002 (already done)
-- BL-005 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005
+- Next item to implement: BL-006
+- BL-006 title: Implement full traceability graph
+- BL-006 depends_on: BL-003, BL-004 (already done)
+- BL-006 acceptance criteria:
 
-  1) Ingestion supports source intake, parsing, normalization, semantic linking, validation, and release.
-  2) Standards packages are immutable and versioned.
-  3) Regression examples pass before release.
+  1) Traceability graph stores requirement, clause, model, calculation, artifact, and approval links.
+  2) Graph supports audit queries by revision and clause.
+  3) All graph writes are revisioned and immutable by default.
 
-- BL-005 deliverables:
+- BL-006 deliverables:
 
-  - Versioned standards package
-  - Ingestion pipeline runbook
+  - Traceability graph schema
+  - Query examples and audit report templates
 
 Repository constraints:
 
@@ -40,12 +40,12 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-005 standards ingestion pipeline behavior using existing repository patterns.
-2) Add deterministic, versioned package outputs for ingested standards.
-3) Ensure fail-closed validation for malformed or incomplete source inputs.
-4) Add/extend tests under `tests/` for ingestion flow, package versioning, and regression checks.
-5) Update related interface/contract docs under `docs/interfaces/` and operational notes/runbook docs as needed.
-6) Persist/update BL-005 sample artifacts under `artifacts/bl-005/` if introduced.
+1) Implement BL-006 full traceability graph behavior using existing repository patterns.
+2) Add deterministic, revisioned graph writes with immutability guarantees.
+3) Expose audit query helpers for revision-scoped and clause-scoped evidence retrieval.
+4) Add/extend tests under `tests/` for graph writes, link integrity, query behavior, and immutability controls.
+5) Update related architecture/interface docs under `docs/` to describe graph schema and query usage.
+6) Persist/update BL-006 sample artifacts under `artifacts/` if introduced.
 
 Output format:
 
