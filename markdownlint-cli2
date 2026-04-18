@@ -40,12 +40,19 @@ def load_disabled_rules(config_path: Path) -> set[str]:
 
 
 def unique_files(patterns: list[str]) -> list[Path]:
-    candidates: list[str] = []
-    for pattern in patterns:
-        matches = glob.glob(pattern, recursive=True)
-        candidates.extend(matches if matches else [pattern])
+    all_files = [path for path in Path(".").rglob("*") if path.is_file()]
+    paths: list[Path] = []
 
-    paths = [Path(item) for item in candidates if Path(item).is_file()]
+    for pattern in patterns:
+        normalized = pattern.lstrip("./")
+        matched = [p for p in all_files if p.as_posix().lstrip("./") and glob.fnmatch.fnmatch(p.as_posix().lstrip("./"), normalized)]
+        if matched:
+            paths.extend(matched)
+        else:
+            candidate = Path(pattern)
+            if candidate.is_file():
+                paths.append(candidate)
+
     uniq: dict[str, Path] = {}
     for path in paths:
         uniq[str(path)] = path
