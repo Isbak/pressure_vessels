@@ -61,6 +61,7 @@ The model supports engineering design, fabrication, inspection, operations, and 
 ### 2.2 Class Hierarchy (Simplified)
 
 - **Component**
+
   - PressureBoundaryComponent
     - ShellCourse
     - Head
@@ -68,6 +69,7 @@ The model supports engineering design, fabrication, inspection, operations, and 
     - Flange
     - ReinforcementPad
     - Closure
+
   - NonPressureComponent
     - Support
     - Platform
