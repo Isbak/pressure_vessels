@@ -14,7 +14,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 
 1. `docs/platform_runtime_stack_registry.yaml` declares each stack component, status, and module mapping.
 2. `infra/platform/environment.bootstrap.yaml` binds components to target environments.
-3. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+3. `infra/platform/iac/module.primitives.yaml` defines reusable IaC provisioning primitives shared across environments.
+4. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+5. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -25,6 +27,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f services/backend/README.md`
 - Confirm bootstrap environment manifest exists:
   - `test -f infra/platform/environment.bootstrap.yaml`
+- Confirm IaC foundation module exists:
+  - `test -f infra/platform/iac/module.primitives.yaml`
 
 ## Incident Operations
 

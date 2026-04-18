@@ -1,0 +1,30 @@
+version: 1
+kind: PlatformIaCModule
+metadata:
+  name: platform-iac-foundation
+spec:
+  primitives:
+    - key: environment_namespace
+      description: Reusable namespace/project scaffold per target environment.
+      lifecycle:
+        - plan
+        - apply
+        - validate
+    - key: network_baseline
+      description: Shared network baseline with deterministic CIDR ownership.
+      lifecycle:
+        - plan
+        - apply
+        - validate
+    - key: secret_reference_bindings
+      description: Secret reference wiring hooks consumed by downstream modules.
+      lifecycle:
+        - plan
+        - apply
+        - validate
+    - key: state_backend_contract
+      description: State backend contract for auditable IaC executions.
+      lifecycle:
+        - plan
+        - apply
+        - validate

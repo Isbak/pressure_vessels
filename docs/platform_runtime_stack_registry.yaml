@@ -80,10 +80,10 @@ components:
     notes: Secret issuance and encryption.
   - key: iac-opentofu-or-terraform
     capability: infrastructure-as-code
-    status: planned
+    status: deployed
     owner: platform-runtime
     module_path: infra/platform/iac
-    notes: Environment provisioning modules.
+    notes: IaC foundation module skeleton with reusable provisioning primitives.
   - key: runtime-docker-kubernetes
     capability: runtime-platform
     status: planned
