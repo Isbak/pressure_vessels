@@ -13,16 +13,23 @@ Required fields:
 - `artifact_retention_days` (integer `>= 1`)
 - `required_gates[]` (unique gate IDs that must report `success` unless exception-approved)
 
-### `PolicyExceptions.v1`
+### `PolicyExceptionsDocument.v1` (`version: 1`)
+
+Required fields:
+
+- `version` (`1`)
+- `exceptions[]` objects validated by `docs/governance/policy_exceptions_schema.v1.json`
 
 Required fields per exception:
 
-- `exception_id` (unique)
-- `gate_id` (single exception allowed per gate)
-- `rationale` (non-empty)
-- `approved_by` (non-empty reviewer identity)
-- `approved_on` (ISO date)
-- `approval_record_ref` (non-empty traceable approval reference)
+- `id` (unique)
+- `gate` (gate this exception can waive)
+- `scope[]` (one or more paths/globs)
+- `justification` (non-empty)
+- `approver` (GitHub handle, e.g., `@reviewer`)
+- `approved_at` (ISO-8601 datetime)
+- `expires_at` (ISO-8601 datetime; expired exceptions are ignored)
+- `linked_backlog_id` (traceable backlog/work item reference)
 
 ## Gate Evaluation Contract
 
@@ -45,7 +52,8 @@ Behavior:
 
 - Missing gates fail closed (`fail:missing`).
 - Non-success gate results fail closed unless a matching approved exception exists.
-- Any exception usage is explicitly listed in `applied_exception_ids[]` for audit review.
+- Matching requires same `gate`, unexpired `expires_at`, and at least one `scope` match against changed paths.
+- Any exception usage is explicitly listed in `applied_exception_ids[]` for audit review and logged with approver identity.
 
 ## CI Operational Expectations
 

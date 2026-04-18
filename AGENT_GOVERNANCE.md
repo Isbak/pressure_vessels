@@ -197,6 +197,16 @@ Use this checklist in every PR description:
 
 ---
 
+### Exception Request & Approval Workflow
+
+- **Request**: author opens/updates a backlog item and proposes an exception entry in `.github/governance/policy_exceptions.v1.json` including scope, justification, approver, and expiration.
+- **Approval**: one non-author human reviewer listed as `approver` approves the linked backlog item/PR before merge; exceptions without explicit approval are rejected.
+- **Validation**: CI validates exception payloads against `docs/governance/policy_exceptions_schema.v1.json` and applies only unexpired scope-matching exceptions.
+- **Timeline alignment**:
+  - **First 30 days**: adopt schema and empty baseline exception registry (`version=1`, no active exceptions).
+  - **By 60 days**: require linked backlog IDs for every exception and weekly review of nearing expirations.
+  - **By 90 days**: track exception aging metrics and enforce auto-cleanup for expired entries in governance reviews.
+
 ## 12) Metrics to Track
 
 - PR lead time by risk class.
