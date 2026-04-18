@@ -8,10 +8,13 @@ You are implementing backlog item **BL-016: Implement workflow orchestrator with
 Authoritative source:
 - `docs/development_backlog.yaml`
 
-Backlog context (resolved as of 2026-04-18):
+Backlog context (resolved from YAML on 2026-04-18):
 - `BL-016` status is `todo`.
-- `BL-016` dependencies are `BL-004`, `BL-007`, and `BL-012`, and all are `done`.
-- Therefore `BL-016` is the next eligible item.
+- `BL-016` dependencies:
+  - `BL-004`: `done`
+  - `BL-007`: `done`
+  - `BL-012`: `done`
+- This makes `BL-016` the first `todo`/`in_progress` item whose `depends_on` set is fully `done`.
 
 Restate before coding:
 - Item ID/title: BL-016 — Implement workflow orchestrator with human-in-the-loop approval gates
