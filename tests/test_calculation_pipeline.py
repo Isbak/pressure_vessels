@@ -210,6 +210,40 @@ def test_check_reproducibility_hashes_are_stable_for_canonical_payload():
     hashes = [record.reproducibility.canonical_payload_sha256 for record in calc.checks]
     assert len(set(hashes)) == len(hashes)
     assert all(len(value) == 64 for value in hashes)
+    assert all(record.validity_envelope is not None for record in calc.checks)
+
+
+def test_validity_envelope_metadata_is_deterministic_and_model_declared():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    assert calc_a.to_json_dict() == calc_b.to_json_dict()
+
+    shell = next(record for record in calc_a.checks if record.check_id == "UG-27-shell")
+    assert shell.validity_envelope == {
+        "model_id": "ug27_shell_thickness_v1",
+        "status": "in_envelope",
+        "bounds": {
+            "internal_pressure_pa": {"min": 1.0, "max": 20_000_000.0},
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "shell_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+        "evaluated_inputs": {
+            "internal_pressure_pa": 1_800_000.0,
+            "allowable_stress_pa": 138_000_000.0,
+            "joint_efficiency": 0.85,
+            "shell_inside_diameter_m": 2.0,
+            "corrosion_allowance_m": 0.003,
+        },
+    }
 
 
 def test_margin_utilization_outputs_are_deterministic():
@@ -471,6 +505,53 @@ def test_model_domain_gate_rejects_out_of_range_joint_efficiency():
             sizing_input=invalid,
             now_utc=FIXED_NOW,
         )
+
+
+def test_model_domain_gate_fails_closed_when_validity_envelope_is_violated():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    out_of_envelope = SizingCheckInput(
+        internal_pressure=Quantity(value=1.8, unit="MPa"),
+        allowable_stress=Quantity(value=138.0, unit="MPa"),
+        joint_efficiency=0.85,
+        corrosion_allowance=Quantity(value=3.0, unit="mm"),
+        shell_inside_diameter=Quantity(value=9.0, unit="m"),
+        shell_provided_thickness=Quantity(value=20.0, unit="mm"),
+        head_inside_diameter=Quantity(value=2.0, unit="m"),
+        head_provided_thickness=Quantity(value=18.0, unit="mm"),
+        nozzle_inside_diameter=Quantity(value=0.35, unit="m"),
+        nozzle_provided_thickness=Quantity(value=4.0, unit="mm"),
+    )
+
+    with pytest.raises(ValueError, match="outside validity envelope"):
+        run_calculation_pipeline(
+            req,
+            design_basis,
+            matrix,
+            sizing_input=out_of_envelope,
+            now_utc=FIXED_NOW,
+        )
+
+
+def test_clause_linkage_and_non_conformance_behavior_remain_compatible_with_validity_metadata():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+    calc, non_conformance = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+
+    failed_check = next(record for record in calc.checks if record.check_id == "UG-45-nozzle")
+    failed_entry = next(entry for entry in non_conformance.entries if entry.check_id == "UG-45-nozzle")
+    assert failed_check.clause_id == failed_entry.clause_id == "UG-45"
+    assert failed_check.validity_envelope["status"] == "in_envelope"
+    assert failed_check.reproducibility.hash_algorithm == "sha256"
 
 
 def test_model_domain_gate_rejects_invalid_near_limit_threshold():

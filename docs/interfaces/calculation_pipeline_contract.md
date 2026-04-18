@@ -28,6 +28,16 @@ If any condition fails, BL-003 raises a deterministic `ValueError`.
 
 Each produced `CalculationRecord.clause_id` must be present and marked `applicable: true` in the provided `ApplicabilityMatrix`. If not, `run_calculation_pipeline` raises a deterministic `ValueError` ("BL-003 clause-coverage gate failed: ..."). This closes Workflow D Quality Gate #3 (Clause coverage) and Gate #4 (Traceability).
 
+## Model-Domain / Validity-Envelope Gate (BL-003e)
+
+BL-003 fails closed when caller inputs are outside deterministic engineering-model envelopes.
+
+- Every check route declares a model-specific envelope (`min`/`max` bounds in canonical SI units).
+- Before any records are emitted, BL-003 validates planned checks against their envelopes.
+- If any bound is violated, BL-003 raises deterministic `ValueError`:
+  - `"BL-003 model-domain gate failed: <check_id> input <name>=<value> is outside validity envelope [<min>, <max>]."`
+- Envelope coverage is deterministic for conditional checks (UG-28 checks are validated only when `external_pressure` is declared).
+
 ## Applied Defaults
 
 When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable stress, joint efficiency, geometry) so smoke-tests against the canonical prompt remain runnable. Every default value is recorded verbatim in `CalculationRecordsArtifact.applied_defaults` so that pass/fail outcomes are fully traceable. Callers that want fail-closed behavior should pass a `SizingCheckInput` built from the Materials and Geometry modules.
@@ -72,6 +82,24 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
       "design_pressure_pa": null,
       "computed_mawp_pa": null,
       "pressure_margin_pa": null,
+      "validity_envelope": {
+        "model_id": "ug27_shell_thickness_v1",
+        "status": "in_envelope",
+        "bounds": {
+          "internal_pressure_pa": {"min": 1.0, "max": 20000000.0},
+          "allowable_stress_pa": {"min": 50000000.0, "max": 500000000.0},
+          "joint_efficiency": {"min": 0.5, "max": 1.0},
+          "shell_inside_diameter_m": {"min": 0.25, "max": 8.0},
+          "corrosion_allowance_m": {"min": 0.0, "max": 0.02}
+        },
+        "evaluated_inputs": {
+          "internal_pressure_pa": 1800000.0,
+          "allowable_stress_pa": 138000000.0,
+          "joint_efficiency": 0.85,
+          "shell_inside_diameter_m": 2.0,
+          "corrosion_allowance_m": 0.003
+        }
+      },
       "pass_status": true,
       "reproducibility": {
         "canonical_payload_sha256": "<sha256 over canonical check payload>",
@@ -122,6 +150,11 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
   - `parent_component`, `parent_check_id` (set for routed checks such as nozzle reinforcement linked to shell/head parent checks)
 
   - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for pressure-capacity checks such as MAWP and UG-28 external-pressure)
+  - `validity_envelope` metadata:
+    - `model_id` (deterministic model route identifier)
+    - `status` (`"in_envelope"` for emitted checks)
+    - `bounds` (declared domain limits used for fail-closed gating)
+    - `evaluated_inputs` (normalized values checked against bounds)
 
   - `pass_status`
 
@@ -211,9 +244,7 @@ Clause-coverage gate impact:
 
 ## Scope (MVP) and Deferred Items
 
-BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure, conditional UG-28 external-pressure checks for shell/head, and UG-37 nozzle reinforcement-area replacement with parent-route linkage. The following Workflow D items remain deferred and tracked as follow-up backlog entries:
-
-- BL-003e Model-domain / validity-envelope gating
+BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure, conditional UG-28 external-pressure checks for shell/head, UG-37 nozzle reinforcement-area replacement with parent-route linkage, and BL-003e model-domain/validity-envelope fail-closed gating.
 
 ## BL-004 Handoff Contract
 

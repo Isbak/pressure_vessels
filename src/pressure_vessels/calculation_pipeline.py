@@ -46,6 +46,105 @@ _CHECK_CLAUSE_MAP: dict[str, str] = {
     "UG-37-nozzle-head-reinforcement": "UG-37",
 }
 
+_MODEL_VALIDITY_ENVELOPES: dict[str, dict[str, Any]] = {
+    "UG-27-shell": {
+        "model_id": "ug27_shell_thickness_v1",
+        "bounds": {
+            "internal_pressure_pa": {"min": 1.0, "max": 20_000_000.0},
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "shell_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-32-head": {
+        "model_id": "ug32_head_thickness_v1",
+        "bounds": {
+            "internal_pressure_pa": {"min": 1.0, "max": 20_000_000.0},
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "head_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-45-nozzle": {
+        "model_id": "ug45_nozzle_thickness_v1",
+        "bounds": {
+            "internal_pressure_pa": {"min": 1.0, "max": 20_000_000.0},
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "nozzle_inside_diameter_m": {"min": 0.05, "max": 2.0},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-27-shell-mawp": {
+        "model_id": "ug27_shell_mawp_v1",
+        "bounds": {
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "shell_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "shell_provided_thickness_m": {"min": 0.002, "max": 0.25},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-32-head-mawp": {
+        "model_id": "ug32_head_mawp_v1",
+        "bounds": {
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "head_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "head_provided_thickness_m": {"min": 0.002, "max": 0.25},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-45-nozzle-mawp": {
+        "model_id": "ug45_nozzle_mawp_v1",
+        "bounds": {
+            "allowable_stress_pa": {"min": 50_000_000.0, "max": 500_000_000.0},
+            "joint_efficiency": {"min": 0.5, "max": 1.0},
+            "nozzle_inside_diameter_m": {"min": 0.05, "max": 2.0},
+            "nozzle_provided_thickness_m": {"min": 0.001, "max": 0.25},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-37-nozzle-shell-reinforcement": {
+        "model_id": "ug37_nozzle_shell_reinforcement_v1",
+        "bounds": {
+            "shell_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "nozzle_inside_diameter_m": {"min": 0.05, "max": 2.0},
+            "shell_provided_thickness_m": {"min": 0.002, "max": 0.25},
+            "nozzle_provided_thickness_m": {"min": 0.001, "max": 0.25},
+        },
+    },
+    "UG-37-nozzle-head-reinforcement": {
+        "model_id": "ug37_nozzle_head_reinforcement_v1",
+        "bounds": {
+            "head_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "nozzle_inside_diameter_m": {"min": 0.05, "max": 2.0},
+            "head_provided_thickness_m": {"min": 0.002, "max": 0.25},
+            "nozzle_provided_thickness_m": {"min": 0.001, "max": 0.25},
+        },
+    },
+    "UG-28-shell-external": {
+        "model_id": "ug28_shell_external_v1",
+        "bounds": {
+            "external_pressure_pa": {"min": 1.0, "max": 2_000_000.0},
+            "shell_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "shell_provided_thickness_m": {"min": 0.002, "max": 0.25},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+    "UG-28-head-external": {
+        "model_id": "ug28_head_external_v1",
+        "bounds": {
+            "external_pressure_pa": {"min": 1.0, "max": 2_000_000.0},
+            "head_inside_diameter_m": {"min": 0.25, "max": 8.0},
+            "head_provided_thickness_m": {"min": 0.002, "max": 0.25},
+            "corrosion_allowance_m": {"min": 0.0, "max": 0.02},
+        },
+    },
+}
+
 
 @dataclass(frozen=True)
 class Quantity:
@@ -100,6 +199,7 @@ class CalculationRecord:
     design_pressure_pa: float | None = None
     computed_mawp_pa: float | None = None
     pressure_margin_pa: float | None = None
+    validity_envelope: dict[str, Any] | None = None
 
     def to_json_dict(self) -> dict[str, Any]:
         return {
@@ -119,6 +219,7 @@ class CalculationRecord:
             "design_pressure_pa": self.design_pressure_pa,
             "computed_mawp_pa": self.computed_mawp_pa,
             "pressure_margin_pa": self.pressure_margin_pa,
+            "validity_envelope": self.validity_envelope,
             "pass_status": self.pass_status,
             "reproducibility": self.reproducibility.to_json_dict(),
         }
@@ -198,6 +299,7 @@ def run_calculation_pipeline(
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
     normalized_input, applied_defaults = _normalize_and_resolve_inputs(requirement_set, sizing_input)
     _validate_model_domain_gate(normalized_input, near_limit_threshold)
+    _validate_validity_envelopes(normalized_input)
 
     shell_check = _build_shell_check(normalized_input, near_limit_threshold)
     head_check = _build_head_check(normalized_input, near_limit_threshold)
@@ -725,6 +827,10 @@ def _to_record(
         pass_status = pressure_margin_pa >= 0.0
     is_near_limit = pass_status and utilization >= near_limit_threshold
     clause_id = _CHECK_CLAUSE_MAP[check_id]
+    validity_envelope = _build_validity_envelope_metadata(
+        check_id=check_id,
+        inputs=_model_domain_inputs_from_record_inputs(inputs),
+    )
 
     canonical = {
         "check_id": check_id,
@@ -743,6 +849,7 @@ def _to_record(
         "design_pressure_pa": design_pressure_pa,
         "computed_mawp_pa": computed_mawp_pa,
         "pressure_margin_pa": pressure_margin_pa,
+        "validity_envelope": validity_envelope,
         "pass_status": pass_status,
     }
     check_hash = _sha256_payload(canonical)
@@ -764,6 +871,7 @@ def _to_record(
         design_pressure_pa=design_pressure_pa,
         computed_mawp_pa=round(computed_mawp_pa, 9) if computed_mawp_pa is not None else None,
         pressure_margin_pa=pressure_margin_pa,
+        validity_envelope=validity_envelope,
         pass_status=pass_status,
         reproducibility=ReproducibilityMetadata(
             canonical_payload_sha256=check_hash,
@@ -859,3 +967,105 @@ def _validate_model_domain_gate(inputs: SizingCheckInput, near_limit_threshold: 
     for name, value in dimensional_values.items():
         if value <= 0.0:
             raise ValueError(f"BL-003 model-domain gate failed: {name} must be positive.")
+
+
+def _model_domain_inputs(inputs: SizingCheckInput) -> dict[str, float]:
+    domain_inputs = {
+        "internal_pressure_pa": inputs.internal_pressure.value,
+        "allowable_stress_pa": inputs.allowable_stress.value,
+        "joint_efficiency": inputs.joint_efficiency,
+        "corrosion_allowance_m": inputs.corrosion_allowance.value,
+        "shell_inside_diameter_m": inputs.shell_inside_diameter.value,
+        "shell_provided_thickness_m": inputs.shell_provided_thickness.value,
+        "head_inside_diameter_m": inputs.head_inside_diameter.value,
+        "head_provided_thickness_m": inputs.head_provided_thickness.value,
+        "nozzle_inside_diameter_m": inputs.nozzle_inside_diameter.value,
+        "nozzle_provided_thickness_m": inputs.nozzle_provided_thickness.value,
+    }
+    if inputs.external_pressure is not None:
+        domain_inputs["external_pressure_pa"] = inputs.external_pressure.value
+    return domain_inputs
+
+
+def _model_domain_inputs_from_record_inputs(record_inputs: dict[str, float]) -> dict[str, float]:
+    field_map = {
+        "P_Pa": "internal_pressure_pa",
+        "S_Pa": "allowable_stress_pa",
+        "E": "joint_efficiency",
+        "CA_m": "corrosion_allowance_m",
+        "D_m": "shell_inside_diameter_m",
+        "d_m": "nozzle_inside_diameter_m",
+        "t_m": "shell_provided_thickness_m",
+        "P_external_Pa": "external_pressure_pa",
+    }
+    normalized: dict[str, float] = {}
+    for key, value in record_inputs.items():
+        mapped = field_map.get(key)
+        if mapped is not None:
+            normalized[mapped] = value
+
+    # Some check routes overload D_m/t_m for head/nozzle. Keep deterministic
+    # aliases so validity-envelope metadata can project the expected key names.
+    if "D_m" in record_inputs and "P_Pa" in record_inputs and "head_inside_diameter_m" not in normalized:
+        normalized["head_inside_diameter_m"] = record_inputs["D_m"]
+    if "D_m" in record_inputs and "t_m" in record_inputs and "head_inside_diameter_m" not in normalized:
+        normalized["head_inside_diameter_m"] = record_inputs["D_m"]
+    if "d_m" in record_inputs and "t_m" in record_inputs:
+        normalized["nozzle_provided_thickness_m"] = record_inputs["t_m"]
+    if "t_m" in record_inputs:
+        normalized["shell_provided_thickness_m"] = record_inputs["t_m"]
+        normalized["head_provided_thickness_m"] = record_inputs["t_m"]
+        normalized["nozzle_provided_thickness_m"] = record_inputs["t_m"]
+    if "D_parent_m" in record_inputs:
+        normalized["shell_inside_diameter_m"] = record_inputs["D_parent_m"]
+        normalized["head_inside_diameter_m"] = record_inputs["D_parent_m"]
+    if "d_opening_m" in record_inputs:
+        normalized["nozzle_inside_diameter_m"] = record_inputs["d_opening_m"]
+    if "t_parent_m" in record_inputs:
+        normalized["shell_provided_thickness_m"] = record_inputs["t_parent_m"]
+        normalized["head_provided_thickness_m"] = record_inputs["t_parent_m"]
+    if "t_nozzle_m" in record_inputs:
+        normalized["nozzle_provided_thickness_m"] = record_inputs["t_nozzle_m"]
+    return normalized
+
+
+def _planned_check_ids(inputs: SizingCheckInput) -> list[str]:
+    check_ids = [
+        "UG-27-shell",
+        "UG-32-head",
+        "UG-45-nozzle",
+        "UG-27-shell-mawp",
+        "UG-32-head-mawp",
+        "UG-45-nozzle-mawp",
+        "UG-37-nozzle-shell-reinforcement",
+        "UG-37-nozzle-head-reinforcement",
+    ]
+    if inputs.external_pressure is not None:
+        check_ids.extend(["UG-28-shell-external", "UG-28-head-external"])
+    return check_ids
+
+
+def _validate_validity_envelopes(inputs: SizingCheckInput) -> None:
+    domain_inputs = _model_domain_inputs(inputs)
+    for check_id in _planned_check_ids(inputs):
+        envelope = _MODEL_VALIDITY_ENVELOPES[check_id]
+        for input_name, bounds in envelope["bounds"].items():
+            value = domain_inputs[input_name]
+            if value < bounds["min"] or value > bounds["max"]:
+                raise ValueError(
+                    "BL-003 model-domain gate failed: "
+                    f"{check_id} input {input_name}={value} is outside validity envelope "
+                    f"[{bounds['min']}, {bounds['max']}]."
+                )
+
+
+def _build_validity_envelope_metadata(check_id: str, inputs: dict[str, float]) -> dict[str, Any]:
+    envelope = _MODEL_VALIDITY_ENVELOPES[check_id]
+    declared_bounds = envelope["bounds"]
+    evaluated_inputs = {name: inputs[name] for name in declared_bounds}
+    return {
+        "model_id": envelope["model_id"],
+        "status": "in_envelope",
+        "bounds": declared_bounds,
+        "evaluated_inputs": evaluated_inputs,
+    }
