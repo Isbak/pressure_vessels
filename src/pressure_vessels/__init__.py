@@ -1,5 +1,15 @@
 """Pressure vessels package."""
 
+from .compliance_pipeline import (
+    ClauseComplianceRecord,
+    ComplianceDossierHuman,
+    ComplianceDossierMachine,
+    EvidenceLink,
+    ReviewChecklistItem,
+    generate_compliance_dossier,
+    write_compliance_artifacts,
+)
+
 from .design_basis_pipeline import (
     ApplicabilityMatrix,
     ClauseApplicabilityRecord,
@@ -29,17 +39,24 @@ __all__ = [
     "CalculationRecord",
     "CalculationRecordsArtifact",
     "ClauseApplicabilityRecord",
+    "ClauseComplianceRecord",
+    "ComplianceDossierHuman",
+    "ComplianceDossierMachine",
     "DesignBasis",
     "Gap",
+    "EvidenceLink",
     "NonConformanceEntry",
     "NonConformanceListArtifact",
     "Quantity",
     "RequirementSet",
     "RequirementValue",
     "ReproducibilityMetadata",
+    "ReviewChecklistItem",
     "SizingCheckInput",
     "build_design_basis",
+    "generate_compliance_dossier",
     "parse_prompt_to_requirement_set",
     "run_calculation_pipeline",
     "write_calculation_artifacts",
+    "write_compliance_artifacts",
 ]

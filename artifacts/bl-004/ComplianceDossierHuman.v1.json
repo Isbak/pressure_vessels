@@ -1,0 +1,85 @@
+{
+  "clause_matrix_rows": [
+    {
+      "check_ids": "-",
+      "clause_id": "UG-16",
+      "justification": "Applicable because design pressure is defined for pressure boundary sizing.",
+      "status": "not_evaluated"
+    },
+    {
+      "check_ids": "-",
+      "clause_id": "UG-20",
+      "justification": "Applicable because design temperature is defined for material selection limits.",
+      "status": "not_evaluated"
+    },
+    {
+      "check_ids": "-",
+      "clause_id": "UG-25",
+      "justification": "Applicable because corrosion allowance input is provided.",
+      "status": "not_evaluated"
+    },
+    {
+      "check_ids": "UG-27-shell",
+      "clause_id": "UG-27",
+      "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified.",
+      "status": "pass"
+    },
+    {
+      "check_ids": "-",
+      "clause_id": "UG-28",
+      "justification": "Not applicable in MVP because external pressure service is not declared and internal pressure basis is assumed.",
+      "status": "not_applicable"
+    },
+    {
+      "check_ids": "UG-32-head",
+      "clause_id": "UG-32",
+      "justification": "Applicable because head thickness under internal pressure must be verified.",
+      "status": "pass"
+    },
+    {
+      "check_ids": "UG-45-nozzle",
+      "clause_id": "UG-45",
+      "justification": "Applicable because nozzle neck minimum thickness must be verified.",
+      "status": "fail"
+    },
+    {
+      "check_ids": "-",
+      "clause_id": "UCS-66",
+      "justification": "Not applicable because design temperature is above low-temperature impact-test threshold.",
+      "status": "not_applicable"
+    }
+  ],
+  "deterministic_hash": "03ec08e24be9fe538b50fd9e6ea5ec988f0910b1a81b3744fb1cdb1322a24ace",
+  "evidence_trace_lines": [
+    "code_standard -> UG-16 -> ApplicabilityModel.v1 -> UG-16:applicable=true -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-16",
+    "code_standard -> UG-20 -> ApplicabilityModel.v1 -> UG-20:applicable=true -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-20",
+    "code_standard -> UG-27 -> t = (P*D)/(2*(S*E-0.6P)) + CA -> UG-27-shell:pass=true -> CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-27-shell",
+    "code_standard -> UG-32 -> t = (0.885*P*D)/(2*S*E-0.2P) + CA -> UG-32-head:pass=true -> CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-32-head",
+    "code_standard -> UG-45 -> t = (0.5*P*d)/(S*E-0.4P) + CA -> UG-45-nozzle:pass=false -> CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-45-nozzle",
+    "corrosion_allowance -> UG-25 -> ApplicabilityModel.v1 -> UG-25:applicable=true -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-25",
+    "design_pressure -> UG-16 -> ApplicabilityModel.v1 -> UG-16:applicable=true -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-16",
+    "design_pressure -> UG-27 -> t = (P*D)/(2*(S*E-0.6P)) + CA -> UG-27-shell:pass=true -> CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-27-shell",
+    "design_pressure -> UG-28 -> ApplicabilityModel.v1 -> UG-28:applicable=false -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-28",
+    "design_pressure -> UG-32 -> t = (0.885*P*D)/(2*S*E-0.2P) + CA -> UG-32-head:pass=true -> CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-32-head",
+    "design_pressure -> UG-45 -> t = (0.5*P*d)/(S*E-0.4P) + CA -> UG-45-nozzle:pass=false -> CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-45-nozzle",
+    "design_temperature -> UCS-66 -> ApplicabilityModel.v1 -> UCS-66:applicable=false -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UCS-66",
+    "design_temperature -> UG-20 -> ApplicabilityModel.v1 -> UG-20:applicable=true -> ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-20"
+  ],
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "review_checklist_lines": [
+    "[CHK-001] Confirm requirement-to-clause evidence links cover all applicable clauses.",
+    "[CHK-002] Review all failed clause checks and verify non-conformance severity assignments.",
+    "[CHK-003] Confirm applied default assumptions are acceptable for release."
+  ],
+  "schema_version": "ComplianceDossierHuman.v1",
+  "source_applicability_matrix_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8",
+  "source_calculation_records_hash": "21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822",
+  "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
+  "source_non_conformance_hash": "be07b2ee50b74ff8e2ec2012de4f345980df898d62588fbc80b4e3226604943f",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+  "summary_lines": [
+    "Primary standard: ASME Section VIII Division 1 (ASME_BPVC_2023)",
+    "Clause outcomes: pass=2, fail=1, not_applicable=2"
+  ],
+  "title": "BL-004 Compliance Dossier"
+}

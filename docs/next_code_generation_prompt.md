@@ -8,20 +8,18 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002
-- Next item to implement: BL-003
-- BL-003 title: Implement core ASME Div 1 sizing checks
-- BL-003 depends_on: BL-001, BL-002 (already done)
-- BL-003 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-004
+- Next item to implement: BL-003a
+- BL-003a title: Implement MAWP check
+- BL-003a depends_on: BL-003 (already done)
+- BL-003a acceptance criteria:
 
-  1) Deterministic sizing checks run for shell/head/nozzle and related checks.
-  2) All calculations are unit-safe with reproducibility hashes.
-  3) Pass/fail records and non-conformance list are stored.
+  1) MAWP is computed per applicable ASME Div 1 clauses for each sized component.
+  2) Result is stored in CalculationRecords with `clause_id` and reproducibility hash.
 
-- BL-003 deliverables:
+- BL-003a deliverables:
 
-  - CalculationRecords
-  - Non-conformance list
+  - MAWP entries in `CalculationRecords.v1`
 
 Repository constraints:
 
@@ -35,36 +33,34 @@ Existing relevant files:
 - `src/pressure_vessels/requirements_pipeline.py`
 - `src/pressure_vessels/design_basis_pipeline.py`
 - `src/pressure_vessels/calculation_pipeline.py`
+- `src/pressure_vessels/compliance_pipeline.py`
 - `tests/test_requirements_pipeline.py`
 - `tests/test_design_basis_pipeline.py`
 - `tests/test_calculation_pipeline.py`
+- `tests/test_compliance_pipeline.py`
 - `docs/interfaces/requirements_pipeline_contract.md`
 - `docs/interfaces/design_basis_pipeline_contract.md`
 - `docs/interfaces/calculation_pipeline_contract.md`
+- `docs/interfaces/compliance_pipeline_contract.md`
 - `artifacts/bl-001/`
 - `artifacts/bl-002/`
 - `artifacts/bl-003/`
+- `artifacts/bl-004/`
 
 Task:
 
-1) Implement a new compliance-report module for BL-004 (e.g., `src/pressure_vessels/compliance_pipeline.py`).
-2) Define typed input/output structures and artifact schemas for:
+1) Extend BL-003 calculations to include deterministic MAWP checks per relevant component routes.
+2) Add typed MAWP record fields and preserve existing schema compatibility conventions.
+3) Ensure each MAWP result is linked to `clause_id`, includes reproducibility hash metadata, and is integrated into `CalculationRecords.v1` deterministically.
+4) Enforce/extend handoff and clause-coverage gates as needed without weakening current controls.
+5) Persist updated sample BL-003 artifacts under `artifacts/bl-003/`.
+6) Add/extend tests in `tests/test_calculation_pipeline.py` for:
 
-   - clause-by-clause compliance matrix
-   - evidence links (requirement -> clause -> model -> result -> artifact)
-   - human approver review checklist
-   - human-readable and machine-readable dossier payloads
+   - deterministic MAWP outputs
+   - clause linkage and reproducibility metadata
+   - interactions with existing pass/fail and non-conformance behavior
 
-3) Re-use `RequirementSet.v1`, `DesignBasis.v1`, `ApplicabilityMatrix.v1`, `CalculationRecords.v1`, and `NonConformanceList.v1` as inputs. Enforce handoff gates consistent with the BL-001/BL-002/BL-003 patterns.
-4) Persist sample BL-004 artifacts under `artifacts/bl-004/`.
-5) Add tests (e.g., `tests/test_compliance_pipeline.py`) that validate:
-
-   - deterministic outputs
-   - correct evidence wiring
-   - review checklist generation
-   - schema shape of both dossier forms
-
-6) Add `docs/interfaces/compliance_pipeline_contract.md` following the BL-001/BL-002/BL-003 pattern.
+7) Update `docs/interfaces/calculation_pipeline_contract.md` to document MAWP behavior and schema updates.
 
 Output format:
 
