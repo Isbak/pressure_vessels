@@ -1,0 +1,11 @@
+{
+  "decision": "accepted",
+  "from_revision_id": "REV-1000",
+  "rationale": "All impacted checks passed deterministic re-verification.",
+  "reverification_check_ids": [
+    "UG-27-shell",
+    "UG-27-shell-mawp"
+  ],
+  "schema_version": "BaselineUpdateStatus.v1",
+  "to_revision_id": "REV-1001"
+}

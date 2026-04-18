@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007
-- Next item to implement: BL-008
-- BL-008 title: Add change impact and selective re-verification
-- BL-008 depends_on: BL-003, BL-006 (already done)
-- BL-008 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008
+- Next item to implement: BL-009
+- BL-009 title: Support multi-standard design routes
+- BL-009 depends_on: BL-005, BL-006 (already done)
+- BL-009 acceptance criteria:
 
-  1) Requirement/code/model deltas are detected automatically.
-  2) Minimal re-verification set is computed and executed.
-  3) Signed change impact report is generated for each revision delta.
+  1) System supports ASME + PED + additional standards as configured routes.
+  2) Applicability and evidence mapping remain clause-level and traceable.
+  3) Route selection logic is deterministic and auditable.
 
-- BL-008 deliverables:
+- BL-009 deliverables:
 
-  - ImpactReport artifact
-  - Updated baseline status
+  - Multi-standard routing engine
+  - Compatibility test matrix
 
 Repository constraints:
 
@@ -40,12 +40,11 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-008 change-impact and selective re-verification behavior using existing repository patterns.
-2) Add deterministic delta detection for requirement/code/model changes tied to revisioned traceability artifacts.
-3) Compute and execute a minimal re-verification set and persist an explicit baseline update decision.
-4) Generate a signed change impact report artifact per revision delta.
-5) Add/extend tests under `tests/` for deterministic delta detection, selective re-verification scope, and signed impact report evidence links.
-6) Update related architecture/interface docs under `docs/` to describe BL-008 schema and usage, and persist sample artifacts under `artifacts/` if introduced.
+1) Implement BL-009 multi-standard design routing behavior using existing repository patterns.
+2) Add deterministic route selection for at least ASME and PED, and allow extension for additional standards.
+3) Preserve clause-level applicability and evidence traceability across selected standard routes.
+4) Add/extend tests under `tests/` for deterministic route selection, cross-standard traceability integrity, and compatibility matrix behavior.
+5) Update related architecture/interface docs under `docs/` to describe BL-009 schema and usage, and persist sample artifacts under `artifacts/` if introduced.
 
 Output format:
 

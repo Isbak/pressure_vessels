@@ -12,6 +12,7 @@
 - `execute_selective_reverification(selected_checks, current_graph)`
 - `generate_change_impact_report(previous_snapshot, current_snapshot, previous_graph, current_graph, current_calculation_records, signing_key_ref, now_utc=None)`
 - `write_impact_report(impact_report, directory, filename_prefix="")`
+- `write_baseline_update_status(baseline_update_status, directory, filename_prefix="")`
 
 ## Schemas
 
@@ -62,7 +63,9 @@ Explicit baseline decision persisted with each report.
 - If model changes, impacted clauses/models are found from traceability graph link deltas.
 - If requirement changes, impacted requirement->clause links define clause scope.
 - Re-verification execution uses deterministic, already-produced calculation outcomes and emits clause/check-scoped evidence refs.
+- Impact report generation validates snapshot-to-traceability alignment (`revision_id`, requirement hash, and graph hash) and current calculation hash integrity before running delta analysis.
 
 ## Artifact Example
 
 - Sample artifact: `artifacts/bl-008/ImpactReport.v1.sample.json`
+- Sample artifact: `artifacts/bl-008/BaselineUpdateStatus.v1.sample.json`

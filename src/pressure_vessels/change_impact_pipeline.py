@@ -170,6 +170,13 @@ def generate_change_impact_report(
     """Generate a signed BL-008 impact report with selective re-verification and baseline decision."""
     if not signing_key_ref.strip():
         raise ValueError("BL-008 impact report failed: signing_key_ref must be non-empty.")
+    _validate_revision_trace_alignment(
+        previous_snapshot=previous_snapshot,
+        current_snapshot=current_snapshot,
+        previous_graph=previous_graph,
+        current_graph=current_graph,
+        current_calculation_records=current_calculation_records,
+    )
 
     delta = detect_revision_delta(previous_snapshot, current_snapshot)
     selected_checks, impacted_clause_ids = compute_minimal_reverification_set(
@@ -320,6 +327,47 @@ def write_impact_report(
     output_path = target / f"{filename_prefix}{IMPACT_REPORT_VERSION}.json"
     output_path.write_text(json.dumps(impact_report.to_json_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return output_path
+
+
+def write_baseline_update_status(
+    baseline_update_status: BaselineUpdateStatus,
+    directory: str | Path,
+    *,
+    filename_prefix: str = "",
+) -> Path:
+    """Persist deterministic BL-008 baseline update decision artifact."""
+    target = Path(directory)
+    target.mkdir(parents=True, exist_ok=True)
+    output_path = target / f"{filename_prefix}{BASELINE_UPDATE_STATUS_VERSION}.json"
+    output_path.write_text(
+        json.dumps(baseline_update_status.to_json_dict(), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return output_path
+
+
+def _validate_revision_trace_alignment(
+    *,
+    previous_snapshot: RevisionTraceSnapshot,
+    current_snapshot: RevisionTraceSnapshot,
+    previous_graph: TraceabilityGraphRevision,
+    current_graph: TraceabilityGraphRevision,
+    current_calculation_records: CalculationRecordsArtifact,
+) -> None:
+    if previous_snapshot.revision_id != previous_graph.revision_id:
+        raise ValueError("BL-008 impact report failed: previous snapshot/graph revision mismatch.")
+    if current_snapshot.revision_id != current_graph.revision_id:
+        raise ValueError("BL-008 impact report failed: current snapshot/graph revision mismatch.")
+    if previous_snapshot.traceability_graph_hash != previous_graph.deterministic_hash:
+        raise ValueError("BL-008 impact report failed: previous snapshot traceability hash mismatch.")
+    if current_snapshot.traceability_graph_hash != current_graph.deterministic_hash:
+        raise ValueError("BL-008 impact report failed: current snapshot traceability hash mismatch.")
+    if previous_snapshot.requirement_set_hash != previous_graph.source_requirement_set_hash:
+        raise ValueError("BL-008 impact report failed: previous snapshot requirement hash mismatch.")
+    if current_snapshot.requirement_set_hash != current_graph.source_requirement_set_hash:
+        raise ValueError("BL-008 impact report failed: current snapshot requirement hash mismatch.")
+    if current_snapshot.calculation_records_hash != current_calculation_records.deterministic_hash:
+        raise ValueError("BL-008 impact report failed: current snapshot calculation hash mismatch.")
 
 
 def _collect_impacted_clauses(
