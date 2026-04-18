@@ -207,6 +207,12 @@ def _build_mvp_clause_records(requirement_set: RequirementSet) -> list[ClauseApp
             evidence_fields=["corrosion_allowance"] if has_corrosion_allowance else ["requirements"],
         ),
         ClauseApplicabilityRecord(
+            clause_id="UG-27",
+            applicable=True,
+            justification="Applicable because cylindrical shell thickness under internal pressure must be verified.",
+            evidence_fields=["design_pressure", "code_standard"],
+        ),
+        ClauseApplicabilityRecord(
             clause_id="UG-28",
             applicable=False,
             justification=(
@@ -214,6 +220,18 @@ def _build_mvp_clause_records(requirement_set: RequirementSet) -> list[ClauseApp
                 "and internal pressure basis is assumed."
             ),
             evidence_fields=["design_pressure"],
+        ),
+        ClauseApplicabilityRecord(
+            clause_id="UG-32",
+            applicable=True,
+            justification="Applicable because head thickness under internal pressure must be verified.",
+            evidence_fields=["design_pressure", "code_standard"],
+        ),
+        ClauseApplicabilityRecord(
+            clause_id="UG-45",
+            applicable=True,
+            justification="Applicable because nozzle neck minimum thickness must be verified.",
+            evidence_fields=["design_pressure", "code_standard"],
         ),
         ClauseApplicabilityRecord(
             clause_id="UCS-66",

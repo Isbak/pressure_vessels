@@ -32,11 +32,38 @@
       ]
     },
     {
+      "clause_id": "UG-27",
+      "applicable": true,
+      "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified.",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ]
+    },
+    {
       "clause_id": "UG-28",
       "applicable": false,
       "justification": "Not applicable in MVP because external pressure service is not declared and internal pressure basis is assumed.",
       "evidence_fields": [
         "design_pressure"
+      ]
+    },
+    {
+      "clause_id": "UG-32",
+      "applicable": true,
+      "justification": "Applicable because head thickness under internal pressure must be verified.",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ]
+    },
+    {
+      "clause_id": "UG-45",
+      "applicable": true,
+      "justification": "Applicable because nozzle neck minimum thickness must be verified.",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
       ]
     },
     {
@@ -48,5 +75,5 @@
       ]
     }
   ],
-  "deterministic_hash": "b90b03d393687c86a48c0df22512bc09b574e0e09b5905e1dc4a8f9f447b72cb"
+  "deterministic_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8"
 }

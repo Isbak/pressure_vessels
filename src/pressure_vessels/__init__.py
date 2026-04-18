@@ -15,6 +15,7 @@ from .calculation_pipeline import (
     ReproducibilityMetadata,
     SizingCheckInput,
     run_calculation_pipeline,
+    write_calculation_artifacts,
 )
 from .requirements_pipeline import (
     Gap,
@@ -40,4 +41,5 @@ __all__ = [
     "build_design_basis",
     "parse_prompt_to_requirement_set",
     "run_calculation_pipeline",
+    "write_calculation_artifacts",
 ]

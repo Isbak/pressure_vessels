@@ -32,6 +32,8 @@ Related repository docs:
 
 - `docs/interfaces/design_basis_pipeline_contract.md`
 
+- `docs/interfaces/calculation_pipeline_contract.md`
+
 ---
 
 ## 1. Vision

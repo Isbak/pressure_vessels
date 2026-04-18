@@ -1,15 +1,16 @@
 {
   "schema_version": "NonConformanceList.v1",
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
-  "source_calculation_records_hash": "0b5d0c04ca50604d4c5a4f1a54f10db745f394658f380be068d2ff4b2bdc8f4a",
+  "source_calculation_records_hash": "21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822",
   "entries": [
     {
       "check_id": "UG-45-nozzle",
+      "clause_id": "UG-45",
       "component": "nozzle",
       "observed": "provided=0.004000 m",
       "required": "minimum=0.005702 m",
       "severity": "major"
     }
   ],
-  "deterministic_hash": "1023db5f9248731c08fce7033f1b69b4316aad5383573020e69949cd9767b57b"
+  "deterministic_hash": "be07b2ee50b74ff8e2ec2012de4f345980df898d62588fbc80b4e3226604943f"
 }

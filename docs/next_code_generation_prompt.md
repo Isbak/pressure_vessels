@@ -34,30 +34,37 @@ Existing relevant files:
 
 - `src/pressure_vessels/requirements_pipeline.py`
 - `src/pressure_vessels/design_basis_pipeline.py`
+- `src/pressure_vessels/calculation_pipeline.py`
 - `tests/test_requirements_pipeline.py`
 - `tests/test_design_basis_pipeline.py`
+- `tests/test_calculation_pipeline.py`
+- `docs/interfaces/requirements_pipeline_contract.md`
+- `docs/interfaces/design_basis_pipeline_contract.md`
+- `docs/interfaces/calculation_pipeline_contract.md`
 - `artifacts/bl-001/`
 - `artifacts/bl-002/`
+- `artifacts/bl-003/`
 
 Task:
 
-1) Implement a new calculation pipeline module for BL-003 (e.g., `src/pressure_vessels/calculation_pipeline.py`).
-2) Define typed input/output structures and artifact schema for:
+1) Implement a new compliance-report module for BL-004 (e.g., `src/pressure_vessels/compliance_pipeline.py`).
+2) Define typed input/output structures and artifact schemas for:
 
-   - calculation records
-   - pass/fail status
-   - non-conformance entries
-   - reproducibility hash metadata
+   - clause-by-clause compliance matrix
+   - evidence links (requirement -> clause -> model -> result -> artifact)
+   - human approver review checklist
+   - human-readable and machine-readable dossier payloads
 
-3) Add deterministic placeholder ASME Div 1 checks for shell, head, and nozzle sizing, with clear extension points for full formulas.
-4) Ensure unit normalization/safety in all calculations.
-5) Persist sample BL-003 artifacts under `artifacts/bl-003/`.
-6) Add tests (e.g., `tests/test_calculation_pipeline.py`) that validate:
+3) Re-use `RequirementSet.v1`, `DesignBasis.v1`, `ApplicabilityMatrix.v1`, `CalculationRecords.v1`, and `NonConformanceList.v1` as inputs. Enforce handoff gates consistent with the BL-001/BL-002/BL-003 patterns.
+4) Persist sample BL-004 artifacts under `artifacts/bl-004/`.
+5) Add tests (e.g., `tests/test_compliance_pipeline.py`) that validate:
 
    - deterministic outputs
-   - correct pass/fail behavior
-   - non-conformance generation
-   - reproducibility hash stability
+   - correct evidence wiring
+   - review checklist generation
+   - schema shape of both dossier forms
+
+6) Add `docs/interfaces/compliance_pipeline_contract.md` following the BL-001/BL-002/BL-003 pattern.
 
 Output format:
 
