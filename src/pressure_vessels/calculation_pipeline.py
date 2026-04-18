@@ -14,6 +14,7 @@ from .requirements_pipeline import CANONICAL_UNITS, RequirementSet
 
 CALCULATION_RECORDS_VERSION = "CalculationRecords.v1"
 NON_CONFORMANCE_LIST_VERSION = "NonConformanceList.v1"
+DEFAULT_NEAR_LIMIT_THRESHOLD = 0.9
 
 # BL-003 MVP placeholder defaults used when sizing_input is not supplied.
 # These are surfaced in the CalculationRecordsArtifact.applied_defaults section
@@ -90,6 +91,8 @@ class CalculationRecord:
     provided_thickness_m: float
     margin_m: float
     utilization_ratio: float
+    near_limit_threshold: float
+    is_near_limit: bool
     pass_status: bool
     reproducibility: ReproducibilityMetadata
     parent_component: str | None = None
@@ -109,6 +112,8 @@ class CalculationRecord:
             "provided_thickness_m": self.provided_thickness_m,
             "margin_m": self.margin_m,
             "utilization_ratio": self.utilization_ratio,
+            "near_limit_threshold": self.near_limit_threshold,
+            "is_near_limit": self.is_near_limit,
             "parent_component": self.parent_component,
             "parent_check_id": self.parent_check_id,
             "design_pressure_pa": self.design_pressure_pa,
@@ -181,6 +186,7 @@ def run_calculation_pipeline(
     sizing_input: SizingCheckInput | None = None,
     *,
     now_utc: datetime | None = None,
+    near_limit_threshold: float = DEFAULT_NEAR_LIMIT_THRESHOLD,
 ) -> tuple[CalculationRecordsArtifact, NonConformanceListArtifact]:
     """Run deterministic shell/head/nozzle sizing checks for BL-003 MVP."""
     _validate_handoff_gate(
@@ -191,18 +197,19 @@ def run_calculation_pipeline(
 
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
     normalized_input, applied_defaults = _normalize_and_resolve_inputs(requirement_set, sizing_input)
-    _validate_model_domain_gate(normalized_input)
+    _validate_model_domain_gate(normalized_input, near_limit_threshold)
 
-    shell_check = _build_shell_check(normalized_input)
-    head_check = _build_head_check(normalized_input)
-    nozzle_check = _build_nozzle_check(normalized_input)
-    shell_mawp_check = _build_shell_mawp_check(normalized_input)
-    head_mawp_check = _build_head_mawp_check(normalized_input)
-    nozzle_mawp_check = _build_nozzle_mawp_check(normalized_input)
+    shell_check = _build_shell_check(normalized_input, near_limit_threshold)
+    head_check = _build_head_check(normalized_input, near_limit_threshold)
+    nozzle_check = _build_nozzle_check(normalized_input, near_limit_threshold)
+    shell_mawp_check = _build_shell_mawp_check(normalized_input, near_limit_threshold)
+    head_mawp_check = _build_head_mawp_check(normalized_input, near_limit_threshold)
+    nozzle_mawp_check = _build_nozzle_mawp_check(normalized_input, near_limit_threshold)
     reinforcement_checks = _build_reinforcement_checks(
         inputs=normalized_input,
         nozzle_thickness_check=nozzle_check,
         parent_thickness_checks=[shell_check, head_check],
+        near_limit_threshold=near_limit_threshold,
     )
 
     checks = [
@@ -214,7 +221,7 @@ def run_calculation_pipeline(
         nozzle_mawp_check,
         *reinforcement_checks,
     ]
-    checks.extend(_build_external_pressure_checks(normalized_input))
+    checks.extend(_build_external_pressure_checks(normalized_input, near_limit_threshold))
 
     _validate_clause_coverage(checks, applicability_matrix)
 
@@ -388,7 +395,7 @@ def _normalize_and_resolve_inputs(
     return normalized, applied_defaults
 
 
-def _build_shell_check(inputs: SizingCheckInput) -> CalculationRecord:
+def _build_shell_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
     p = inputs.internal_pressure.value
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
@@ -405,10 +412,11 @@ def _build_shell_check(inputs: SizingCheckInput) -> CalculationRecord:
         inputs={"P_Pa": p, "S_Pa": s, "E": e, "D_m": d, "CA_m": ca},
         required=required,
         provided=provided,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
-def _build_head_check(inputs: SizingCheckInput) -> CalculationRecord:
+def _build_head_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
     p = inputs.internal_pressure.value
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
@@ -425,10 +433,11 @@ def _build_head_check(inputs: SizingCheckInput) -> CalculationRecord:
         inputs={"P_Pa": p, "S_Pa": s, "E": e, "D_m": d, "CA_m": ca},
         required=required,
         provided=provided,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
-def _build_nozzle_check(inputs: SizingCheckInput) -> CalculationRecord:
+def _build_nozzle_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
     p = inputs.internal_pressure.value
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
@@ -445,10 +454,11 @@ def _build_nozzle_check(inputs: SizingCheckInput) -> CalculationRecord:
         inputs={"P_Pa": p, "S_Pa": s, "E": e, "d_m": d, "CA_m": ca},
         required=required,
         provided=provided,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
-def _build_shell_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
+def _build_shell_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
     d = inputs.shell_inside_diameter.value
@@ -467,10 +477,11 @@ def _build_shell_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
         provided=provided,
         design_pressure_pa=p_design,
         computed_mawp_pa=mawp,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
-def _build_head_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
+def _build_head_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
     d = inputs.head_inside_diameter.value
@@ -489,10 +500,11 @@ def _build_head_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
         provided=provided,
         design_pressure_pa=p_design,
         computed_mawp_pa=mawp,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
-def _build_nozzle_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
+def _build_nozzle_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
     d = inputs.nozzle_inside_diameter.value
@@ -511,10 +523,13 @@ def _build_nozzle_mawp_check(inputs: SizingCheckInput) -> CalculationRecord:
         provided=provided,
         design_pressure_pa=p_design,
         computed_mawp_pa=mawp,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
-def _build_external_pressure_checks(inputs: SizingCheckInput) -> list[CalculationRecord]:
+def _build_external_pressure_checks(
+    inputs: SizingCheckInput, near_limit_threshold: float
+) -> list[CalculationRecord]:
     if inputs.external_pressure is None:
         return []
 
@@ -527,6 +542,7 @@ def _build_external_pressure_checks(inputs: SizingCheckInput) -> list[Calculatio
             provided_thickness_m=inputs.shell_provided_thickness.value,
             corrosion_allowance_m=inputs.corrosion_allowance.value,
             p_external_pa=p_external,
+            near_limit_threshold=near_limit_threshold,
         ),
         _build_ug28_external_check(
             check_id="UG-28-head-external",
@@ -535,6 +551,7 @@ def _build_external_pressure_checks(inputs: SizingCheckInput) -> list[Calculatio
             provided_thickness_m=inputs.head_provided_thickness.value,
             corrosion_allowance_m=inputs.corrosion_allowance.value,
             p_external_pa=p_external,
+            near_limit_threshold=near_limit_threshold,
         ),
     ]
     return checks
@@ -545,6 +562,7 @@ def _build_reinforcement_checks(
     inputs: SizingCheckInput,
     nozzle_thickness_check: CalculationRecord,
     parent_thickness_checks: list[CalculationRecord],
+    near_limit_threshold: float,
 ) -> list[CalculationRecord]:
     parent_index = {record.component: record for record in parent_thickness_checks}
     return [
@@ -559,6 +577,7 @@ def _build_reinforcement_checks(
             nozzle_provided_thickness_m=inputs.nozzle_provided_thickness.value,
             nozzle_required_thickness_m=nozzle_thickness_check.required_thickness_m,
             corrosion_allowance_m=inputs.corrosion_allowance.value,
+            near_limit_threshold=near_limit_threshold,
         ),
         _build_ug37_reinforcement_check(
             check_id="UG-37-nozzle-head-reinforcement",
@@ -571,6 +590,7 @@ def _build_reinforcement_checks(
             nozzle_provided_thickness_m=inputs.nozzle_provided_thickness.value,
             nozzle_required_thickness_m=nozzle_thickness_check.required_thickness_m,
             corrosion_allowance_m=inputs.corrosion_allowance.value,
+            near_limit_threshold=near_limit_threshold,
         ),
     ]
 
@@ -587,6 +607,7 @@ def _build_ug37_reinforcement_check(
     nozzle_provided_thickness_m: float,
     nozzle_required_thickness_m: float,
     corrosion_allowance_m: float,
+    near_limit_threshold: float,
 ) -> CalculationRecord:
     parent_excess_m = max(parent_provided_thickness_m - parent_required_thickness_m, 0.0)
     nozzle_excess_m = max(nozzle_provided_thickness_m - nozzle_required_thickness_m, 0.0)
@@ -622,6 +643,7 @@ def _build_ug37_reinforcement_check(
         required=required_area_m2,
         provided=available_area_m2,
         parent_check_id=parent_check_id,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
@@ -633,6 +655,7 @@ def _build_ug28_external_check(
     provided_thickness_m: float,
     corrosion_allowance_m: float,
     p_external_pa: float,
+    near_limit_threshold: float,
 ) -> CalculationRecord:
     # Deterministic UG-28 chart/equation route placeholder:
     # A-factor is computed from geometry; B-factor is selected via a bounded
@@ -671,6 +694,7 @@ def _build_ug28_external_check(
         provided=provided_thickness_m,
         design_pressure_pa=p_external_pa,
         computed_mawp_pa=allowable_external_pa,
+        near_limit_threshold=near_limit_threshold,
     )
 
 
@@ -686,17 +710,20 @@ def _to_record(
     parent_check_id: str | None = None,
     design_pressure_pa: float | None = None,
     computed_mawp_pa: float | None = None,
+    near_limit_threshold: float = DEFAULT_NEAR_LIMIT_THRESHOLD,
 ) -> CalculationRecord:
     required_rounded = round(required, 9)
     provided_rounded = round(provided, 9)
     margin = round(provided_rounded - required_rounded, 9)
     utilization = round(required_rounded / provided_rounded, 9) if provided_rounded > 0.0 else float("inf")
+    is_near_limit = pass_status = False
     pressure_margin_pa = None
     if design_pressure_pa is None or computed_mawp_pa is None:
         pass_status = provided_rounded >= required_rounded
     else:
         pressure_margin_pa = round(computed_mawp_pa - design_pressure_pa, 9)
         pass_status = pressure_margin_pa >= 0.0
+    is_near_limit = pass_status and utilization >= near_limit_threshold
     clause_id = _CHECK_CLAUSE_MAP[check_id]
 
     canonical = {
@@ -709,6 +736,8 @@ def _to_record(
         "provided_thickness_m": provided_rounded,
         "margin_m": margin,
         "utilization_ratio": utilization,
+        "near_limit_threshold": near_limit_threshold,
+        "is_near_limit": is_near_limit,
         "parent_component": parent_component,
         "parent_check_id": parent_check_id,
         "design_pressure_pa": design_pressure_pa,
@@ -728,6 +757,8 @@ def _to_record(
         provided_thickness_m=provided_rounded,
         margin_m=margin,
         utilization_ratio=utilization,
+        near_limit_threshold=near_limit_threshold,
+        is_near_limit=is_near_limit,
         parent_component=parent_component,
         parent_check_id=parent_check_id,
         design_pressure_pa=design_pressure_pa,
@@ -806,7 +837,7 @@ def _external_pressure_from_requirements(requirement_set: RequirementSet) -> Qua
     return Quantity(value=float(external_pressure.value), unit="Pa")
 
 
-def _validate_model_domain_gate(inputs: SizingCheckInput) -> None:
+def _validate_model_domain_gate(inputs: SizingCheckInput, near_limit_threshold: float) -> None:
     if not (0.0 < inputs.joint_efficiency <= 1.0):
         raise ValueError("BL-003 model-domain gate failed: joint_efficiency must be in (0, 1].")
 
@@ -814,6 +845,8 @@ def _validate_model_domain_gate(inputs: SizingCheckInput) -> None:
         raise ValueError(
             "BL-003 model-domain gate failed: allowable_stress and internal_pressure must be positive."
         )
+    if not (0.0 < near_limit_threshold <= 1.0):
+        raise ValueError("BL-003 model-domain gate failed: near_limit_threshold must be in (0, 1].")
 
     dimensional_values = {
         "shell_inside_diameter": inputs.shell_inside_diameter.value,

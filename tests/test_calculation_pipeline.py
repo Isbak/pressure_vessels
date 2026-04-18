@@ -91,6 +91,7 @@ def test_calculation_pipeline_generates_expected_pass_fail_and_non_conformance()
     assert [record.pass_status for record in calc.checks] == [True, True, False, True, True, False, False, False]
     for record in calc.checks:
         assert record.utilization_ratio > 0.0
+        assert record.near_limit_threshold == 0.9
 
     assert len(non_conformance.entries) == 4
     assert [entry.check_id for entry in non_conformance.entries] == [
@@ -209,6 +210,67 @@ def test_check_reproducibility_hashes_are_stable_for_canonical_payload():
     hashes = [record.reproducibility.canonical_payload_sha256 for record in calc.checks]
     assert len(set(hashes)) == len(hashes)
     assert all(len(value) == 64 for value in hashes)
+
+
+def test_margin_utilization_outputs_are_deterministic():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    assert calc_a.to_json_dict() == calc_b.to_json_dict()
+
+    shell = next(record for record in calc_a.checks if record.check_id == "UG-27-shell")
+    assert shell.margin_m == 0.001512132
+    assert shell.utilization_ratio == 0.9243934
+    assert shell.is_near_limit is True
+    assert shell.near_limit_threshold == 0.9
+
+
+def test_near_limit_threshold_is_configurable_and_persisted_on_records():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    calc, _ = run_calculation_pipeline(
+        req,
+        design_basis,
+        matrix,
+        now_utc=FIXED_NOW,
+        near_limit_threshold=0.95,
+    )
+    shell = next(record for record in calc.checks if record.check_id == "UG-27-shell")
+    assert shell.near_limit_threshold == 0.95
+    assert shell.is_near_limit is False
+
+
+def test_near_limit_fields_are_clause_linked_and_hashed_in_reproducibility_metadata():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+    calc_default, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_tuned, _ = run_calculation_pipeline(
+        req, design_basis, matrix, now_utc=FIXED_NOW, near_limit_threshold=0.95
+    )
+
+    shell_default = next(record for record in calc_default.checks if record.check_id == "UG-27-shell")
+    shell_tuned = next(record for record in calc_tuned.checks if record.check_id == "UG-27-shell")
+    assert shell_default.clause_id == "UG-27"
+    assert shell_tuned.clause_id == "UG-27"
+    assert (
+        shell_default.reproducibility.canonical_payload_sha256
+        != shell_tuned.reproducibility.canonical_payload_sha256
+    )
 
 
 def test_mawp_outputs_are_deterministic_and_clause_linked():
@@ -337,6 +399,9 @@ def test_external_pressure_failures_feed_non_conformance_with_clause_linkage():
     assert failed_entry.clause_id == "UG-28"
     assert failed_entry.observed.startswith("allowable_pressure=")
     assert failed_entry.required == "minimum_design_pressure=50000.000 Pa"
+    failed_check = next(record for record in calc.checks if record.check_id == "UG-28-head-external")
+    assert failed_check.pass_status is False
+    assert failed_check.is_near_limit is False
 
 
 def test_handoff_gate_rejects_non_canonical_unit():
@@ -405,6 +470,24 @@ def test_model_domain_gate_rejects_out_of_range_joint_efficiency():
             matrix,
             sizing_input=invalid,
             now_utc=FIXED_NOW,
+        )
+
+
+def test_model_domain_gate_rejects_invalid_near_limit_threshold():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    with pytest.raises(ValueError, match="near_limit_threshold"):
+        run_calculation_pipeline(
+            req,
+            design_basis,
+            matrix,
+            now_utc=FIXED_NOW,
+            near_limit_threshold=1.2,
         )
 
 

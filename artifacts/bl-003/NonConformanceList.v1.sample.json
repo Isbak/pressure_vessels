@@ -1,5 +1,5 @@
 {
-  "deterministic_hash": "274805f654f221337be492b175f6289c1bdf808928430494c8407af05978916f",
+  "deterministic_hash": "ff83560fb311c3447aa0b2e4143817f8251f673c363a8b35089b91bb70be81bd",
   "entries": [
     {
       "check_id": "UG-45-nozzle",
@@ -52,5 +52,5 @@
   ],
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
   "schema_version": "NonConformanceList.v1",
-  "source_calculation_records_hash": "d0912c1224e1a7c0a351d6250831894f90406091a4887a7b2c2b1ffb3e381d02"
+  "source_calculation_records_hash": "15eb04c69996751257a5215d555b62d045f9e21dd702b84ee85dccc040873a89"
 }

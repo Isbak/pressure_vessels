@@ -8,18 +8,18 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c
-- Next item to implement: BL-003d
-- BL-003d title: Report margins and utilization ratios
-- BL-003d depends_on: BL-003 (already done)
-- BL-003d acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d
+- Next item to implement: BL-003e
+- BL-003e title: Enforce model-domain / validity-envelope gate
+- BL-003e depends_on: BL-003 (already done)
+- BL-003e acceptance criteria:
 
-  1) Each CalculationRecord exposes provided/required margin and utilization ratio.
-  2) Near-limit threshold is configurable and persisted on the record.
+  1) Each engineering model declares a validity envelope.
+  2) Pipeline fails closed when inputs fall outside the declared envelope.
 
-- BL-003d deliverables:
+- BL-003e deliverables:
 
-  - Margin/utilization fields on CalculationRecord
+  - Validity envelope metadata on CalculationRecord
 
 Repository constraints:
 
@@ -49,19 +49,19 @@ Existing relevant files:
 
 Task:
 
-1) Extend BL-003 calculations to include explicit near-limit reporting fields on each `CalculationRecord` (deterministic and backward-compatible).
-2) Add a configurable near-limit threshold (defaulted deterministically) and persist the threshold/value(s) on records needed for downstream compliance rendering.
-3) Ensure margin/utilization reporting remains clause-linked and reproducibility-safe (hash behavior remains deterministic and stable).
-4) Enforce/extend handoff, model-domain, and clause-coverage gates as needed without weakening current controls.
+1) Add explicit validity-envelope metadata to BL-003 calculation records so each check declares the model-domain bounds it assumes.
+2) Enforce deterministic fail-closed model-domain gating when caller inputs violate validity-envelope limits.
+3) Keep clause linkage and reproducibility hashing deterministic after schema updates.
+4) Extend handoff/model-domain/clause-coverage gates only as needed, without weakening existing controls.
 5) Persist updated sample BL-003 artifacts under `artifacts/bl-003/`.
 6) Add/extend tests in `tests/test_calculation_pipeline.py` for:
 
-   - deterministic margin/utilization outputs
-   - near-limit threshold configurability and persistence
+   - deterministic validity-envelope metadata outputs
+   - fail-closed behavior for out-of-envelope inputs
    - clause linkage and reproducibility metadata compatibility
    - interactions with existing pass/fail and non-conformance behavior
 
-7) Update `docs/interfaces/calculation_pipeline_contract.md` to document margin/utilization behavior and schema updates.
+7) Update `docs/interfaces/calculation_pipeline_contract.md` to document validity-envelope behavior and schema updates.
 
 Output format:
 
