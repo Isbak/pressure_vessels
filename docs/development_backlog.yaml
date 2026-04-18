@@ -437,7 +437,8 @@ items:
   area: quality
   phase: 'Phase 4: Hardening'
   priority: P2
-  status: todo
+  status: blocked
+  status_note: Blocked until BL-016 is implemented; dependencies must be done before active execution.
   effort: M
   depends_on:
   - BL-013
