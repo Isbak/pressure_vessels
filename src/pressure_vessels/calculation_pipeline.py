@@ -41,6 +41,8 @@ _CHECK_CLAUSE_MAP: dict[str, str] = {
     "UG-45-nozzle-mawp": "UG-45",
     "UG-28-shell-external": "UG-28",
     "UG-28-head-external": "UG-28",
+    "UG-37-nozzle-shell-reinforcement": "UG-37",
+    "UG-37-nozzle-head-reinforcement": "UG-37",
 }
 
 
@@ -90,6 +92,8 @@ class CalculationRecord:
     utilization_ratio: float
     pass_status: bool
     reproducibility: ReproducibilityMetadata
+    parent_component: str | None = None
+    parent_check_id: str | None = None
     design_pressure_pa: float | None = None
     computed_mawp_pa: float | None = None
     pressure_margin_pa: float | None = None
@@ -105,6 +109,8 @@ class CalculationRecord:
             "provided_thickness_m": self.provided_thickness_m,
             "margin_m": self.margin_m,
             "utilization_ratio": self.utilization_ratio,
+            "parent_component": self.parent_component,
+            "parent_check_id": self.parent_check_id,
             "design_pressure_pa": self.design_pressure_pa,
             "computed_mawp_pa": self.computed_mawp_pa,
             "pressure_margin_pa": self.pressure_margin_pa,
@@ -185,14 +191,28 @@ def run_calculation_pipeline(
 
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
     normalized_input, applied_defaults = _normalize_and_resolve_inputs(requirement_set, sizing_input)
+    _validate_model_domain_gate(normalized_input)
+
+    shell_check = _build_shell_check(normalized_input)
+    head_check = _build_head_check(normalized_input)
+    nozzle_check = _build_nozzle_check(normalized_input)
+    shell_mawp_check = _build_shell_mawp_check(normalized_input)
+    head_mawp_check = _build_head_mawp_check(normalized_input)
+    nozzle_mawp_check = _build_nozzle_mawp_check(normalized_input)
+    reinforcement_checks = _build_reinforcement_checks(
+        inputs=normalized_input,
+        nozzle_thickness_check=nozzle_check,
+        parent_thickness_checks=[shell_check, head_check],
+    )
 
     checks = [
-        _build_shell_check(normalized_input),
-        _build_head_check(normalized_input),
-        _build_nozzle_check(normalized_input),
-        _build_shell_mawp_check(normalized_input),
-        _build_head_mawp_check(normalized_input),
-        _build_nozzle_mawp_check(normalized_input),
+        shell_check,
+        head_check,
+        nozzle_check,
+        shell_mawp_check,
+        head_mawp_check,
+        nozzle_mawp_check,
+        *reinforcement_checks,
     ]
     checks.extend(_build_external_pressure_checks(normalized_input))
 
@@ -520,6 +540,91 @@ def _build_external_pressure_checks(inputs: SizingCheckInput) -> list[Calculatio
     return checks
 
 
+def _build_reinforcement_checks(
+    *,
+    inputs: SizingCheckInput,
+    nozzle_thickness_check: CalculationRecord,
+    parent_thickness_checks: list[CalculationRecord],
+) -> list[CalculationRecord]:
+    parent_index = {record.component: record for record in parent_thickness_checks}
+    return [
+        _build_ug37_reinforcement_check(
+            check_id="UG-37-nozzle-shell-reinforcement",
+            parent_component="shell",
+            opening_diameter_m=inputs.nozzle_inside_diameter.value,
+            parent_diameter_m=inputs.shell_inside_diameter.value,
+            parent_provided_thickness_m=inputs.shell_provided_thickness.value,
+            parent_required_thickness_m=parent_index["shell"].required_thickness_m,
+            parent_check_id=parent_index["shell"].check_id,
+            nozzle_provided_thickness_m=inputs.nozzle_provided_thickness.value,
+            nozzle_required_thickness_m=nozzle_thickness_check.required_thickness_m,
+            corrosion_allowance_m=inputs.corrosion_allowance.value,
+        ),
+        _build_ug37_reinforcement_check(
+            check_id="UG-37-nozzle-head-reinforcement",
+            parent_component="head",
+            opening_diameter_m=inputs.nozzle_inside_diameter.value,
+            parent_diameter_m=inputs.head_inside_diameter.value,
+            parent_provided_thickness_m=inputs.head_provided_thickness.value,
+            parent_required_thickness_m=parent_index["head"].required_thickness_m,
+            parent_check_id=parent_index["head"].check_id,
+            nozzle_provided_thickness_m=inputs.nozzle_provided_thickness.value,
+            nozzle_required_thickness_m=nozzle_thickness_check.required_thickness_m,
+            corrosion_allowance_m=inputs.corrosion_allowance.value,
+        ),
+    ]
+
+
+def _build_ug37_reinforcement_check(
+    *,
+    check_id: str,
+    parent_component: str,
+    opening_diameter_m: float,
+    parent_diameter_m: float,
+    parent_provided_thickness_m: float,
+    parent_required_thickness_m: float,
+    parent_check_id: str,
+    nozzle_provided_thickness_m: float,
+    nozzle_required_thickness_m: float,
+    corrosion_allowance_m: float,
+) -> CalculationRecord:
+    parent_excess_m = max(parent_provided_thickness_m - parent_required_thickness_m, 0.0)
+    nozzle_excess_m = max(nozzle_provided_thickness_m - nozzle_required_thickness_m, 0.0)
+
+    # Deterministic UG-37/UG-45 reinforcement-area route:
+    # required area is opening diameter multiplied by required parent thickness.
+    # available area is parent excess area + nozzle excess area over an effective
+    # reinforcement width related to opening and parent geometry.
+    effective_half_width_m = min(0.5 * opening_diameter_m, (opening_diameter_m * parent_diameter_m) ** 0.5)
+    available_area_m2 = (opening_diameter_m * parent_excess_m) + (2.0 * effective_half_width_m * nozzle_excess_m)
+    required_area_m2 = opening_diameter_m * parent_required_thickness_m
+
+    return _to_record(
+        check_id=check_id,
+        component="nozzle",
+        parent_component=parent_component,
+        formula=(
+            "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; "
+            "A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), "
+            "w=min(d/2,sqrt(d*D_parent))"
+        ),
+        inputs={
+            "d_opening_m": opening_diameter_m,
+            "D_parent_m": parent_diameter_m,
+            "CA_m": corrosion_allowance_m,
+            "t_parent_m": parent_provided_thickness_m,
+            "t_required_parent_m": parent_required_thickness_m,
+            "t_nozzle_m": nozzle_provided_thickness_m,
+            "t_required_nozzle_m": nozzle_required_thickness_m,
+            "w_effective_m": effective_half_width_m,
+            "A_available_m2": available_area_m2,
+        },
+        required=required_area_m2,
+        provided=available_area_m2,
+        parent_check_id=parent_check_id,
+    )
+
+
 def _build_ug28_external_check(
     *,
     check_id: str,
@@ -577,6 +682,8 @@ def _to_record(
     inputs: dict[str, float],
     required: float,
     provided: float,
+    parent_component: str | None = None,
+    parent_check_id: str | None = None,
     design_pressure_pa: float | None = None,
     computed_mawp_pa: float | None = None,
 ) -> CalculationRecord:
@@ -602,6 +709,8 @@ def _to_record(
         "provided_thickness_m": provided_rounded,
         "margin_m": margin,
         "utilization_ratio": utilization,
+        "parent_component": parent_component,
+        "parent_check_id": parent_check_id,
         "design_pressure_pa": design_pressure_pa,
         "computed_mawp_pa": computed_mawp_pa,
         "pressure_margin_pa": pressure_margin_pa,
@@ -619,6 +728,8 @@ def _to_record(
         provided_thickness_m=provided_rounded,
         margin_m=margin,
         utilization_ratio=utilization,
+        parent_component=parent_component,
+        parent_check_id=parent_check_id,
         design_pressure_pa=design_pressure_pa,
         computed_mawp_pa=round(computed_mawp_pa, 9) if computed_mawp_pa is not None else None,
         pressure_margin_pa=pressure_margin_pa,
@@ -693,3 +804,25 @@ def _external_pressure_from_requirements(requirement_set: RequirementSet) -> Qua
     if external_pressure is None:
         return None
     return Quantity(value=float(external_pressure.value), unit="Pa")
+
+
+def _validate_model_domain_gate(inputs: SizingCheckInput) -> None:
+    if not (0.0 < inputs.joint_efficiency <= 1.0):
+        raise ValueError("BL-003 model-domain gate failed: joint_efficiency must be in (0, 1].")
+
+    if inputs.allowable_stress.value <= 0.0 or inputs.internal_pressure.value <= 0.0:
+        raise ValueError(
+            "BL-003 model-domain gate failed: allowable_stress and internal_pressure must be positive."
+        )
+
+    dimensional_values = {
+        "shell_inside_diameter": inputs.shell_inside_diameter.value,
+        "head_inside_diameter": inputs.head_inside_diameter.value,
+        "nozzle_inside_diameter": inputs.nozzle_inside_diameter.value,
+        "shell_provided_thickness": inputs.shell_provided_thickness.value,
+        "head_provided_thickness": inputs.head_provided_thickness.value,
+        "nozzle_provided_thickness": inputs.nozzle_provided_thickness.value,
+    }
+    for name, value in dimensional_values.items():
+        if value <= 0.0:
+            raise ValueError(f"BL-003 model-domain gate failed: {name} must be positive.")

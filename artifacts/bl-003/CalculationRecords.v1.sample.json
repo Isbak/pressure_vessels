@@ -31,11 +31,13 @@
         "S_Pa": 138000000.0
       },
       "margin_m": 0.001512132,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": true,
       "pressure_margin_pa": null,
       "provided_thickness_m": 0.02,
       "reproducibility": {
-        "canonical_payload_sha256": "295d54bf0a1a26eca5bf7a9173ab095a701c578c714a6cb0fa18a139555aaf58",
+        "canonical_payload_sha256": "33020df984bdb4d694ee5f14d2684e2c590cd2d8b1173e0e82b950344b57865c",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 0.018487868,
@@ -56,11 +58,13 @@
         "S_Pa": 138000000.0
       },
       "margin_m": 0.001398566,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": true,
       "pressure_margin_pa": null,
       "provided_thickness_m": 0.018,
       "reproducibility": {
-        "canonical_payload_sha256": "c7fcd8896be2e7836a1576369bf0e23d2657177f32629226e0631f7dce85068f",
+        "canonical_payload_sha256": "029e4bcd40343ac8fa38e1d5570f0200a0be5293ed19801c41925f32b012a844",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 0.016601434,
@@ -81,11 +85,13 @@
         "d_m": 0.35
       },
       "margin_m": -0.001702007,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": false,
       "pressure_margin_pa": null,
       "provided_thickness_m": 0.004,
       "reproducibility": {
-        "canonical_payload_sha256": "3bb241108dd63bac5374989b8ab879ce53477a0a7cd24b2af432697c1b33da79",
+        "canonical_payload_sha256": "4d2750ab5bc341ef3a54af0cec7ff0dce04e0885f63165587122e7a5d0553d7a",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 0.005702007,
@@ -107,11 +113,13 @@
         "t_m": 0.02
       },
       "margin_m": -1799999.98,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": true,
       "pressure_margin_pa": 173965.551375965,
       "provided_thickness_m": 0.02,
       "reproducibility": {
-        "canonical_payload_sha256": "acef0981232a83e05082b2230067823bfcf491d1eb683eb2853d966b32e55405",
+        "canonical_payload_sha256": "d621e6d2e73f3a444b7ef0704c1afaed6fa41407d029fb056e8fb435774082a6",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 1800000.0,
@@ -133,11 +141,13 @@
         "t_m": 0.018
       },
       "margin_m": -1799999.982,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": true,
       "pressure_margin_pa": 184771.573604061,
       "provided_thickness_m": 0.018,
       "reproducibility": {
-        "canonical_payload_sha256": "76b01c9857f89860e0a919905387ab3d5b0fd7ffe214d34885fe548006464a5f",
+        "canonical_payload_sha256": "88093be5ab8d7af3a8ab4fcc682f538cfdc78bd8522aeef980e4d546d71d3e45",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 1800000.0,
@@ -159,15 +169,79 @@
         "t_m": 0.004
       },
       "margin_m": -1799999.996,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": false,
       "pressure_margin_pa": -1131242.873432155,
       "provided_thickness_m": 0.004,
       "reproducibility": {
-        "canonical_payload_sha256": "02d1e2151e50baad765820bbc3f479efd85fa6a515ed378fc9daad148bfc9150",
+        "canonical_payload_sha256": "feddf74ae8326aba140b97d81ccb3fa3d4f606316ac7c4f52c8e2500c7aa6d71",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 1800000.0,
       "utilization_ratio": 450000000.0
+    },
+    {
+      "check_id": "UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "component": "nozzle",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "inputs": {
+        "A_available_m2": 0.0005292461999999998,
+        "CA_m": 0.003,
+        "D_parent_m": 2.0,
+        "d_opening_m": 0.35,
+        "t_nozzle_m": 0.004,
+        "t_parent_m": 0.02,
+        "t_required_nozzle_m": 0.005702007,
+        "t_required_parent_m": 0.018487868,
+        "w_effective_m": 0.175
+      },
+      "margin_m": -0.005941508,
+      "parent_check_id": "UG-27-shell",
+      "parent_component": "shell",
+      "pass_status": false,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.000529246,
+      "reproducibility": {
+        "canonical_payload_sha256": "1034314e4525b2e031e226007f0df44258e25c8a73dc5767f581536c3115b611",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.006470754,
+      "utilization_ratio": 12.226363544
+    },
+    {
+      "check_id": "UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "component": "nozzle",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "inputs": {
+        "A_available_m2": 0.0004894980999999989,
+        "CA_m": 0.003,
+        "D_parent_m": 2.0,
+        "d_opening_m": 0.35,
+        "t_nozzle_m": 0.004,
+        "t_parent_m": 0.018,
+        "t_required_nozzle_m": 0.005702007,
+        "t_required_parent_m": 0.016601434,
+        "w_effective_m": 0.175
+      },
+      "margin_m": -0.005321004,
+      "parent_check_id": "UG-32-head",
+      "parent_component": "head",
+      "pass_status": false,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.000489498,
+      "reproducibility": {
+        "canonical_payload_sha256": "a79353043099ebbe58d8da1feaba85d040237256b8476bac5a894d1f32b9cec5",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.005810502,
+      "utilization_ratio": 11.870328377
     },
     {
       "check_id": "UG-28-shell-external",
@@ -189,11 +263,13 @@
         "t_net_m": 0.017
       },
       "margin_m": -49999.98,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": false,
       "pressure_margin_pa": -9328.278388278,
       "provided_thickness_m": 0.02,
       "reproducibility": {
-        "canonical_payload_sha256": "636183cc77cc461cd62e0bc00ab07f52866b5a82e092a6fc9057dae1f89de20b",
+        "canonical_payload_sha256": "7db3d15c9cb49aa6075faf50c23c95f0ee91bbe21eebdaa22e677e3db0629e87",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 50000.0,
@@ -219,21 +295,23 @@
         "t_net_m": 0.015
       },
       "margin_m": -49999.982,
+      "parent_check_id": null,
+      "parent_component": null,
       "pass_status": false,
       "pressure_margin_pa": -22802.197802198,
       "provided_thickness_m": 0.018,
       "reproducibility": {
-        "canonical_payload_sha256": "76ab1caba981f174080204593c6046d1f5120b38e733a7dfa8a907946afd5af1",
+        "canonical_payload_sha256": "97dd3c2e7ffe528161d5125e0352829f9e76fd808319235832d885cc39c66495",
         "hash_algorithm": "sha256"
       },
       "required_thickness_m": 50000.0,
       "utilization_ratio": 2777777.777777778
     }
   ],
-  "deterministic_hash": "f635a125c8979634ad9150bd03986a4449211f11565ab39de36fc0652eb2514e",
+  "deterministic_hash": "d0912c1224e1a7c0a351d6250831894f90406091a4887a7b2c2b1ffb3e381d02",
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
   "schema_version": "CalculationRecords.v1",
-  "source_applicability_matrix_hash": "d489877471a3073e7505121ecc4b7a8a996cb0f3e92890f11580bfc6ff89193e",
+  "source_applicability_matrix_hash": "b7c919a588abb8c573f21d804d8e84a4e8e7683a23c42fe7149b9f00083aa0e5",
   "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
   "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
 }

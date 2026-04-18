@@ -1,5 +1,5 @@
 {
-  "deterministic_hash": "8a81359bc4347d83ee0802efcf0394fda2f128ee67e4a2bd790e5fb184838d5d",
+  "deterministic_hash": "274805f654f221337be492b175f6289c1bdf808928430494c8407af05978916f",
   "entries": [
     {
       "check_id": "UG-45-nozzle",
@@ -15,6 +15,22 @@
       "component": "nozzle",
       "observed": "mawp=668757.127 Pa",
       "required": "minimum_design_pressure=1800000.000 Pa",
+      "severity": "major"
+    },
+    {
+      "check_id": "UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "component": "nozzle",
+      "observed": "provided=0.000529 m",
+      "required": "minimum=0.006471 m",
+      "severity": "major"
+    },
+    {
+      "check_id": "UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "component": "nozzle",
+      "observed": "provided=0.000489 m",
+      "required": "minimum=0.005811 m",
       "severity": "major"
     },
     {
@@ -36,5 +52,5 @@
   ],
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
   "schema_version": "NonConformanceList.v1",
-  "source_calculation_records_hash": "f635a125c8979634ad9150bd03986a4449211f11565ab39de36fc0652eb2514e"
+  "source_calculation_records_hash": "d0912c1224e1a7c0a351d6250831894f90406091a4887a7b2c2b1ffb3e381d02"
 }

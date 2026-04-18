@@ -8,18 +8,18 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b
-- Next item to implement: BL-003c
-- BL-003c title: Implement reinforcement-area replacement (UG-37/UG-45 full)
-- BL-003c depends_on: BL-003 (already done)
-- BL-003c acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c
+- Next item to implement: BL-003d
+- BL-003d title: Report margins and utilization ratios
+- BL-003d depends_on: BL-003 (already done)
+- BL-003d acceptance criteria:
 
-  1) Reinforcement-area replacement is computed per UG-37/UG-45 for each nozzle.
-  2) Records reference both nozzle and parent shell/head.
+  1) Each CalculationRecord exposes provided/required margin and utilization ratio.
+  2) Near-limit threshold is configurable and persisted on the record.
 
-- BL-003c deliverables:
+- BL-003d deliverables:
 
-  - Reinforcement entries in `CalculationRecords.v1`
+  - Margin/utilization fields on CalculationRecord
 
 Repository constraints:
 
@@ -49,19 +49,19 @@ Existing relevant files:
 
 Task:
 
-1) Extend BL-003 calculations to include deterministic reinforcement-area replacement checks for nozzles per UG-37/UG-45.
-2) Ensure reinforcement checks connect nozzle calculations to parent shell/head routes where applicable.
-3) Ensure each reinforcement result is linked to `clause_id`, includes reproducibility hash metadata, and is integrated into `CalculationRecords.v1` deterministically.
+1) Extend BL-003 calculations to include explicit near-limit reporting fields on each `CalculationRecord` (deterministic and backward-compatible).
+2) Add a configurable near-limit threshold (defaulted deterministically) and persist the threshold/value(s) on records needed for downstream compliance rendering.
+3) Ensure margin/utilization reporting remains clause-linked and reproducibility-safe (hash behavior remains deterministic and stable).
 4) Enforce/extend handoff, model-domain, and clause-coverage gates as needed without weakening current controls.
 5) Persist updated sample BL-003 artifacts under `artifacts/bl-003/`.
 6) Add/extend tests in `tests/test_calculation_pipeline.py` for:
 
-   - deterministic reinforcement outputs
-   - clause linkage and reproducibility metadata
-   - parent-component linkage behavior for nozzle reinforcement checks
+   - deterministic margin/utilization outputs
+   - near-limit threshold configurability and persistence
+   - clause linkage and reproducibility metadata compatibility
    - interactions with existing pass/fail and non-conformance behavior
 
-7) Update `docs/interfaces/calculation_pipeline_contract.md` to document reinforcement behavior and schema updates.
+7) Update `docs/interfaces/calculation_pipeline_contract.md` to document margin/utilization behavior and schema updates.
 
 Output format:
 

@@ -75,6 +75,8 @@ def test_calculation_pipeline_generates_expected_pass_fail_and_non_conformance()
         "shell",
         "head",
         "nozzle",
+        "nozzle",
+        "nozzle",
     ]
     assert [record.clause_id for record in calc.checks] == [
         "UG-27",
@@ -83,15 +85,22 @@ def test_calculation_pipeline_generates_expected_pass_fail_and_non_conformance()
         "UG-27",
         "UG-32",
         "UG-45",
+        "UG-37",
+        "UG-37",
     ]
-    assert [record.pass_status for record in calc.checks] == [True, True, False, True, True, False]
+    assert [record.pass_status for record in calc.checks] == [True, True, False, True, True, False, False, False]
     for record in calc.checks:
         assert record.utilization_ratio > 0.0
 
-    assert len(non_conformance.entries) == 2
-    assert [entry.check_id for entry in non_conformance.entries] == ["UG-45-nozzle", "UG-45-nozzle-mawp"]
-    assert [entry.clause_id for entry in non_conformance.entries] == ["UG-45", "UG-45"]
-    assert [entry.component for entry in non_conformance.entries] == ["nozzle", "nozzle"]
+    assert len(non_conformance.entries) == 4
+    assert [entry.check_id for entry in non_conformance.entries] == [
+        "UG-45-nozzle",
+        "UG-45-nozzle-mawp",
+        "UG-37-nozzle-shell-reinforcement",
+        "UG-37-nozzle-head-reinforcement",
+    ]
+    assert [entry.clause_id for entry in non_conformance.entries] == ["UG-45", "UG-45", "UG-37", "UG-37"]
+    assert [entry.component for entry in non_conformance.entries] == ["nozzle", "nozzle", "nozzle", "nozzle"]
     assert non_conformance.entries[0].required.startswith("minimum=")
     assert non_conformance.entries[1].required.startswith("minimum_design_pressure=")
 
@@ -260,6 +269,30 @@ def test_external_pressure_checks_run_only_when_external_pressure_is_declared():
     ]
 
 
+def test_reinforcement_outputs_are_deterministic_clause_linked_and_parent_linked():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    calc_a, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    calc_b, _ = run_calculation_pipeline(req, design_basis, matrix, now_utc=FIXED_NOW)
+    assert calc_a.to_json_dict() == calc_b.to_json_dict()
+
+    reinforcement_checks = [record for record in calc_a.checks if record.check_id.startswith("UG-37-")]
+    assert [record.check_id for record in reinforcement_checks] == [
+        "UG-37-nozzle-shell-reinforcement",
+        "UG-37-nozzle-head-reinforcement",
+    ]
+    assert [record.clause_id for record in reinforcement_checks] == ["UG-37", "UG-37"]
+    assert [record.parent_component for record in reinforcement_checks] == ["shell", "head"]
+    assert [record.parent_check_id for record in reinforcement_checks] == ["UG-27-shell", "UG-32-head"]
+    assert all(record.reproducibility.hash_algorithm == "sha256" for record in reinforcement_checks)
+    assert all(len(record.reproducibility.canonical_payload_sha256) == 64 for record in reinforcement_checks)
+
+
 def test_external_pressure_outputs_are_deterministic_and_clause_linked():
     prompt = (
         "Design a horizontal pressure vessel for propane storage, "
@@ -342,6 +375,37 @@ def test_handoff_gate_rejects_mismatched_applicability_matrix():
 
     with pytest.raises(ValueError, match="applicability_matrix"):
         run_calculation_pipeline(req_a, design_basis_a, matrix_b, now_utc=FIXED_NOW)
+
+
+def test_model_domain_gate_rejects_out_of_range_joint_efficiency():
+    prompt = (
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    req, design_basis, matrix = _build_inputs(prompt)
+
+    invalid = SizingCheckInput(
+        internal_pressure=Quantity(value=1.8, unit="MPa"),
+        allowable_stress=Quantity(value=138.0, unit="MPa"),
+        joint_efficiency=1.1,
+        corrosion_allowance=Quantity(value=3.0, unit="mm"),
+        shell_inside_diameter=Quantity(value=2.0, unit="m"),
+        shell_provided_thickness=Quantity(value=20.0, unit="mm"),
+        head_inside_diameter=Quantity(value=2.0, unit="m"),
+        head_provided_thickness=Quantity(value=18.0, unit="mm"),
+        nozzle_inside_diameter=Quantity(value=0.35, unit="m"),
+        nozzle_provided_thickness=Quantity(value=4.0, unit="mm"),
+    )
+
+    with pytest.raises(ValueError, match="model-domain gate failed"):
+        run_calculation_pipeline(
+            req,
+            design_basis,
+            matrix,
+            sizing_input=invalid,
+            now_utc=FIXED_NOW,
+        )
 
 
 def test_write_calculation_artifacts_persists_canonical_json(tmp_path):

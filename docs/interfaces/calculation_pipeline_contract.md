@@ -65,6 +65,8 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
       "provided_thickness_m": 0.02,
       "margin_m": 0.001512132,
       "utilization_ratio": 0.9243934,
+      "parent_component": null,
+      "parent_check_id": null,
       "design_pressure_pa": null,
       "computed_mawp_pa": null,
       "pressure_margin_pa": null,
@@ -113,6 +115,7 @@ When `sizing_input=None`, the pipeline injects MVP placeholder values (allowable
   - `inputs` snapshot in canonical SI units (`Pa`, `m`, dimensionless)
 
   - `required_thickness_m`, `provided_thickness_m`, `margin_m`, `utilization_ratio`
+  - `parent_component`, `parent_check_id` (set for routed checks such as nozzle reinforcement linked to shell/head parent checks)
 
   - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for pressure-capacity checks such as MAWP and UG-28 external-pressure)
 
@@ -174,11 +177,37 @@ Clause-coverage gate impact:
 
 - If an external-pressure check is produced, `UG-28` **must** be marked applicable in `ApplicabilityMatrix`; otherwise BL-003 raises deterministic `ValueError`.
 
+## Reinforcement-Area Replacement (BL-003c / UG-37 + UG-45 linkage)
+
+BL-003c adds deterministic nozzle reinforcement-area replacement checks:
+
+- `UG-37-nozzle-shell-reinforcement`
+- `UG-37-nozzle-head-reinforcement`
+
+Deterministic route (UG-37 area replacement with UG-45 nozzle-thickness linkage):
+
+- Uses required nozzle thickness from `UG-45-nozzle` (`t_r_nozzle`) and required parent thickness from the linked parent route (`UG-27-shell` or `UG-32-head`) as `t_r_parent`.
+- Computes required reinforcement area `A_req = d_opening * t_r_parent`.
+- Computes available reinforcement area
+  `A_avail = d_opening*max(t_parent-t_r_parent,0) + 2*w*max(t_nozzle-t_r_nozzle,0)`.
+- Uses deterministic effective half-width `w = min(d_opening/2, sqrt(d_opening*D_parent))`.
+- Pass criterion: `A_avail >= A_req`.
+
+Each reinforcement record includes:
+
+- `clause_id: "UG-37"`
+- `component: "nozzle"`
+- `parent_component: "shell" | "head"`
+- `parent_check_id: "UG-27-shell" | "UG-32-head"`
+- per-check reproducibility metadata (`sha256`)
+
+Clause-coverage gate impact:
+
+- If reinforcement checks are produced, `UG-37` **must** be marked applicable in `ApplicabilityMatrix`; otherwise BL-003 raises deterministic `ValueError`.
+
 ## Scope (MVP) and Deferred Items
 
-BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure, plus conditional UG-28 external-pressure checks for shell/head. The following Workflow D items remain deferred and tracked as follow-up backlog entries BL-003c..BL-003e:
-
-- BL-003c Reinforcement-area replacement (UG-37 / UG-45 full)
+BL-003 MVP now implements thickness + MAWP checks for shell (UG-27), head (UG-32), and nozzle (UG-45) under internal pressure, conditional UG-28 external-pressure checks for shell/head, and UG-37 nozzle reinforcement-area replacement with parent-route linkage. The following Workflow D items remain deferred and tracked as follow-up backlog entries:
 
 - BL-003d Margin / utilization near-limit reporting
 
