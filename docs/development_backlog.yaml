@@ -475,3 +475,13 @@ items:
   - Stack foundation implementation plan and bootstrap modules
   - Environment provisioning manifests
   - Updated operations runbook
+- id: BL-019
+  title: Automate governance and CI control drift review
+  status: todo
+  depends_on: []
+  source: audit 2026-04-18, observation 1 and 3
+- id: BL-020
+  title: Add README-anchor consistency check trigger
+  status: todo
+  depends_on: []
+  source: audit 2026-04-18, observation 2
