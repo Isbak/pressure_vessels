@@ -459,7 +459,7 @@ items:
   area: platform
   phase: 'Phase 4: Hardening'
   priority: P2
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-012

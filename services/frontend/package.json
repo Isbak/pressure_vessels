@@ -1,0 +1,11 @@
+{
+  "name": "pressure-vessels-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "description": "BL-018 frontend service skeleton",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}

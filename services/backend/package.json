@@ -1,0 +1,11 @@
+{
+  "name": "pressure-vessels-backend",
+  "private": true,
+  "version": "0.0.1",
+  "description": "BL-018 backend service skeleton",
+  "scripts": {
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  }
+}
