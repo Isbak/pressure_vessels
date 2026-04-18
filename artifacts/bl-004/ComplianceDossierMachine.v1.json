@@ -40,7 +40,8 @@
     {
       "applicable": true,
       "check_ids": [
-        "UG-27-shell"
+        "UG-27-shell",
+        "UG-27-shell-mawp"
       ],
       "clause_id": "UG-27",
       "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified.",
@@ -56,7 +57,8 @@
     {
       "applicable": true,
       "check_ids": [
-        "UG-32-head"
+        "UG-32-head",
+        "UG-32-head-mawp"
       ],
       "clause_id": "UG-32",
       "justification": "Applicable because head thickness under internal pressure must be verified.",
@@ -65,7 +67,18 @@
     {
       "applicable": true,
       "check_ids": [
-        "UG-45-nozzle"
+        "UG-37-nozzle-head-reinforcement",
+        "UG-37-nozzle-shell-reinforcement"
+      ],
+      "clause_id": "UG-37",
+      "justification": "Applicable because nozzle openings require reinforcement-area replacement checks against parent components.",
+      "status": "fail"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-45-nozzle",
+        "UG-45-nozzle-mawp"
       ],
       "clause_id": "UG-45",
       "justification": "Applicable because nozzle neck minimum thickness must be verified.",
@@ -80,95 +93,165 @@
     }
   ],
   "compliance_matrix_schema_version": "ComplianceMatrix.v1",
-  "deterministic_hash": "c595a8c9a0bda1967927853d48c29230686d381f5b1b49f7d432cd436f1f98d2",
+  "deterministic_hash": "cf416be5db56572d3ae44a6f870bc9fd32aa870087fec7b91434e817894bcba1",
   "evidence_link_set_schema_version": "EvidenceLinkSet.v1",
   "evidence_links": [
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-16",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-16",
       "clause_id": "UG-16",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "code_standard",
       "result_id": "UG-16:applicable=true"
     },
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-20",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-20",
       "clause_id": "UG-20",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "code_standard",
       "result_id": "UG-20:applicable=true"
     },
     {
-      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-27-shell",
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "model_id": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-27-shell-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell",
       "clause_id": "UG-27",
       "model_id": "t = (P*D)/(2*(S*E-0.6P)) + CA",
       "requirement_field": "code_standard",
       "result_id": "UG-27-shell:pass=true"
     },
     {
-      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-32-head",
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "model_id": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-32-head-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head",
       "clause_id": "UG-32",
       "model_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
       "requirement_field": "code_standard",
       "result_id": "UG-32-head:pass=true"
     },
     {
-      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-45-nozzle",
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-37-nozzle-head-reinforcement:pass=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-37-nozzle-shell-reinforcement:pass=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "model_id": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-45-nozzle-mawp:pass=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle",
       "clause_id": "UG-45",
       "model_id": "t = (0.5*P*d)/(S*E-0.4P) + CA",
       "requirement_field": "code_standard",
       "result_id": "UG-45-nozzle:pass=false"
     },
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-25",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-25",
       "clause_id": "UG-25",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "corrosion_allowance",
       "result_id": "UG-25:applicable=true"
     },
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-16",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-16",
       "clause_id": "UG-16",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "design_pressure",
       "result_id": "UG-16:applicable=true"
     },
     {
-      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-27-shell",
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "model_id": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-27-shell-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell",
       "clause_id": "UG-27",
       "model_id": "t = (P*D)/(2*(S*E-0.6P)) + CA",
       "requirement_field": "design_pressure",
       "result_id": "UG-27-shell:pass=true"
     },
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-28",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-28",
       "clause_id": "UG-28",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "design_pressure",
       "result_id": "UG-28:applicable=false"
     },
     {
-      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-32-head",
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "model_id": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-32-head-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-32-head",
       "clause_id": "UG-32",
       "model_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
       "requirement_field": "design_pressure",
       "result_id": "UG-32-head:pass=true"
     },
     {
-      "artifact_ref": "CalculationRecords.v1#21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822:UG-45-nozzle",
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-37-nozzle-head-reinforcement:pass=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-37-nozzle-shell-reinforcement:pass=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "model_id": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-45-nozzle-mawp:pass=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-45-nozzle",
       "clause_id": "UG-45",
       "model_id": "t = (0.5*P*d)/(S*E-0.4P) + CA",
       "requirement_field": "design_pressure",
       "result_id": "UG-45-nozzle:pass=false"
     },
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UCS-66",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UCS-66",
       "clause_id": "UCS-66",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "design_temperature",
       "result_id": "UCS-66:applicable=false"
     },
     {
-      "artifact_ref": "ApplicabilityMatrix.v1#91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8:UG-20",
+      "artifact_ref": "ApplicabilityMatrix.v1#7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527:UG-20",
       "clause_id": "UG-20",
       "model_id": "ApplicabilityModel.v1",
       "requirement_field": "design_temperature",
@@ -176,6 +259,10 @@
     }
   ],
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "reproducibility": {
+    "canonicalization": "json.sort_keys+compact",
+    "hash_algorithm": "sha256"
+  },
   "review_checklist": [
     {
       "evidence_refs": [
@@ -205,9 +292,9 @@
   ],
   "review_checklist_schema_version": "ReviewChecklist.v1",
   "schema_version": "ComplianceDossierMachine.v1",
-  "source_applicability_matrix_hash": "91be392c526af7571b47c6a7044ab15c4c31da33bdea77d44c0c6a2b354e1cd8",
-  "source_calculation_records_hash": "21c0dd6196b558211c2c20af0d24b9045be7d26fb383044f9d50b35f66621822",
+  "source_applicability_matrix_hash": "7efb490b7021fcd2264d0928dd14a5d72e3a9d05e763396fc57a0009e048b527",
+  "source_calculation_records_hash": "8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a",
   "source_design_basis_signature": "bf45824c0ec969973612ce4f1994a771ca20c8f8df2c906f7d4da7a0c3169ef4",
-  "source_non_conformance_hash": "be07b2ee50b74ff8e2ec2012de4f345980df898d62588fbc80b4e3226604943f",
+  "source_non_conformance_hash": "ed09bfdf784bb6845ef5b15810a9524b8753f7d36382f61d1fb31539d1e7edf6",
   "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
 }
