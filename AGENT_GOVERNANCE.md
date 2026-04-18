@@ -80,9 +80,11 @@ Classify every PR as one of:
    - One agent produces the patch.
 3. **Cross-check**
    - The other agent performs an independent review and flags:
+
      - correctness issues,
      - safety/compliance risks,
      - missing tests.
+
 4. **Human review**
    - Required reviewer(s) approve according to risk class.
 5. **Merge**
@@ -238,4 +240,3 @@ You are close to best practice when all of the following are true:
 - Keep agent-specific instructions in `.agents/codex/AGENTS.md` and `.agents/claude/CLAUDE.md`.
 - Keep PR governance checks in `.github/pull_request_template.md`.
 - Revisit quarterly or after any major incident.
-
