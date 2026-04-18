@@ -20,7 +20,6 @@ RULE_LABELS = {
     "MD012": "multiple-consecutive-blank-lines",
     "MD022": "blanks-around-headings",
     "MD031": "blanks-around-fences",
-    "MD032": "blanks-around-lists",
     "MD040": "fenced-code-language",
     "MD047": "single-trailing-newline",
 }
