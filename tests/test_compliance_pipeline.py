@@ -167,6 +167,8 @@ def test_dossier_schema_shapes_include_required_sections():
     assert isinstance(machine_json["evidence_links"], list)
     assert isinstance(machine_json["review_checklist"], list)
     assert machine_json["material_basis"]["schema_version"] == "MaterialBasis.v1"
+    assert "geometry_basis" in machine_json
+    assert "geometry_basis_ref" in human_json
     assert "reproducibility" in machine_json
     assert human_json["material_basis_ref"].startswith("MaterialBasis.v1:")
 

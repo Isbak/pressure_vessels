@@ -4,7 +4,7 @@ This document defines the deterministic contract for the **Calculation Engine** 
 
 ## Entry Point
 
-- Python API: `pressure_vessels.calculation_pipeline.run_calculation_pipeline(requirement_set, design_basis, applicability_matrix, sizing_input=None, now_utc=None, near_limit_threshold=0.9)`
+- Python API: `pressure_vessels.calculation_pipeline.run_calculation_pipeline(requirement_set, design_basis, applicability_matrix, sizing_input=None, geometry_input=None, now_utc=None, near_limit_threshold=0.9, strict_sizing_input_gate=False)`
 
 - Persistence helper: `pressure_vessels.calculation_pipeline.write_calculation_artifacts(calc_artifact, non_conformance_artifact, directory)`
 
@@ -42,6 +42,17 @@ BL-003 fails closed when caller inputs are outside deterministic engineering-mod
 
 When `sizing_input=None`, the pipeline now resolves allowable stress, joint efficiency, and corrosion policy from the deterministic materials module and only applies MVP placeholders for geometry. Material allowables are versioned and include standards-package trace fields. Corrosion allowance policy is explicit and persisted in both `material_basis` and `applied_defaults`.
 
+## Geometry/CAD Interface + Strict Sizing Gate (BL-014)
+
+- `pressure_vessels.geometry_module.GeometryInput` provides deterministic geometry revision metadata and canonical shell/head/nozzle dimensions.
+- When `geometry_input` is supplied, BL-003/BL-014 derives sizing routes from:
+  - pressure/material/corrosion from deterministic requirement + materials basis
+  - geometry dimensions from `GeometryInput`.
+- When `strict_sizing_input_gate=True`, the pipeline fails closed unless either:
+  - `sizing_input` is provided, or
+  - `geometry_input` is provided.
+- Fail-closed error string: `"BL-014 strict sizing-input gate failed: sizing_input or geometry_input is required."`
+
 ## Output Artifacts
 
 `run_calculation_pipeline` returns a tuple:
@@ -73,10 +84,28 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
       "value_mm": 3.0
     }
   },
+  "geometry_basis": {
+    "source": "geometry_module.GeometryInput.v1",
+    "geometry_revision_id": "REV-2026-04-18-A",
+    "source_system": "cad-system",
+    "source_model_sha256": "<sha256>"
+  },
   "applied_defaults": {
     "applied_mvp_defaults": false,
     "values": {},
     "source": "caller-provided"
+  },
+  "cad_ready_parameter_export": {
+    "schema_version": "CadReadyParameterExport.v1",
+    "geometry_revision_id": "REV-2026-04-18-A",
+    "source_system": "cad-system",
+    "source_model_sha256": "<sha256>",
+    "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>",
+    "parameters": {
+      "shell_inside_diameter_m": 2.4,
+      "shell_provided_thickness_m": 0.022
+    },
+    "deterministic_hash": "<sha256>"
   },
   "checks": [
     {

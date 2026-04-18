@@ -88,10 +88,21 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
     "material_spec": "SA-516 Gr.70",
     "corrosion_allowance_policy": {"policy_id": "CA-INPUT-REQUIREMENT"}
   },
+  "geometry_basis": {
+    "source": "geometry_module.GeometryInput.v1",
+    "geometry_revision_id": "REV-2026-04-18-A",
+    "source_system": "cad-system",
+    "source_model_sha256": "<sha256>"
+  },
   "applied_defaults": {
     "applied_mvp_defaults": true,
     "values": {"allowable_stress_Pa": 138000000.0},
     "source": "BL-003 MVP placeholder; replace with Materials Module outputs."
+  },
+  "cad_ready_parameter_export": {
+    "schema_version": "CadReadyParameterExport.v1",
+    "geometry_revision_id": "REV-2026-04-18-A",
+    "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>"
   },
   "deterministic_hash": "<sha256 over canonical unsigned ComplianceDossierMachine payload>"
 }
@@ -110,6 +121,7 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
   "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>",
   "source_non_conformance_hash": "<NonConformanceList.deterministic_hash>",
   "material_basis_ref": "MaterialBasis.v1:ASME Section VIII Division 1:ASME_BPVC_2023:ASME_BPVC_2023.materials.2026-04",
+  "geometry_basis_ref": "geometry_module.GeometryInput.v1:REV-2026-04-18-A",
   "reproducibility": {
     "canonicalization": "json.sort_keys+compact",
     "hash_algorithm": "sha256"
@@ -144,6 +156,7 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
 - Each requirement-to-clause pair present in `ApplicabilityMatrix.evidence_fields` (where the requirement exists) must have at least one evidence link.
 - Each applicable clause must have at least one evidence link.
 - `review_checklist` is generated as deterministic fixed IDs (`CHK-001`..`CHK-003`).
+- Geometry revision trace metadata is carried through from `CalculationRecords.geometry_basis` and CAD export metadata from `CalculationRecords.cad_ready_parameter_export`.
 - Both dossier hashes are sha256 over canonical unsigned payloads (`json.dumps(..., sort_keys=True, separators=(",",":"))`).
 
 ## Acceptance-Criteria Mapping

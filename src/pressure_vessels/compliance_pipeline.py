@@ -82,7 +82,9 @@ class ComplianceDossierMachine:
     evidence_links: list[EvidenceLink]
     review_checklist: list[ReviewChecklistItem]
     material_basis: dict[str, Any]
+    geometry_basis: dict[str, Any]
     applied_defaults: dict[str, Any]
+    cad_ready_parameter_export: dict[str, Any] | None
     deterministic_hash: str
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -102,7 +104,9 @@ class ComplianceDossierMachine:
             "evidence_links": [record.to_json_dict() for record in self.evidence_links],
             "review_checklist": [record.to_json_dict() for record in self.review_checklist],
             "material_basis": self.material_basis,
+            "geometry_basis": self.geometry_basis,
             "applied_defaults": self.applied_defaults,
+            "cad_ready_parameter_export": self.cad_ready_parameter_export,
             "deterministic_hash": self.deterministic_hash,
         }
 
@@ -118,6 +122,7 @@ class ComplianceDossierHuman:
     source_calculation_records_hash: str
     source_non_conformance_hash: str
     material_basis_ref: str
+    geometry_basis_ref: str
     reproducibility: dict[str, str]
     summary_lines: list[str]
     clause_matrix_rows: list[dict[str, str]]
@@ -136,6 +141,7 @@ class ComplianceDossierHuman:
             "source_calculation_records_hash": self.source_calculation_records_hash,
             "source_non_conformance_hash": self.source_non_conformance_hash,
             "material_basis_ref": self.material_basis_ref,
+            "geometry_basis_ref": self.geometry_basis_ref,
             "reproducibility": self.reproducibility,
             "summary_lines": self.summary_lines,
             "clause_matrix_rows": self.clause_matrix_rows,
@@ -187,7 +193,9 @@ def generate_compliance_dossier(
         "evidence_links": [record.to_json_dict() for record in evidence_links],
         "review_checklist": [record.to_json_dict() for record in checklist],
         "material_basis": calculation_records.material_basis,
+        "geometry_basis": calculation_records.geometry_basis,
         "applied_defaults": calculation_records.applied_defaults,
+        "cad_ready_parameter_export": calculation_records.cad_ready_parameter_export,
     }
     machine_hash = _sha256_payload(machine_payload)
 
@@ -207,7 +215,9 @@ def generate_compliance_dossier(
         evidence_links=evidence_links,
         review_checklist=checklist,
         material_basis=calculation_records.material_basis,
+        geometry_basis=calculation_records.geometry_basis,
         applied_defaults=calculation_records.applied_defaults,
+        cad_ready_parameter_export=calculation_records.cad_ready_parameter_export,
         deterministic_hash=machine_hash,
     )
 
@@ -229,6 +239,10 @@ def generate_compliance_dossier(
             f"{calculation_records.material_basis['schema_version']}:"
             f"{calculation_records.material_basis['standards_package_ref']}:"
             f"{calculation_records.material_basis['allowables_version']}"
+        ),
+        "geometry_basis_ref": (
+            f"{calculation_records.geometry_basis['source']}:"
+            f"{calculation_records.geometry_basis.get('geometry_revision_id')}"
         ),
         "reproducibility": {"canonicalization": "json.sort_keys+compact", "hash_algorithm": "sha256"},
         "summary_lines": [
@@ -273,6 +287,7 @@ def generate_compliance_dossier(
         source_calculation_records_hash=calculation_records.deterministic_hash,
         source_non_conformance_hash=non_conformance_list.deterministic_hash,
         material_basis_ref=human_payload["material_basis_ref"],
+        geometry_basis_ref=human_payload["geometry_basis_ref"],
         reproducibility=human_payload["reproducibility"],
         summary_lines=human_payload["summary_lines"],
         clause_matrix_rows=human_payload["clause_matrix_rows"],

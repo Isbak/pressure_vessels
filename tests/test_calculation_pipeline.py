@@ -10,6 +10,7 @@ from pressure_vessels.calculation_pipeline import (
     run_calculation_pipeline,
     write_calculation_artifacts,
 )
+from pressure_vessels.geometry_module import GEOMETRY_INPUT_VERSION, GeometryInput
 from pressure_vessels.design_basis_pipeline import build_design_basis
 from pressure_vessels.requirements_pipeline import (
     RequirementValue,
@@ -172,6 +173,59 @@ def test_applied_defaults_are_not_flagged_when_caller_supplies_sizing_input():
     assert calc.applied_defaults["applied_mvp_defaults"] is False
     assert calc.applied_defaults["values"] == {}
     assert calc.material_basis["material_spec"] == "SA-516 Gr.70"
+    assert calc.geometry_basis["source"] == "sizing_input"
+    assert calc.cad_ready_parameter_export is None
+
+
+def test_geometry_input_adapter_drives_deterministic_shell_head_nozzle_inputs():
+    req, design_basis, matrix = _build_inputs(
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    geometry_input = GeometryInput(
+        schema_version=GEOMETRY_INPUT_VERSION,
+        geometry_revision_id="REV-2026-04-18-A",
+        source_system="cad-system",
+        source_model_sha256="a" * 64,
+        shell_inside_diameter_m=2.4,
+        shell_provided_thickness_m=0.022,
+        head_inside_diameter_m=2.4,
+        head_provided_thickness_m=0.020,
+        nozzle_inside_diameter_m=0.30,
+        nozzle_provided_thickness_m=0.007,
+    )
+    calc, _ = run_calculation_pipeline(
+        req,
+        design_basis,
+        matrix,
+        geometry_input=geometry_input,
+        strict_sizing_input_gate=True,
+        now_utc=FIXED_NOW,
+    )
+
+    shell = next(record for record in calc.checks if record.check_id == "UG-27-shell")
+    assert shell.inputs["D_m"] == 2.4
+    assert calc.applied_defaults["applied_mvp_defaults"] is False
+    assert calc.geometry_basis["geometry_revision_id"] == "REV-2026-04-18-A"
+    assert calc.cad_ready_parameter_export is not None
+    assert calc.cad_ready_parameter_export["source_calculation_records_hash"] == calc.deterministic_hash
+
+
+def test_strict_sizing_input_gate_fails_closed_when_geometry_and_sizing_inputs_missing():
+    req, design_basis, matrix = _build_inputs(
+        "Design a horizontal pressure vessel for propane storage, "
+        "18 bar design pressure, 65°C design temperature, 30 m3 capacity, "
+        "ASME Section VIII Div 1, corrosion allowance 3 mm."
+    )
+    with pytest.raises(ValueError, match="BL-014 strict sizing-input gate failed"):
+        run_calculation_pipeline(
+            req,
+            design_basis,
+            matrix,
+            strict_sizing_input_gate=True,
+            now_utc=FIXED_NOW,
+        )
 
 
 def test_corrosion_policy_fallback_is_explicit_when_requirement_is_absent():
