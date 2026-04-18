@@ -12,7 +12,6 @@ This model is intended to be:
 
 - **Traceable**: links stakeholder needs to requirements, architecture, analysis, tests, and compliance evidence.
 
-
 ---
 
 ## 2) System Context and Mission
@@ -39,7 +38,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 
 - Manufacturing supply chain
 
-
 ### 2.3 Operational Environments
 
 - Indoor process unit
@@ -49,7 +47,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 - Transport and storage conditions
 
 - Commissioning/decommissioning states
-
 
 ---
 
@@ -65,7 +62,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 
 5. High availability with maintainable module replacement strategy.
 
-
 ---
 
 ## 4) Requirements Model (Layered)
@@ -79,7 +75,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 - **Level 2 (Subsystem/Module):** Shell, heads, nozzles, supports, instrumentation, joints, coatings.
 
 - **Level 3 (Component):** Material, dimensions, weld class, inspection acceptance, traceability.
-
 
 ## 4.2 Requirement Categories
 
@@ -119,7 +114,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 
   - Configuration control and backward-compatible interfaces.
 
-
 ## 4.3 Example Requirement IDs
 
 - `REQ-SYS-001`: The system shall maintain pressure boundary integrity for all approved load cases.
@@ -129,7 +123,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 - `REQ-IF-006`: Module interface geometry and rating shall be standardized and version controlled.
 
 - `REQ-QA-009`: Every pressure-boundary component shall have material and inspection traceability records.
-
 
 ---
 
@@ -150,7 +143,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 - Maintainability and replacement
 
 - Compliance and evidence management
-
 
 ## 5.2 Logical Subsystems
 
@@ -178,7 +170,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 
    - Digital thread: requirements ↔ rules ↔ calculations ↔ inspections ↔ artifacts.
 
-
 ## 5.3 Allocation Matrix (Excerpt)
 
 - Function “Containment” → Pressure Containment Subsystem
@@ -186,7 +177,6 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 - Function “Maintainability” → Structural + Process Interface + Configuration Subsystems
 
 - Function “Compliance evidence” → Configuration & Traceability Subsystem
-
 
 ---
 
@@ -204,13 +194,11 @@ The pressure tank system stores process fluids safely under defined pressure/tem
 
 - `M-INSTR-x`: instrumentation and tapping modules
 
-
 ## 6.2 Platform vs Variant Design
 
 - **Platform elements (common):** interface standards, data schema, quality gates, documentation model.
 
 - **Variant elements (scaled):** diameter/length count, nozzle count, thickness class, support size.
-
 
 ## 6.3 Interface Control
 
@@ -225,7 +213,6 @@ Use Interface Control Documents (ICDs) for:
 - Sensor and wiring handoff points
 
 - Digital identifiers and revision semantics
-
 
 ---
 
@@ -245,7 +232,6 @@ Use Interface Control Documents (ICDs) for:
 
 - Manufacturing constraints (forming/weld capability)
 
-
 ## 7.2 Derived Metrics
 
 - MAWP margin
@@ -258,7 +244,6 @@ Use Interface Control Documents (ICDs) for:
 
 - Standardization ratio (common parts / total parts)
 
-
 ## 7.3 Trade Studies
 
 Perform multi-objective trades:
@@ -268,7 +253,6 @@ Perform multi-objective trades:
 - Standardization vs performance optimization
 
 - Initial CAPEX vs lifecycle OPEX
-
 
 ---
 
@@ -292,7 +276,6 @@ Perform multi-objective trades:
 
 - Decommissioned
 
-
 ## 8.2 Event Triggers
 
 - Requirement change
@@ -304,7 +287,6 @@ Perform multi-objective trades:
 - Inspection finding / nonconformance
 
 - Rerating request
-
 
 Each trigger initiates impact analysis and potentially recalculation/reverification workflows.
 
@@ -322,7 +304,6 @@ Each trigger initiates impact analysis and potentially recalculation/reverificat
 
 - **Compliance level:** clause-by-clause evidence completeness.
 
-
 ## 9.2 Requirement-to-Test Traceability
 
 Each requirement should map to:
@@ -334,7 +315,6 @@ Each requirement should map to:
 3. Acceptance criteria
 
 4. Reviewer and approval record
-
 
 ## 9.3 Digital Acceptance Gate
 
@@ -356,7 +336,6 @@ To keep verification deterministic and auditable, V&V should execute through six
 
 6. **Change impact re-verification** — recompute minimal affected task set for requirement/code/model deltas.
 
-
 These workflows should be treated as release-gating functions, not optional reporting steps.
 
 ---
@@ -373,7 +352,6 @@ These workflows should be treated as release-gating functions, not optional repo
 
 - Immutable audit trail for engineering decisions and approvals.
 
-
 ### 10.1 Trigger-to-Workflow Rules
 
 For configuration control, the following events must trigger semantic re-verification:
@@ -388,7 +366,6 @@ For configuration control, the following events must trigger semantic re-verific
 
 - **Inspector nonconformance** -> open decision record and rerun workflow 5 after disposition.
 
-
 ---
 
 ## 11) Risk and Safety Engineering View
@@ -400,7 +377,6 @@ For configuration control, the following events must trigger semantic re-verific
 - Detection and diagnostics linked to instrumentation modules.
 
 - Residual risk tracked against acceptance thresholds.
-
 
 Optional methods: FMEA/FMECA, HAZOP integration, and risk-based inspection planning.
 
@@ -416,7 +392,6 @@ Optional methods: FMEA/FMECA, HAZOP integration, and risk-based inspection plann
 
 - Introduce new modules without breaking existing interface contracts.
 
-
 ## 12.2 Organizational Scalability
 
 - Shared module library with governance.
@@ -424,7 +399,6 @@ Optional methods: FMEA/FMECA, HAZOP integration, and risk-based inspection plann
 - Standard review gates and automated compliance checks.
 
 - Federated team workflow with central digital thread.
-
 
 ---
 
@@ -448,7 +422,6 @@ Optional methods: FMEA/FMECA, HAZOP integration, and risk-based inspection plann
 
 9. Compliance evidence index.
 
-
 ### 13.1 Semantic-Layer Deliverables (Required)
 
 In addition to the baseline package above, each released revision should include:
@@ -465,7 +438,6 @@ In addition to the baseline package above, each released revision should include
 
 6. Change-impact report showing why checks were or were not re-executed.
 
-
 ---
 
 ## 14) Practical Implementation Notes (for this repository context)
@@ -479,6 +451,5 @@ This model is designed to align directly with the existing ontology/information 
 - Baseline and change events linked to `configuration_baseline` and `lifecycle_event`.
 
 - Audit artifacts stored in `digital_artifact` with checksums and revision tags.
-
 
 The result is a complete **systems engineering layer on top of the modular pressure vessel data model**, enabling scalable product-line development with compliance-ready traceability.

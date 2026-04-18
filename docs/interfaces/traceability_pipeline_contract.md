@@ -20,7 +20,6 @@ Required fields:
   - `source_compliance_dossier_hash`
 - `links[]` containing deterministic `TraceabilityLink` entries
 
-
 ### `TraceabilityLink`
 
 Each link contains:
@@ -31,7 +30,6 @@ Each link contains:
 - `relation`
 - `clause_id` (optional clause scope)
 
-
 Allowed endpoint kinds:
 
 - `requirement`
@@ -40,7 +38,6 @@ Allowed endpoint kinds:
 - `calculation`
 - `artifact`
 - `approval`
-
 
 ## Query Helpers
 
@@ -55,13 +52,11 @@ Allowed endpoint kinds:
   - returns `TraceabilityAuditReportTemplate.v1`
   - includes deterministic `summary_lines` and `evidence_rows`
 
-
 ## Write and Immutability Rules
 
 - `write_traceability_graph_revision()` writes `<revision_id>.traceability_graph.json` with file mode `x` (no overwrite).
 - `with_additional_links()` blocks mutation when `immutable=true` unless explicitly bypassed.
 - Graph build validates upstream artifact hash/signature consistency before emitting a revision.
-
 
 ## Example Usage
 

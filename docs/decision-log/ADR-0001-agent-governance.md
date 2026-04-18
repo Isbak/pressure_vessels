@@ -4,7 +4,6 @@
 
 - Date: 2026-04-17
 
-
 ## Context
 
 The project requires consistent behavior across different coding/review agents.

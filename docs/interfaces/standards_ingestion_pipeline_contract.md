@@ -7,7 +7,6 @@ This document defines the deterministic contract for the standards ingestion pip
 - Python API: `pressure_vessels.standards_ingestion_pipeline.run_standards_ingestion(...)`
 - Persistence helper: `pressure_vessels.standards_ingestion_pipeline.write_standards_package(package, directory)`
 
-
 ## Pipeline Stages
 
 BL-005 ingestion runs these fail-closed stages in order:
@@ -20,7 +19,6 @@ BL-005 ingestion runs these fail-closed stages in order:
 6. Regression gating
 7. Immutable release packaging
 
-
 ## Source Intake Requirements
 
 Each `StandardSource` must provide non-empty:
@@ -31,7 +29,6 @@ Each `StandardSource` must provide non-empty:
 - `edition`
 - `revision`
 - `content_text`
-
 
 If any field is missing or empty, ingestion raises `ValueError`.
 
@@ -47,7 +44,6 @@ Release is blocked unless all conditions are true:
 - Every semantic link references known clause IDs.
 - At least one regression example is provided.
 - Every regression example passes (required clauses and required link pairs are present).
-
 
 If any condition fails, ingestion raises `ValueError` and no package is released.
 

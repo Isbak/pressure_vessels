@@ -8,7 +8,6 @@ Constraints:
 
 - Preserve backward compatibility unless stated otherwise.
 
-
 Validation:
 
 - Run: <commands>

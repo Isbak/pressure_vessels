@@ -4,7 +4,6 @@
 
 - Date: 2026-04-17
 
-
 ## Context
 
 The platform requires self-hosted, open-software model inference for agentic workflows, with predictable latency and high throughput.
@@ -19,7 +18,6 @@ Adopt **vLLM** as the primary production LLM serving runtime. Use Ollama for loc
 
 - Ollama-only
 
-
 ## Consequences
 
 - Improves production throughput and batching efficiency.
@@ -27,7 +25,6 @@ Adopt **vLLM** as the primary production LLM serving runtime. Use Ollama for loc
 - Adds operational complexity compared with developer-local runtimes.
 
 - Requires benchmark validation for model upgrades.
-
 
 ## Rollback / Migration Trigger
 

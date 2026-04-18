@@ -8,7 +8,6 @@
 
 - Cite governing code clauses when calculations or checks are reported.
 
-
 ## Development
 
 - Keep pull requests scoped and reversible.

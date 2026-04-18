@@ -6,7 +6,6 @@ This document defines the deterministic contract for the **Design Basis Engine**
 
 - Python API: `pressure_vessels.design_basis_pipeline.build_design_basis(requirement_set: RequirementSet, now_utc: datetime | None = None)`
 
-
 ## BL-001 Handoff Gate (Required)
 
 BL-002 proceeds only if all are true:
@@ -27,7 +26,6 @@ BL-002 proceeds only if all are true:
 
   - `code_standard`
 
-
 If any condition fails, BL-002 raises a deterministic `ValueError`.
 
 ## Output Artifacts
@@ -37,7 +35,6 @@ If any condition fails, BL-002 raises a deterministic `ValueError`.
 1. `DesignBasis.v1`
 
 2. `ApplicabilityMatrix.v1`
-
 
 ### Schema: `DesignBasis.v1`
 
