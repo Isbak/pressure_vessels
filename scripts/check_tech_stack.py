@@ -106,6 +106,19 @@ def main() -> int:
                 f"{component!r} is marked deployed but module_path does not exist: {module_path}"
             )
 
+    iac_key = "iac-opentofu-or-terraform"
+    if iac_key in registry:
+        iac_entry = registry[iac_key]
+        iac_status = iac_entry.get("status")
+        iac_module_path = iac_entry.get("module_path")
+        iac_module_exists = bool(iac_module_path) and (repo_root / iac_module_path).exists()
+        expected_iac_status = "deployed" if iac_module_exists else "planned"
+        if iac_status != expected_iac_status:
+            failures.append(
+                f"{iac_key!r} status must be {expected_iac_status!r} when module_path "
+                f"{'exists' if iac_module_exists else 'is absent'}: {iac_module_path}"
+            )
+
     extra_registry_keys = sorted(set(registry) - all_declared)
     if extra_registry_keys:
         failures.append(
