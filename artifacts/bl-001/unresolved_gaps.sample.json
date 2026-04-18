@@ -1,0 +1,14 @@
+[
+  {
+    "field": "design_pressure",
+    "reason": "Mandatory field missing or not parseable from prompt."
+  },
+  {
+    "field": "design_temperature",
+    "reason": "Mandatory field missing or not parseable from prompt."
+  },
+  {
+    "field": "code_standard",
+    "reason": "Mandatory field missing or not parseable from prompt."
+  }
+]

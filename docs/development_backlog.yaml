@@ -25,7 +25,7 @@ items:
   area: requirements
   phase: 'Phase 1: MVP'
   priority: P0
-  status: todo
+  status: done
   effort: M
   depends_on: []
   references:
