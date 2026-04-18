@@ -8,18 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d
-- Next item to implement: BL-003e
-- BL-003e title: Enforce model-domain / validity-envelope gate
-- BL-003e depends_on: BL-003 (already done)
-- BL-003e acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e
+- Next item to implement: BL-004
+- BL-004 title: Generate basic compliance report
+- BL-004 depends_on: BL-003 (already done)
+- BL-004 acceptance criteria:
 
-  1) Each engineering model declares a validity envelope.
-  2) Pipeline fails closed when inputs fall outside the declared envelope.
+  1) Clause-by-clause compliance matrix is produced.
+  2) Evidence links map requirement -> clause -> model -> result -> artifact.
+  3) Review checklist is included for human approvers.
 
-- BL-003e deliverables:
+- BL-004 deliverables:
 
-  - Validity envelope metadata on CalculationRecord
+  - ComplianceDossier (human-readable)
+  - ComplianceDossier (machine-readable)
 
 Repository constraints:
 
@@ -49,19 +51,20 @@ Existing relevant files:
 
 Task:
 
-1) Add explicit validity-envelope metadata to BL-003 calculation records so each check declares the model-domain bounds it assumes.
-2) Enforce deterministic fail-closed model-domain gating when caller inputs violate validity-envelope limits.
-3) Keep clause linkage and reproducibility hashing deterministic after schema updates.
-4) Extend handoff/model-domain/clause-coverage gates only as needed, without weakening existing controls.
-5) Persist updated sample BL-003 artifacts under `artifacts/bl-003/`.
-6) Add/extend tests in `tests/test_calculation_pipeline.py` for:
-
-   - deterministic validity-envelope metadata outputs
-   - fail-closed behavior for out-of-envelope inputs
-   - clause linkage and reproducibility metadata compatibility
-   - interactions with existing pass/fail and non-conformance behavior
-
-7) Update `docs/interfaces/calculation_pipeline_contract.md` to document validity-envelope behavior and schema updates.
+1) Implement deterministic BL-004 dossier generation in `src/pressure_vessels/compliance_pipeline.py` to produce:
+   - clause-by-clause compliance matrix
+   - requirement -> clause -> model -> result -> artifact evidence links
+   - human-review checklist entries
+2) Ensure handoff gates validate consistency across RequirementSet, DesignBasis, ApplicabilityMatrix, CalculationRecords, and NonConformanceList artifacts (fail closed on mismatch).
+3) Keep outputs deterministic and hash-stable (including canonical JSON serialization and reproducibility metadata fields).
+4) Preserve compatibility with existing BL-003 artifacts and clause linkage assumptions.
+5) Persist/update BL-004 sample artifacts under `artifacts/bl-004/` as needed.
+6) Add/extend tests in `tests/test_compliance_pipeline.py` for:
+   - deterministic dossier outputs
+   - clause matrix and evidence-link completeness
+   - checklist generation and required flags
+   - handoff-gate failure behavior and hash-link validation
+7) Update `docs/interfaces/compliance_pipeline_contract.md` to document BL-004 behavior and schema updates.
 
 Output format:
 
