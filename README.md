@@ -35,6 +35,7 @@ Related repository docs:
 - `docs/interfaces/calculation_pipeline_contract.md`
 
 - `docs/interfaces/traceability_pipeline_contract.md`
+- `docs/interfaces/change_impact_pipeline_contract.md`
 
 ---
 
@@ -327,6 +328,7 @@ To support ASME/PED-style review workflows:
 - Standards ingestion pipeline
 
 - Full traceability graph
+- Change impact and selective re-verification with signed impact reports
 
 - Certification dossier export
 

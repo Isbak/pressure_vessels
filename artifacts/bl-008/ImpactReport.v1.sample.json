@@ -1,0 +1,70 @@
+{
+  "baseline_update_status": {
+    "decision": "accepted",
+    "from_revision_id": "REV-1000",
+    "rationale": "All impacted checks passed deterministic re-verification.",
+    "reverification_check_ids": [
+      "UG-27-shell",
+      "UG-27-shell-mawp"
+    ],
+    "schema_version": "BaselineUpdateStatus.v1",
+    "to_revision_id": "REV-1001"
+  },
+  "deterministic_hash": "9f54292884dfc3e1f7733f6833e47d7951a4e7f0227e8b74e1b32b3898bb4046",
+  "evidence_links": [
+    "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a",
+    "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell",
+    "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp",
+    "RevisionTraceSnapshot.v1#REV-1000",
+    "RevisionTraceSnapshot.v1#REV-1001",
+    "TraceabilityGraphRevision.v1#d479bdce3758a0df07a1488458d489389702722e93c10d73de42d040b3540ece"
+  ],
+  "from_revision_id": "REV-1000",
+  "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "impacted_clause_ids": [
+    "UG-27"
+  ],
+  "minimal_reverification_check_ids": [
+    "UG-27-shell",
+    "UG-27-shell-mawp"
+  ],
+  "reverification_results": [
+    {
+      "check_id": "UG-27-shell",
+      "clause_id": "UG-27",
+      "evidence_refs": [
+        "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell"
+      ],
+      "status": "pass"
+    },
+    {
+      "check_id": "UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "evidence_refs": [
+        "CalculationRecords.v1#8d1cb13156fd91a08a5d71ffebcb4fde7bc3afc45883625f4312dcc953179e6a:UG-27-shell-mawp"
+      ],
+      "status": "pass"
+    }
+  ],
+  "revision_delta": {
+    "changed_domains": [
+      "model"
+    ],
+    "changed_hashes": {
+      "model": {
+        "from": "models:v1",
+        "to": "models:v2"
+      }
+    },
+    "from_revision_id": "REV-1000",
+    "schema_version": "RevisionDelta.v1",
+    "to_revision_id": "REV-1001"
+  },
+  "schema_version": "ImpactReport.v1",
+  "signing": {
+    "algorithm": "sha256",
+    "signature": "93d71b95195a65599cafd66a64ea50d1e0755896bb8506117fc982562a9e7835",
+    "signing_key_ref": "kms://pressure-vessels/bl-008"
+  },
+  "to_revision_id": "REV-1001"
+}

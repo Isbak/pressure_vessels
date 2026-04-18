@@ -24,3 +24,11 @@ Primary concerns:
 - Includes `CertificationDossierTemplateCatalog.v1`, signed calculation snapshot references, and `ChangeImpactReport.v1.placeholder` section for BL-008 integration.
 - Adds an `InspectorRegulatorWorkflow.v1` scaffold so design authority, inspector, and regulator review steps can be tracked against artifact refs.
 
+
+
+## BL-008 Change Impact and Selective Re-Verification
+
+- Schema set: `RevisionTraceSnapshot.v1`, `RevisionDelta.v1`, `ImpactReport.v1`, and `BaselineUpdateStatus.v1`.
+- Revision deltas are detected automatically for requirement, code, and model fingerprints.
+- Minimal re-verification scope is computed from traceability graph link deltas and executed deterministically against current calculation records.
+- Every revision delta emits a signed `ImpactReport.v1` artifact with evidence links and an explicit baseline update decision.
