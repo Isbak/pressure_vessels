@@ -68,6 +68,7 @@ def lint_file(path: Path, disabled_rules: set[str]) -> list[tuple[int, str, str]
     raw = path.read_text(encoding="utf-8")
     lines = raw.splitlines()
 
+    in_fence_flags = [False] * len(lines)
     in_fence = False
     fence_line = ""
 
@@ -78,7 +79,8 @@ def lint_file(path: Path, disabled_rules: set[str]) -> list[tuple[int, str, str]
         if "MD010" not in disabled_rules and "\t" in line:
             findings.append((idx, "MD010", RULE_LABELS["MD010"]))
 
-        if line.startswith("```") or line.startswith("~~~"):
+        is_fence_marker = line.startswith("```") or line.startswith("~~~")
+        if is_fence_marker:
             marker = line[:3]
             if not in_fence:
                 in_fence = True
@@ -90,10 +92,12 @@ def lint_file(path: Path, disabled_rules: set[str]) -> list[tuple[int, str, str]
                 if "MD040" not in disabled_rules and re.match(r"^(```|~~~)\s*$", line):
                     findings.append((idx, "MD040", RULE_LABELS["MD040"]))
             elif marker == fence_line:
-                in_fence = False
-                fence_line = ""
                 if "MD031" not in disabled_rules and idx < len(lines) and lines[idx].strip() != "":
                     findings.append((idx, "MD031", RULE_LABELS["MD031"]))
+                in_fence = False
+                fence_line = ""
+
+        in_fence_flags[idx - 1] = in_fence and not is_fence_marker
 
     if "MD012" not in disabled_rules:
         blank_run = 0
@@ -107,6 +111,8 @@ def lint_file(path: Path, disabled_rules: set[str]) -> list[tuple[int, str, str]
 
     if "MD022" not in disabled_rules:
         for idx, line in enumerate(lines, start=1):
+            if in_fence_flags[idx - 1]:
+                continue
             if re.match(r"^#{1,6} ", line):
                 if idx > 1 and lines[idx - 2].strip() != "":
                     findings.append((idx, "MD022", RULE_LABELS["MD022"]))
@@ -115,6 +121,8 @@ def lint_file(path: Path, disabled_rules: set[str]) -> list[tuple[int, str, str]
 
     if "MD032" not in disabled_rules:
         for idx, line in enumerate(lines, start=1):
+            if in_fence_flags[idx - 1]:
+                continue
             if is_list_line(line):
                 prev_non_empty = lines[idx - 2].strip() if idx > 1 else ""
                 next_non_empty = lines[idx].strip() if idx < len(lines) else ""
