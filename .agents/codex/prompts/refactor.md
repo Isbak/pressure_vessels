@@ -5,6 +5,7 @@ Refactor scope: <module/path>
 Goals:
 
 - Improve readability/maintainability.
+
 - No behavior changes.
 
 Validation:
