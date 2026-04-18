@@ -243,7 +243,6 @@ To support ASME/PED-style review workflows:
 
 ---
 
-
 ## 13. Agent Governance (Codex + Claude Code)
 
 A governance starter policy is available at **`AGENT_GOVERNANCE.md`**. It defines:

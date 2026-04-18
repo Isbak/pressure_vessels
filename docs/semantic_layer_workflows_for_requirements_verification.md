@@ -46,6 +46,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 **Inputs:** user prompt, P&ID tags (optional), client spec (optional), jurisdiction.
 
 **Automated steps:**
+
 1. Parse natural language into typed requirement candidates.
 2. Resolve units and normalize to canonical units.
 3. Detect missing mandatory fields (e.g., design pressure, temperature envelope, fluid hazard class).
@@ -63,6 +64,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 **Inputs:** normalized requirements, jurisdiction, client constraints.
 
 **Automated steps:**
+
 1. Select primary governing code and edition.
 2. Select secondary references (materials, welding, NDE, pressure testing, relief).
 3. Evaluate applicability predicates per clause (service, category, geometry, limits).
@@ -78,6 +80,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 **Goal:** attach each required clause to an executable engineering model.
 
 **Automated steps:**
+
 1. For each required clause, select one approved `EngineeringModel` implementation.
 2. Validate model domain (geometry/material/temp range) against current design.
 3. Bind variable definitions and unit dimensions.
@@ -93,6 +96,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 **Goal:** run clause-driven checks and generate reproducible pass/fail evidence.
 
 **Automated steps:**
+
 1. Execute thickness, MAWP, external pressure, reinforcement, and related checks.
 2. Validate dimensional consistency and unit safety.
 3. Compute margins and utilization ratios.
@@ -108,6 +112,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 **Goal:** package verifications into regulator/inspector-ready traceability.
 
 **Automated steps:**
+
 1. Build clause-by-clause compliance matrix.
 2. Attach evidence links: requirement -> clause -> model -> result -> artifact.
 3. Identify unresolved non-conformances and required dispositions.
@@ -123,6 +128,7 @@ The workflows below are the minimum automation backbone for certifiable outputs.
 **Goal:** ensure any requirement/code/model revision triggers correct re-check scope.
 
 **Automated steps:**
+
 1. Detect delta in requirements, code editions, material data, or model versions.
 2. Propagate impact through dependency graph.
 3. Compute minimal re-verification set.
