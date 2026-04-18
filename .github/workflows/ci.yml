@@ -53,6 +53,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Read CI governance policy
+        id: policy
+        run: |
+          retention="$(jq -r '.artifact_retention_days' docs/governance/ci_governance_policy.v1.json)"
+          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -70,7 +75,7 @@ jobs:
         with:
           name: pytest-junit
           path: artifacts/ci/pytest-junit.xml
-          retention-days: 30
+          retention-days: ${{ steps.policy.outputs.retention }}
 
   tech-stack-check:
     runs-on: ubuntu-latest
@@ -123,6 +128,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Read CI governance policy
+        id: policy
+        run: |
+          retention="$(jq -r '.artifact_retention_days' docs/governance/ci_governance_policy.v1.json)"
+          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -163,4 +173,4 @@ jobs:
           path: |
             artifacts/ci/job-results.json
             artifacts/ci/GovernanceGateReport.v1.json
-          retention-days: 30
+          retention-days: ${{ steps.policy.outputs.retention }}
