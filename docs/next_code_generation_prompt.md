@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008, BL-009
-- Next item to implement: BL-010
-- BL-010 title: Add optimization for cost and manufacturability
-- BL-010 depends_on: BL-003, BL-009 (already done)
-- BL-010 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007, BL-008, BL-009, BL-010
+- Next item to implement: BL-011
+- BL-011 title: Integrate enterprise systems (PLM/ERP/QMS)
+- BL-011 depends_on: BL-007 (already done)
+- BL-011 acceptance criteria:
 
-  1) Optimization objective supports weight/cost/manufacturability trade-offs.
-  2) All optimization outputs remain inside hard compliance constraints.
-  3) Pareto candidate set is exported with justification metadata.
+  1) Artifacts and approvals sync with configured enterprise systems.
+  2) Traceability links are preserved across system boundaries.
+  3) Integration retries and failure handling are observable.
 
-- BL-010 deliverables:
+- BL-011 deliverables:
 
-  - Optimization service
-  - Candidate ranking report
+  - Integration adapters
+  - Operational runbooks
 
 Repository constraints:
 
@@ -40,11 +40,11 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-010 optimization behavior using existing repository patterns.
-2) Add deterministic multi-objective trade-off scoring (weight/cost/manufacturability) guarded by compliance constraints.
-3) Export a deterministic Pareto candidate set with rationale metadata and stable ranking.
-4) Add/extend tests under `tests/` for objective calculations, compliance guardrails, and candidate ranking determinism.
-5) Update related architecture/interface docs under `docs/` to describe BL-010 schema and usage, and persist sample artifacts under `artifacts/` if introduced.
+1) Implement BL-011 enterprise integration behavior using existing repository patterns.
+2) Add deterministic adapters for syncing certification artifacts and approvals to configurable PLM/ERP/QMS targets.
+3) Preserve and validate traceability links across integration boundaries with auditable mappings.
+4) Add/extend tests under `tests/` for sync flows, retry/failure observability, and traceability preservation.
+5) Update related architecture/interface docs under `docs/` to describe BL-011 schemas, integration configuration, and operational runbook expectations.
 
 Output format:
 
