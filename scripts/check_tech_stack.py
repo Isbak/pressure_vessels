@@ -1,85 +1,121 @@
 #!/usr/bin/env python3
-"""Validate tech stack documentation against declared and imported Python dependencies."""
+"""Validate runtime stack declarations against in-repo component mappings."""
 
 from __future__ import annotations
 
 import re
-import sys
 from pathlib import Path
 
-DEPENDENCY_LINE_RE = re.compile(r"^- Dependency: `([^`]+)`", re.MULTILINE)
-IMPORT_RE = re.compile(
-    r"^\s*(?:from\s+([a-zA-Z_][\w]*)\s+import\b|import\s+([a-zA-Z_][\w]*))",
-    re.MULTILINE,
-)
+COMPONENT_RE = re.compile(r"^- Component: `([^`]+)`", re.MULTILINE)
 
 
-def _extract_current_section(text: str) -> str:
-    marker = "## Current"
-    start = text.find(marker)
+def _parse_declared_components(tech_stack_text: str) -> tuple[set[str], set[str]]:
+    current = _extract_section(tech_stack_text, "## Current")
+    planned = _extract_section(tech_stack_text, "## Planned")
+
+    return (
+        {value.strip() for value in COMPONENT_RE.findall(current)},
+        {value.strip() for value in COMPONENT_RE.findall(planned)},
+    )
+
+
+def _extract_section(text: str, header: str) -> str:
+    start = text.find(header)
     if start == -1:
-        raise ValueError("docs/tech-stack.md is missing a '## Current' section")
+        raise ValueError(f"docs/tech-stack.md is missing '{header}'")
 
-    remainder = text[start + len(marker) :]
+    remainder = text[start + len(header) :]
     next_header = remainder.find("\n## ")
     if next_header == -1:
         return remainder
     return remainder[:next_header]
 
 
-def _declared_dependencies(pyproject_path: Path) -> set[str]:
-    content = pyproject_path.read_text(encoding="utf-8")
-    match = re.search(r"(?ms)^\[project\].*?^dependencies\s*=\s*\[(.*?)\]", content)
-    deps: list[str] = []
-    if match:
-        deps = re.findall(r'"([^"]+)"', match.group(1))
-    normalized: set[str] = set()
-    for dep in deps:
-        name = re.split(r"[<>=!~\s\[]", dep, maxsplit=1)[0].strip().lower()
-        if name:
-            normalized.add(name)
-    return normalized
+def _parse_registry(registry_path: Path) -> dict[str, dict[str, str]]:
+    lines = registry_path.read_text(encoding="utf-8").splitlines()
+    components: dict[str, dict[str, str]] = {}
+
+    current: dict[str, str] | None = None
+    for line in lines:
+        if line.startswith("  - key: "):
+            if current is not None and "key" in current:
+                components[current["key"]] = current
+            current = {"key": line.split(": ", 1)[1].strip()}
+            continue
+
+        if current is None:
+            continue
+
+        if line.startswith("    ") and ": " in line:
+            field, raw_value = line.strip().split(": ", 1)
+            current[field] = raw_value.strip()
+
+    if current is not None and "key" in current:
+        components[current["key"]] = current
+
+    return components
 
 
-def _imported_top_level_modules(src_root: Path) -> set[str]:
+def _parse_bootstrap_manifest(manifest_path: Path) -> set[str]:
     modules: set[str] = set()
-    for py_file in src_root.rglob("*.py"):
-        text = py_file.read_text(encoding="utf-8")
-        for from_mod, import_mod in IMPORT_RE.findall(text):
-            module = (from_mod or import_mod).strip()
-            if module:
-                modules.add(module.lower())
+    for line in manifest_path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("        - "):
+            modules.add(line.strip()[2:].strip())
     return modules
 
 
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[1]
     tech_stack_path = repo_root / "docs/tech-stack.md"
-    pyproject_path = repo_root / "pyproject.toml"
-    src_root = repo_root / "src"
+    registry_path = repo_root / "docs/platform_runtime_stack_registry.yaml"
+    bootstrap_manifest_path = repo_root / "infra/platform/environment.bootstrap.yaml"
 
-    current_section = _extract_current_section(tech_stack_path.read_text(encoding="utf-8"))
-    current_dependencies = {
-        match.strip().lower() for match in DEPENDENCY_LINE_RE.findall(current_section)
-    }
+    tech_stack_text = tech_stack_path.read_text(encoding="utf-8")
+    current_components, planned_components = _parse_declared_components(tech_stack_text)
 
-    if not current_dependencies:
-        print("No `- Dependency: ` entries found in docs/tech-stack.md ## Current; nothing to validate.")
+    if not current_components and not planned_components:
+        print("No `- Component: ` entries found in docs/tech-stack.md; nothing to validate.")
         return 0
 
-    declared_dependencies = _declared_dependencies(pyproject_path)
-    imported_modules = _imported_top_level_modules(src_root)
+    registry = _parse_registry(registry_path)
+    bootstrap_modules = _parse_bootstrap_manifest(bootstrap_manifest_path)
 
     failures: list[str] = []
-    for dependency in sorted(current_dependencies):
-        if dependency not in declared_dependencies:
+    all_declared = current_components | planned_components
+    for component in sorted(all_declared):
+        if component not in registry:
+            failures.append(f"{component!r} is declared in docs/tech-stack.md but missing from registry")
+            continue
+
+        entry = registry[component]
+        status = entry.get("status")
+        module_path = entry.get("module_path")
+        if status not in {"deployed", "planned"}:
+            failures.append(f"{component!r} has invalid registry status {status!r}")
+            continue
+
+        if component in current_components and status != "deployed":
+            failures.append(f"{component!r} is under ## Current but status is {status!r}")
+        if component in planned_components and status != "planned":
+            failures.append(f"{component!r} is under ## Planned but status is {status!r}")
+
+        if not module_path:
+            failures.append(f"{component!r} is missing module_path in registry")
+        elif status == "deployed" and not (repo_root / module_path).exists():
             failures.append(
-                f"{dependency!r} is listed in docs/tech-stack.md ## Current but not in pyproject.toml project.dependencies"
+                f"{component!r} is marked deployed but module_path does not exist: {module_path}"
             )
-        if dependency not in imported_modules:
-            failures.append(
-                f"{dependency!r} is listed in docs/tech-stack.md ## Current but not imported anywhere under src/"
-            )
+
+    extra_registry_keys = sorted(set(registry) - all_declared)
+    if extra_registry_keys:
+        failures.append(
+            "Registry has components not declared in docs/tech-stack.md: "
+            + ", ".join(extra_registry_keys)
+        )
+
+    for module in sorted(bootstrap_modules):
+        if module not in registry:
+            failures.append(f"Bootstrap manifest references unknown module: {module}")
 
     if failures:
         print("Tech stack consistency check failed:")
@@ -87,7 +123,10 @@ def main() -> int:
             print(f"- {failure}")
         return 1
 
-    print("Tech stack consistency check passed.")
+    print(
+        "Tech stack consistency check passed for "
+        f"{len(current_components)} deployed and {len(planned_components)} planned components."
+    )
     return 0
 
 

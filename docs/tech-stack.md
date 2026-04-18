@@ -1,10 +1,10 @@
 # Tech Stack Contract
 
-This document mixes deployed and planned capabilities; see section headers.
+This document defines declared stack components and their implementation state.
 
 ## Current
 
-Technologies below are present in this repository today via imports and/or direct invocation under `src/`, `tests/`, `scripts/`, or `.github/workflows/`.
+Technologies below are present in this repository today via imports and/or direct invocation under `src/`, `tests/`, `scripts/`, `.github/workflows/`, or in-repo runtime skeletons.
 
 - Python 3.11 runtime for package and CI execution (`pyproject.toml:9`, `.github/workflows/ci.yml:47`).
 - `setuptools` build backend for packaging (`pyproject.toml:2`, `pyproject.toml:3`).
@@ -13,29 +13,35 @@ Technologies below are present in this repository today via imports and/or direc
 - Ruby runtime used for YAML validation in CI (`.github/workflows/ci.yml:29`).
 - Repository policy scripts executed in CI (`scripts/check_ci_governance.py:1`, `.github/workflows/ci.yml:115`).
 
-### Current Python dependencies declared in `pyproject.toml`
+### Runtime stack components (deployed)
 
-- None. `dependencies = []` and `src/` currently uses only standard library + local package imports (`pyproject.toml:10`, `src/pressure_vessels/requirements_pipeline.py:5`).
+- Component: `frontend-nextjs`
+- Component: `backend-nestjs`
 
 ## Planned
 
-The technologies below are documented target-state components and are **not** currently deployed in this codebase. Each item references the backlog work item that introduces it.
+The technologies below are documented target-state components and are **not** currently deployed in this codebase.
 
-- Next.js + TypeScript frontend (BL-018).
-- NestJS (Node.js + TypeScript) backend API (BL-018).
-- PostgreSQL relational store (BL-018).
-- Redis cache/queue layer (BL-018).
-- Neo4j knowledge graph (BL-006).
-- Qdrant vector retrieval (BL-018).
-- vLLM model serving (BL-018).
-- Llama / Mistral / Qwen model families (BL-018).
-- OpenSearch search/analytics layer (BL-018).
-- Temporal workflow orchestration (BL-016).
-- Keycloak AuthN/AuthZ (BL-018).
-- Prometheus + Grafana + Loki + Tempo observability stack (BL-018).
-- Vault (OSS) or SOPS+age secrets management (BL-018).
-- OpenTofu (or Terraform OSS) infrastructure as code (BL-018).
-- Docker + Kubernetes runtime platform (BL-018).
+### Runtime stack components (planned)
+
+- Component: `datastore-postgresql`
+- Component: `cache-redis`
+- Component: `graph-neo4j`
+- Component: `retrieval-qdrant`
+- Component: `llm-serving-vllm`
+- Component: `models-llama-mistral-qwen`
+- Component: `search-opensearch`
+- Component: `workflow-temporal`
+- Component: `auth-keycloak`
+- Component: `observability-prometheus-grafana-loki-tempo`
+- Component: `secrets-vault-or-sops-age`
+- Component: `iac-opentofu-or-terraform`
+- Component: `runtime-docker-kubernetes`
+
+### Runtime mapping source of truth
+
+- `docs/platform_runtime_stack_registry.yaml` maps each component to ownership, module path, and deployment status.
+- `infra/platform/environment.bootstrap.yaml` maps component modules to deployable environments.
 
 ## Stack Change Policy
 

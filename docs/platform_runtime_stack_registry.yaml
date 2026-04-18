@@ -1,0 +1,92 @@
+version: 1
+components:
+  - key: frontend-nextjs
+    capability: frontend
+    status: deployed
+    owner: platform-experience
+    module_path: services/frontend
+    notes: Next.js + TypeScript service skeleton committed in-repo.
+  - key: backend-nestjs
+    capability: backend-api
+    status: deployed
+    owner: platform-runtime
+    module_path: services/backend
+    notes: NestJS-style service skeleton committed in-repo.
+  - key: datastore-postgresql
+    capability: data
+    status: planned
+    owner: data-platform
+    module_path: infra/platform/postgresql
+    notes: Persistent relational data store.
+  - key: cache-redis
+    capability: cache-and-queue
+    status: planned
+    owner: data-platform
+    module_path: infra/platform/redis
+    notes: Ephemeral queue/cache runtime.
+  - key: graph-neo4j
+    capability: knowledge-graph
+    status: planned
+    owner: knowledge-platform
+    module_path: infra/platform/neo4j
+    notes: Traceability graph runtime.
+  - key: retrieval-qdrant
+    capability: vector-retrieval
+    status: planned
+    owner: retrieval-platform
+    module_path: infra/platform/qdrant
+    notes: Vector index and retrieval runtime.
+  - key: llm-serving-vllm
+    capability: llm-serving
+    status: planned
+    owner: ai-platform
+    module_path: infra/platform/vllm
+    notes: Self-hosted model serving endpoint.
+  - key: models-llama-mistral-qwen
+    capability: model-family
+    status: planned
+    owner: ai-platform
+    module_path: infra/platform/model-catalog
+    notes: Approved base model family set.
+  - key: search-opensearch
+    capability: search-analytics
+    status: planned
+    owner: retrieval-platform
+    module_path: infra/platform/opensearch
+    notes: Full-text search and analytics.
+  - key: workflow-temporal
+    capability: orchestration
+    status: planned
+    owner: orchestration-platform
+    module_path: infra/platform/temporal
+    notes: Workflow orchestration runtime.
+  - key: auth-keycloak
+    capability: authn-authz
+    status: planned
+    owner: security-platform
+    module_path: infra/platform/keycloak
+    notes: Identity and access management.
+  - key: observability-prometheus-grafana-loki-tempo
+    capability: observability
+    status: planned
+    owner: sre-platform
+    module_path: infra/platform/observability
+    notes: Metrics, logs, traces, dashboards.
+  - key: secrets-vault-or-sops-age
+    capability: secrets
+    status: planned
+    owner: security-platform
+    module_path: infra/platform/secrets
+    notes: Secret issuance and encryption.
+  - key: iac-opentofu-or-terraform
+    capability: infrastructure-as-code
+    status: planned
+    owner: platform-runtime
+    module_path: infra/platform/iac
+    notes: Environment provisioning modules.
+  - key: runtime-docker-kubernetes
+    capability: runtime-platform
+    status: planned
+    owner: platform-runtime
+    module_path: infra/platform/runtime
+    notes: Deploy target for platform services.

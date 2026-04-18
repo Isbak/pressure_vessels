@@ -1,0 +1,34 @@
+version: v1
+kind: PlatformEnvironmentBootstrap
+metadata:
+  name: pressure-vessels-platform
+spec:
+  environments:
+    - name: dev
+      cluster: pv-dev
+      region: us-central1
+      modules:
+        - frontend-nextjs
+        - backend-nestjs
+        - datastore-postgresql
+        - cache-redis
+        - auth-keycloak
+        - observability-prometheus-grafana-loki-tempo
+        - runtime-docker-kubernetes
+    - name: staging
+      cluster: pv-staging
+      region: us-central1
+      modules:
+        - frontend-nextjs
+        - backend-nestjs
+        - datastore-postgresql
+        - cache-redis
+        - retrieval-qdrant
+        - llm-serving-vllm
+        - search-opensearch
+        - workflow-temporal
+        - auth-keycloak
+        - observability-prometheus-grafana-loki-tempo
+        - secrets-vault-or-sops-age
+        - iac-opentofu-or-terraform
+        - runtime-docker-kubernetes
