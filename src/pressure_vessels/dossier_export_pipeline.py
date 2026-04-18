@@ -21,15 +21,16 @@ from .compliance_pipeline import (
     ComplianceDossierHuman,
     ComplianceDossierMachine,
 )
+from .change_impact_pipeline import IMPACT_REPORT_VERSION, ImpactReport
 from .design_basis_pipeline import APPLICABILITY_MATRIX_VERSION, DESIGN_BASIS_VERSION, ApplicabilityMatrix, DesignBasis
 from .requirements_pipeline import REQUIREMENT_SET_VERSION, RequirementSet
 from .traceability_pipeline import TRACEABILITY_GRAPH_REVISION_VERSION, TraceabilityGraphRevision
 
 CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION = "CertificationDossierExportPackage.v1"
 CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION = "CertificationDossierPDFPayload.v1"
+CANONICAL_DOSSIER_PDF_RENDER_VERSION = "CanonicalDossierPDF.v1"
 TEMPLATE_CATALOG_VERSION = "CertificationDossierTemplateCatalog.v1"
 SIGNED_CALCULATION_SNAPSHOT_SET_VERSION = "SignedCalculationSnapshotSet.v1"
-CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION = "ChangeImpactReport.v1.placeholder"
 INSPECTOR_WORKFLOW_VERSION = "InspectorRegulatorWorkflow.v1"
 
 
@@ -69,6 +70,19 @@ class InspectorWorkflowStep:
 
 
 @dataclass(frozen=True)
+class WorkflowSignoffTransition:
+    transition_id: str
+    from_step_id: str
+    to_step_id: str
+    trigger: str
+    required_evidence_refs: list[str]
+    state: str
+
+    def to_json_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class CertificationDossierExportPackage:
     schema_version: str
     generated_at_utc: str
@@ -86,12 +100,15 @@ class CertificationDossierExportPackage:
     signed_calculation_snapshot_set_schema_version: str
     change_impact_report_schema_version: str
     inspector_workflow_schema_version: str
+    canonical_pdf_render_schema_version: str
     reproducibility: dict[str, str]
     template_catalog: list[ReportSectionTemplate]
     signed_calculation_snapshots: list[SignedCalculationSnapshotRef]
     change_impact_report: dict[str, Any]
     inspector_regulator_workflow: list[InspectorWorkflowStep]
+    workflow_signoff_transitions: list[WorkflowSignoffTransition]
     pdf_payload: dict[str, Any]
+    canonical_pdf_render: dict[str, Any]
     package_artifact_refs: list[str]
     deterministic_hash: str
 
@@ -113,12 +130,15 @@ class CertificationDossierExportPackage:
             "signed_calculation_snapshot_set_schema_version": self.signed_calculation_snapshot_set_schema_version,
             "change_impact_report_schema_version": self.change_impact_report_schema_version,
             "inspector_workflow_schema_version": self.inspector_workflow_schema_version,
+            "canonical_pdf_render_schema_version": self.canonical_pdf_render_schema_version,
             "reproducibility": self.reproducibility,
             "template_catalog": [template.to_json_dict() for template in self.template_catalog],
             "signed_calculation_snapshots": [snapshot.to_json_dict() for snapshot in self.signed_calculation_snapshots],
             "change_impact_report": self.change_impact_report,
             "inspector_regulator_workflow": [step.to_json_dict() for step in self.inspector_regulator_workflow],
+            "workflow_signoff_transitions": [transition.to_json_dict() for transition in self.workflow_signoff_transitions],
             "pdf_payload": self.pdf_payload,
+            "canonical_pdf_render": self.canonical_pdf_render,
             "package_artifact_refs": self.package_artifact_refs,
             "deterministic_hash": self.deterministic_hash,
         }
@@ -133,6 +153,7 @@ def generate_certification_dossier_export(
     compliance_dossier_human: ComplianceDossierHuman,
     compliance_dossier_machine: ComplianceDossierMachine,
     traceability_graph_revision: TraceabilityGraphRevision,
+    change_impact_report: ImpactReport,
     *,
     revision_id: str,
     previous_revision_id: str | None = None,
@@ -148,6 +169,7 @@ def generate_certification_dossier_export(
         compliance_dossier_human=compliance_dossier_human,
         compliance_dossier_machine=compliance_dossier_machine,
         traceability_graph_revision=traceability_graph_revision,
+        change_impact_report=change_impact_report,
         revision_id=revision_id,
     )
 
@@ -155,14 +177,15 @@ def generate_certification_dossier_export(
 
     template_catalog = _build_template_catalog()
     signed_snapshots = _build_signed_snapshot_refs(calculation_records)
-    change_impact_report = _build_change_impact_report_placeholder(
-        revision_id=revision_id,
-        previous_revision_id=previous_revision_id,
-        calculation_records=calculation_records,
-    )
     workflow = _build_inspector_workflow(
         compliance_dossier_machine_hash=compliance_dossier_machine.deterministic_hash,
         traceability_graph_hash=traceability_graph_revision.deterministic_hash,
+        impact_report_hash=change_impact_report.deterministic_hash,
+    )
+    signoff_transitions = _build_workflow_signoff_transitions(
+        compliance_dossier_machine_hash=compliance_dossier_machine.deterministic_hash,
+        traceability_graph_hash=traceability_graph_revision.deterministic_hash,
+        impact_report_hash=change_impact_report.deterministic_hash,
     )
 
     pdf_payload = {
@@ -183,17 +206,25 @@ def generate_certification_dossier_export(
             f"RequirementSet hash: {requirement_set.deterministic_hash}",
             f"Compliance dossier machine hash: {compliance_dossier_machine.deterministic_hash}",
             f"Traceability graph hash: {traceability_graph_revision.deterministic_hash}",
+            f"Impact report hash: {change_impact_report.deterministic_hash}",
             f"Signed snapshots: {len(signed_snapshots)}",
         ],
     }
+    canonical_pdf_render = render_canonical_dossier_pdf(
+        pdf_payload,
+        template_catalog=template_catalog,
+        impact_report=change_impact_report,
+        signoff_transitions=signoff_transitions,
+    )
 
     package_artifact_refs = [
         f"{CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION}#<package_hash>",
         f"{CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION}#{_sha256_payload(pdf_payload)}",
+        f"{CANONICAL_DOSSIER_PDF_RENDER_VERSION}#{canonical_pdf_render['content_sha256']}",
         f"{COMPLIANCE_DOSSIER_MACHINE_VERSION}#{compliance_dossier_machine.deterministic_hash}",
         f"{TRACEABILITY_GRAPH_REVISION_VERSION}#{traceability_graph_revision.deterministic_hash}",
         f"{SIGNED_CALCULATION_SNAPSHOT_SET_VERSION}#{_sha256_payload([snapshot.to_json_dict() for snapshot in signed_snapshots])}",
-        f"{CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION}#{_sha256_payload(change_impact_report)}",
+        f"{IMPACT_REPORT_VERSION}#{change_impact_report.deterministic_hash}",
     ]
 
     payload = {
@@ -211,14 +242,17 @@ def generate_certification_dossier_export(
         "source_traceability_graph_hash": traceability_graph_revision.deterministic_hash,
         "template_catalog_schema_version": TEMPLATE_CATALOG_VERSION,
         "signed_calculation_snapshot_set_schema_version": SIGNED_CALCULATION_SNAPSHOT_SET_VERSION,
-        "change_impact_report_schema_version": CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION,
+        "change_impact_report_schema_version": IMPACT_REPORT_VERSION,
         "inspector_workflow_schema_version": INSPECTOR_WORKFLOW_VERSION,
+        "canonical_pdf_render_schema_version": CANONICAL_DOSSIER_PDF_RENDER_VERSION,
         "reproducibility": {"canonicalization": "json.sort_keys+compact", "hash_algorithm": "sha256"},
         "template_catalog": [template.to_json_dict() for template in template_catalog],
         "signed_calculation_snapshots": [snapshot.to_json_dict() for snapshot in signed_snapshots],
-        "change_impact_report": change_impact_report,
+        "change_impact_report": change_impact_report.to_json_dict(),
         "inspector_regulator_workflow": [step.to_json_dict() for step in workflow],
+        "workflow_signoff_transitions": [transition.to_json_dict() for transition in signoff_transitions],
         "pdf_payload": pdf_payload,
+        "canonical_pdf_render": canonical_pdf_render,
         "package_artifact_refs": package_artifact_refs,
     }
     deterministic_hash = _sha256_payload(payload)
@@ -243,14 +277,17 @@ def generate_certification_dossier_export(
         source_traceability_graph_hash=traceability_graph_revision.deterministic_hash,
         template_catalog_schema_version=TEMPLATE_CATALOG_VERSION,
         signed_calculation_snapshot_set_schema_version=SIGNED_CALCULATION_SNAPSHOT_SET_VERSION,
-        change_impact_report_schema_version=CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION,
+        change_impact_report_schema_version=IMPACT_REPORT_VERSION,
         inspector_workflow_schema_version=INSPECTOR_WORKFLOW_VERSION,
+        canonical_pdf_render_schema_version=CANONICAL_DOSSIER_PDF_RENDER_VERSION,
         reproducibility=payload["reproducibility"],
         template_catalog=template_catalog,
         signed_calculation_snapshots=signed_snapshots,
-        change_impact_report=change_impact_report,
+        change_impact_report=change_impact_report.to_json_dict(),
         inspector_regulator_workflow=workflow,
+        workflow_signoff_transitions=signoff_transitions,
         pdf_payload=pdf_payload,
+        canonical_pdf_render=canonical_pdf_render,
         package_artifact_refs=finalized_refs,
         deterministic_hash=deterministic_hash,
     )
@@ -261,18 +298,20 @@ def write_certification_dossier_export(
     directory: str | Path,
     *,
     filename_prefix: str = "",
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, Path]:
     """Persist BL-007 package JSON and PDF payload JSON in canonical form."""
     target = Path(directory)
     target.mkdir(parents=True, exist_ok=True)
 
     package_path = target / f"{filename_prefix}{CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION}.json"
     pdf_payload_path = target / f"{filename_prefix}{CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION}.json"
+    canonical_pdf_render_path = target / f"{filename_prefix}{CANONICAL_DOSSIER_PDF_RENDER_VERSION}.pdf"
 
     package_path.write_text(json.dumps(export_package.to_json_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     pdf_payload_path.write_text(json.dumps(export_package.pdf_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    canonical_pdf_render_path.write_text(export_package.canonical_pdf_render["content"], encoding="utf-8")
 
-    return package_path, pdf_payload_path
+    return package_path, pdf_payload_path, canonical_pdf_render_path
 
 
 def _build_template_catalog() -> list[ReportSectionTemplate]:
@@ -299,7 +338,7 @@ def _build_template_catalog() -> list[ReportSectionTemplate]:
             section_id="SEC-004",
             title="Change impact report",
             required=True,
-            source_refs=[CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION],
+            source_refs=[IMPACT_REPORT_VERSION],
         ),
         ReportSectionTemplate(
             section_id="SEC-005",
@@ -326,34 +365,12 @@ def _build_signed_snapshot_refs(
     return snapshots
 
 
-def _build_change_impact_report_placeholder(
+def _build_inspector_workflow(
     *,
-    revision_id: str,
-    previous_revision_id: str | None,
-    calculation_records: CalculationRecordsArtifact,
-) -> dict[str, Any]:
-    impacted_clauses = sorted({check.clause_id for check in calculation_records.checks})
-    return {
-        "schema_version": CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION,
-        "status": "pending_bl_008_integration",
-        "revision_id": revision_id,
-        "previous_revision_id": previous_revision_id,
-        "summary_lines": [
-            "Placeholder change impact section for BL-008 selective re-verification.",
-            f"Detected impacted clauses from current snapshot: {', '.join(impacted_clauses)}",
-        ],
-        "impact_rows": [
-            {
-                "clause_id": clause_id,
-                "impact_level": "to_be_computed",
-                "rationale": "BL-008 will compute revision deltas and impacted evidence links.",
-            }
-            for clause_id in impacted_clauses
-        ],
-    }
-
-
-def _build_inspector_workflow(*, compliance_dossier_machine_hash: str, traceability_graph_hash: str) -> list[InspectorWorkflowStep]:
+    compliance_dossier_machine_hash: str,
+    traceability_graph_hash: str,
+    impact_report_hash: str,
+) -> list[InspectorWorkflowStep]:
     return [
         InspectorWorkflowStep(
             step_id="WF-001",
@@ -361,6 +378,7 @@ def _build_inspector_workflow(*, compliance_dossier_machine_hash: str, traceabil
             prompt="Assemble dossier package and verify hashes before external review.",
             required_artifact_refs=[
                 f"{COMPLIANCE_DOSSIER_MACHINE_VERSION}#{compliance_dossier_machine_hash}",
+                f"{IMPACT_REPORT_VERSION}#{impact_report_hash}",
             ],
             status="pending",
         ),
@@ -371,6 +389,7 @@ def _build_inspector_workflow(*, compliance_dossier_machine_hash: str, traceabil
             required_artifact_refs=[
                 SIGNED_CALCULATION_SNAPSHOT_SET_VERSION,
                 f"{TRACEABILITY_GRAPH_REVISION_VERSION}#{traceability_graph_hash}",
+                f"{IMPACT_REPORT_VERSION}#{impact_report_hash}",
             ],
             status="pending",
         ),
@@ -387,6 +406,83 @@ def _build_inspector_workflow(*, compliance_dossier_machine_hash: str, traceabil
     ]
 
 
+def _build_workflow_signoff_transitions(
+    *,
+    compliance_dossier_machine_hash: str,
+    traceability_graph_hash: str,
+    impact_report_hash: str,
+) -> list[WorkflowSignoffTransition]:
+    return [
+        WorkflowSignoffTransition(
+            transition_id="WF-T001",
+            from_step_id="WF-001",
+            to_step_id="WF-002",
+            trigger="design_authority_submit",
+            required_evidence_refs=[
+                f"{COMPLIANCE_DOSSIER_MACHINE_VERSION}#{compliance_dossier_machine_hash}",
+                f"{IMPACT_REPORT_VERSION}#{impact_report_hash}",
+            ],
+            state="pending",
+        ),
+        WorkflowSignoffTransition(
+            transition_id="WF-T002",
+            from_step_id="WF-002",
+            to_step_id="WF-003",
+            trigger="inspector_signoff",
+            required_evidence_refs=[
+                f"{TRACEABILITY_GRAPH_REVISION_VERSION}#{traceability_graph_hash}",
+                SIGNED_CALCULATION_SNAPSHOT_SET_VERSION,
+            ],
+            state="pending",
+        ),
+        WorkflowSignoffTransition(
+            transition_id="WF-T003",
+            from_step_id="WF-003",
+            to_step_id="WF-003",
+            trigger="regulator_disposition",
+            required_evidence_refs=[
+                CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION,
+                CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION,
+                CANONICAL_DOSSIER_PDF_RENDER_VERSION,
+            ],
+            state="awaiting_decision",
+        ),
+    ]
+
+
+def render_canonical_dossier_pdf(
+    pdf_payload: dict[str, Any],
+    *,
+    template_catalog: list[ReportSectionTemplate],
+    impact_report: ImpactReport,
+    signoff_transitions: list[WorkflowSignoffTransition],
+) -> dict[str, Any]:
+    """Render deterministic canonical dossier PDF content from template-driven payloads."""
+    section_lines = [f"{section.section_id}|{section.title}" for section in template_catalog if section.required]
+    transition_lines = [
+        f"{transition.transition_id}|{transition.from_step_id}>{transition.to_step_id}|{transition.trigger}"
+        for transition in signoff_transitions
+    ]
+    lines = [
+        "%PDF-1.4",
+        f"schema={CANONICAL_DOSSIER_PDF_RENDER_VERSION}",
+        f"title={pdf_payload['title']}",
+        f"revision_id={pdf_payload['revision_id']}",
+        f"generated_at_utc={pdf_payload['generated_at_utc']}",
+        f"impact_report_hash={impact_report.deterministic_hash}",
+        "sections=" + ";".join(section_lines),
+        "workflow_transitions=" + ";".join(transition_lines),
+        "%%EOF",
+    ]
+    content = "\n".join(lines) + "\n"
+    return {
+        "schema_version": CANONICAL_DOSSIER_PDF_RENDER_VERSION,
+        "renderer": "deterministic-template-renderer",
+        "content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+        "content": content,
+    }
+
+
 def _validate_handoff_gate(
     *,
     requirement_set: RequirementSet,
@@ -397,6 +493,7 @@ def _validate_handoff_gate(
     compliance_dossier_human: ComplianceDossierHuman,
     compliance_dossier_machine: ComplianceDossierMachine,
     traceability_graph_revision: TraceabilityGraphRevision,
+    change_impact_report: ImpactReport,
     revision_id: str,
 ) -> None:
     if not revision_id.strip():
@@ -434,6 +531,10 @@ def _validate_handoff_gate(
         raise ValueError("BL-007 export gate failed: machine dossier calculation hash mismatch.")
     if traceability_graph_revision.source_compliance_dossier_hash != compliance_dossier_machine.deterministic_hash:
         raise ValueError("BL-007 export gate failed: traceability graph compliance hash mismatch.")
+    if change_impact_report.schema_version != IMPACT_REPORT_VERSION:
+        raise ValueError("BL-007 export gate failed: unsupported ImpactReport schema version.")
+    if change_impact_report.to_revision_id != revision_id:
+        raise ValueError("BL-007 export gate failed: impact report revision mismatch.")
 
 
 def _sha256_payload(payload: Any) -> str:
