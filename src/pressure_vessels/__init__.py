@@ -39,6 +39,21 @@ from .standards_ingestion_pipeline import (
     write_standards_package,
 )
 
+from .dossier_export_pipeline import (
+    CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION,
+    CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION,
+    CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION,
+    INSPECTOR_WORKFLOW_VERSION,
+    SIGNED_CALCULATION_SNAPSHOT_SET_VERSION,
+    TEMPLATE_CATALOG_VERSION,
+    CertificationDossierExportPackage,
+    InspectorWorkflowStep,
+    ReportSectionTemplate,
+    SignedCalculationSnapshotRef,
+    generate_certification_dossier_export,
+    write_certification_dossier_export,
+)
+
 from .traceability_pipeline import (
     AUDIT_REPORT_TEMPLATE_VERSION,
     TRACEABILITY_GRAPH_REVISION_VERSION,
@@ -78,6 +93,16 @@ __all__ = [
     "RequirementValue",
     "ReproducibilityMetadata",
     "ReviewChecklistItem",
+    "CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION",
+    "CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION",
+    "CHANGE_IMPACT_REPORT_PLACEHOLDER_VERSION",
+    "INSPECTOR_WORKFLOW_VERSION",
+    "SIGNED_CALCULATION_SNAPSHOT_SET_VERSION",
+    "TEMPLATE_CATALOG_VERSION",
+    "CertificationDossierExportPackage",
+    "InspectorWorkflowStep",
+    "ReportSectionTemplate",
+    "SignedCalculationSnapshotRef",
     "SizingCheckInput",
     "AUDIT_REPORT_TEMPLATE_VERSION",
     "ApprovalRecord",
@@ -96,6 +121,8 @@ __all__ = [
     "run_calculation_pipeline",
     "write_calculation_artifacts",
     "write_compliance_artifacts",
+    "generate_certification_dossier_export",
+    "write_certification_dossier_export",
     "ParsedClause",
     "NormalizedClause",
     "RegressionExample",

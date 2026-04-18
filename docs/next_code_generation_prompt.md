@@ -8,20 +8,20 @@ You are implementing the next roadmap item for the `pressure_vessels` repository
 Context:
 
 - Roadmap source: `docs/development_backlog.yaml`
-- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006
-- Next item to implement: BL-007
-- BL-007 title: Certification dossier export
-- BL-007 depends_on: BL-004, BL-006 (already done)
-- BL-007 acceptance criteria:
+- Current completed items: BL-001, BL-002, BL-003, BL-003a, BL-003b, BL-003c, BL-003d, BL-003e, BL-004, BL-005, BL-006, BL-007
+- Next item to implement: BL-008
+- BL-008 title: Add change impact and selective re-verification
+- BL-008 depends_on: BL-003, BL-006 (already done)
+- BL-008 acceptance criteria:
 
-  1) Export package includes PDF + machine-readable JSON.
-  2) Signed calculation snapshots and change impact report are included.
-  3) Package supports inspector/regulator review workflow.
+  1) Requirement/code/model deltas are detected automatically.
+  2) Minimal re-verification set is computed and executed.
+  3) Signed change impact report is generated for each revision delta.
 
-- BL-007 deliverables:
+- BL-008 deliverables:
 
-  - Exportable dossier package
-  - Template catalog for report sections
+  - ImpactReport artifact
+  - Updated baseline status
 
 Repository constraints:
 
@@ -40,12 +40,12 @@ Existing relevant files:
 
 Task:
 
-1) Implement BL-007 certification dossier export behavior using existing repository patterns.
-2) Add deterministic export packaging for both machine-readable JSON and a PDF-oriented payload/template route.
-3) Include signed calculation snapshot references and a change-impact placeholder/report section suitable for future BL-008 integration.
-4) Add/extend tests under `tests/` for export structure, deterministic outputs, and required evidence links.
-5) Update related architecture/interface docs under `docs/` to describe export package schema and usage.
-6) Persist/update BL-007 sample artifacts under `artifacts/` if introduced.
+1) Implement BL-008 change-impact and selective re-verification behavior using existing repository patterns.
+2) Add deterministic delta detection for requirement/code/model changes tied to revisioned traceability artifacts.
+3) Compute and execute a minimal re-verification set and persist an explicit baseline update decision.
+4) Generate a signed change impact report artifact per revision delta.
+5) Add/extend tests under `tests/` for deterministic delta detection, selective re-verification scope, and signed impact report evidence links.
+6) Update related architecture/interface docs under `docs/` to describe BL-008 schema and usage, and persist sample artifacts under `artifacts/` if introduced.
 
 Output format:
 
