@@ -1,0 +1,44 @@
+version: 1
+kind: PlatformLlmServingVllmModule
+metadata:
+  name: platform-llm-serving-vllm-boundaries
+spec:
+  owner: ai-platform
+  endpoint_ownership:
+    - endpoint: llm-serving-vllm
+      owner: ai-platform
+      exposure: internal-cluster-only
+      access_path:
+        - services/backend
+      lifecycle: versioned-inference-contract
+  capacity_envelope:
+    environments:
+      - name: staging
+        max_concurrent_requests: 32
+        sustained_tokens_per_second: 12000
+        burst_tokens_per_second: 18000
+        autoscaling_policy: approval-required-threshold-update
+  access_ownership:
+    roles:
+      - name: vllm-admin
+        owner: ai-platform
+        privileges:
+          - endpoint-config-admin
+          - model-rollout-admin
+      - name: vllm-consumer
+        owner: platform-runtime
+        privileges:
+          - inference-request-submit
+          - inference-response-read
+    direct_service_access:
+      allowed: false
+      path: backend-api-only
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    endpoint_contract_owner: ai-platform
+    capacity_policy_owner: ai-platform
+    access_review_owner: security-platform
+    rollback_owner: ai-platform
+  governance:
+    approved_model_catalog_required: true
+    deterministic_inference_defaults_required: true

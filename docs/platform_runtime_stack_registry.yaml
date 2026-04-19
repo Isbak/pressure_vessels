@@ -38,7 +38,7 @@ components:
     notes: Vector index and retrieval runtime.
   - key: llm-serving-vllm
     capability: llm-serving
-    status: planned
+    status: deployed
     owner: ai-platform
     module_path: infra/platform/vllm
     notes: Self-hosted model serving endpoint.
