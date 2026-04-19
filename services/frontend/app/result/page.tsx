@@ -1,43 +1,42 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { headers } from 'next/headers';
 
-type PromptApiResponse = {
-  prompt: string;
-  response: string;
+import type { PromptResponse } from '../../lib/prompt-contract';
+
+type ResultPageProps = {
+  searchParams: {
+    prompt?: string;
+  };
 };
 
-export default function ResultPage(): JSX.Element {
-  const searchParams = useSearchParams();
-  const prompt = (searchParams.get('prompt') ?? '').trim();
+async function getPromptResult(prompt: string): Promise<PromptResponse> {
+  const headerStore = headers();
+  const host = headerStore.get('host');
 
-  const [payload, setPayload] = useState<PromptApiResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  if (!host) {
+    throw new Error('Host header missing.');
+  }
 
-  useEffect(() => {
-    if (!prompt) {
-      return;
-    }
+  const protocol =
+    headerStore.get('x-forwarded-proto') ??
+    (host.includes('localhost') ? 'http' : 'https');
 
-    const params = new URLSearchParams({ prompt });
+  const endpoint = new URL('/api/prompt', `${protocol}://${host}`);
+  endpoint.searchParams.set('prompt', prompt);
 
-    fetch(`/api/prompt?${params.toString()}`)
-      .then(async (result) => {
-        if (!result.ok) {
-          throw new Error('Prompt request failed.');
-        }
+  const response = await fetch(endpoint, { cache: 'no-store' });
 
-        return (await result.json()) as PromptApiResponse;
-      })
-      .then((json) => {
-        setPayload(json);
-      })
-      .catch(() => {
-        setError('Could not load backend response for the submitted prompt.');
-      });
-  }, [prompt]);
+  if (!response.ok) {
+    throw new Error('Prompt request failed.');
+  }
+
+  return (await response.json()) as PromptResponse;
+}
+
+export default async function ResultPage({
+  searchParams,
+}: ResultPageProps): Promise<JSX.Element> {
+  const prompt = (searchParams.prompt ?? '').trim();
 
   if (!prompt) {
     return (
@@ -49,20 +48,31 @@ export default function ResultPage(): JSX.Element {
     );
   }
 
-  return (
-    <main>
-      <h1>Prompt Result</h1>
-      <p>
-        <strong>Prompt:</strong> {prompt}
-      </p>
-      {error && <p>{error}</p>}
-      {!error && !payload && <p>Loading backend response...</p>}
-      {payload && (
+  try {
+    const payload = await getPromptResult(prompt);
+
+    return (
+      <main>
+        <h1>Prompt Result</h1>
+        <p>
+          <strong>Prompt:</strong> {payload.prompt}
+        </p>
         <p>
           <strong>Backend response:</strong> {payload.response}
         </p>
-      )}
-      <Link href="/">Run another prompt</Link>
-    </main>
-  );
+        <p>
+          <strong>Response source:</strong> {payload.source}
+        </p>
+        <Link href="/">Run another prompt</Link>
+      </main>
+    );
+  } catch {
+    return (
+      <main>
+        <h1>Prompt Result</h1>
+        <p>Could not load backend response for the submitted prompt.</p>
+        <Link href="/">Run another prompt</Link>
+      </main>
+    );
+  }
 }
