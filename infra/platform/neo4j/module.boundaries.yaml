@@ -1,0 +1,80 @@
+version: 1
+kind: PlatformKnowledgeGraphNeo4jModule
+metadata:
+  name: platform-knowledge-graph-neo4j-boundaries
+spec:
+  owner: knowledge-platform
+  engine:
+    family: neo4j
+    major_version: "5"
+    edition: community-or-enterprise
+  database_ownership:
+    - name: traceability
+      owner: knowledge-platform
+      access_path:
+        - services/backend
+      lifecycle: revisioned-immutable-writes
+  graph_schema:
+    node_labels:
+      - name: Requirement
+        owner: requirements-platform
+      - name: Clause
+        owner: compliance-platform
+      - name: Model
+        owner: calculation-platform
+      - name: Calculation
+        owner: calculation-platform
+      - name: Artifact
+        owner: reporting-platform
+      - name: Approval
+        owner: governance-platform
+    relationship_types:
+      - name: SATISFIES
+        owner: compliance-platform
+        from: Requirement
+        to: Clause
+      - name: IMPLEMENTED_BY
+        owner: calculation-platform
+        from: Clause
+        to: Model
+      - name: PRODUCES
+        owner: calculation-platform
+        from: Model
+        to: Calculation
+      - name: EVIDENCED_BY
+        owner: reporting-platform
+        from: Calculation
+        to: Artifact
+      - name: APPROVED_BY
+        owner: governance-platform
+        from: Artifact
+        to: Approval
+  access_ownership:
+    roles:
+      - name: graph-admin
+        owner: knowledge-platform
+        privileges:
+          - database-admin
+          - schema-admin
+      - name: graph-writer
+        owner: platform-runtime
+        privileges:
+          - write-revisioned-subgraph
+      - name: graph-reader
+        owner: platform-runtime
+        privileges:
+          - read-approved-subgraph
+    direct_service_access:
+      allowed: false
+      path: backend-api-only
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    schema_change_owner: knowledge-platform
+    access_review_owner: security-platform
+    backup_owner: platform-runtime
+    retention_defaults:
+      dev_days: 7
+      staging_days: 30
+  governance:
+    schema_versioning_required: true
+    immutable_revision_tag_required: true

@@ -24,6 +24,7 @@ spec:
         - backend-nestjs
         - datastore-postgresql
         - cache-redis
+        - graph-neo4j
         - retrieval-qdrant
         - llm-serving-vllm
         - search-opensearch
