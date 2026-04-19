@@ -18,6 +18,7 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 | `infra/platform/qdrant` | Retrieval Platform Team + Platform Runtime Team | Qdrant collection, indexing lifecycle, and access ownership boundaries with deterministic embedding version controls. |
 | `infra/platform/opensearch` | Retrieval Platform Team + Platform Runtime Team | OpenSearch index, retention, and access ownership boundaries with deterministic lifecycle policy controls. |
 | `infra/platform/vllm` | AI Platform Team + Platform Runtime Team | vLLM endpoint, capacity envelope, and access ownership boundaries with deterministic inference policy controls. |
+| `infra/platform/model-catalog` | AI Platform Team | Approved model families, version policy, and serving consumption contract boundaries. |
 
 ## Environment Provisioning Inputs
 
@@ -35,8 +36,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 12. `infra/platform/qdrant/module.boundaries.yaml` defines Qdrant collection, indexing lifecycle, and access ownership and lifecycle boundaries.
 13. `infra/platform/opensearch/module.boundaries.yaml` defines OpenSearch index ownership, retention lifecycle, and access ownership boundaries.
 14. `infra/platform/vllm/module.boundaries.yaml` defines vLLM endpoint ownership, capacity envelope, and access ownership boundaries.
-15. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-16. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+15. `infra/platform/model-catalog/module.boundaries.yaml` defines approved model families, version policy, and vLLM consumption contract boundaries.
+16. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+17. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -71,6 +73,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f infra/platform/opensearch/module.boundaries.yaml`
 - Confirm LLM serving boundary module exists:
   - `test -f infra/platform/vllm/module.boundaries.yaml`
+- Confirm model catalog boundary module exists:
+  - `test -f infra/platform/model-catalog/module.boundaries.yaml`
 
 ## Incident Operations
 

@@ -29,6 +29,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `retrieval-qdrant`
 - Component: `search-opensearch`
 - Component: `llm-serving-vllm`
+- Component: `models-llama-mistral-qwen`
 
 ## Planned
 
@@ -36,7 +37,7 @@ The technologies below are documented target-state components and are **not** cu
 
 ### Runtime stack components (planned)
 
-- Component: `models-llama-mistral-qwen`
+- None currently.
 
 ### Runtime mapping source of truth
 

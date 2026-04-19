@@ -41,4 +41,5 @@ spec:
     rollback_owner: ai-platform
   governance:
     approved_model_catalog_required: true
+    approved_model_catalog_contract: infra/platform/model-catalog/module.boundaries.yaml
     deterministic_inference_defaults_required: true
