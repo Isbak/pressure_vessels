@@ -56,7 +56,7 @@ components:
     notes: Full-text search and analytics.
   - key: workflow-temporal
     capability: orchestration
-    status: planned
+    status: deployed
     owner: orchestration-platform
     module_path: infra/platform/temporal
     notes: Workflow orchestration runtime.

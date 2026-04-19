@@ -24,6 +24,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `observability-prometheus-grafana-loki-tempo`
 - Component: `runtime-docker-kubernetes`
 - Component: `auth-keycloak`
+- Component: `workflow-temporal`
 
 ## Planned
 
@@ -36,7 +37,6 @@ The technologies below are documented target-state components and are **not** cu
 - Component: `llm-serving-vllm`
 - Component: `models-llama-mistral-qwen`
 - Component: `search-opensearch`
-- Component: `workflow-temporal`
 
 ### Runtime mapping source of truth
 
