@@ -35,6 +35,10 @@ experience (DX) on the pressure_vessels platform.
    - DX improvements should help both builders and operators.
    - Local development, CI behavior, and runtime operations should remain aligned.
 
+7. **Portable by default**
+   - Baseline DX workflows should be reusable across projects with minimal edits.
+   - Project-specific differences should be isolated to configuration, not governance bypasses.
+
 ## Applying these principles
 
 - Use `docs/platform_roadmap.yaml` as the planning artifact for DX work.
