@@ -37,13 +37,13 @@ experience (DX) on the pressure_vessels platform.
 
 ## Applying these principles
 
-- Use `platform_roadmap.yaml` as the planning artifact for DX work.
+- Use `docs/platform_roadmap.yaml` as the planning artifact for DX work.
 - Link each DX backlog item to governing contracts/runbooks.
 - Evaluate roadmap changes against these principles before introducing new fields or workflows.
 
 ## Documentation touchpoints
 
-- `platform_roadmap.yaml` — machine-readable DX roadmap.
+- `docs/platform_roadmap.yaml` — machine-readable DX roadmap.
 - `docs/development_backlog.yaml` — engineering backlog schema baseline.
 - `AGENT_GOVERNANCE.md` — governance constraints that DX must preserve.
 - `docs/runbooks/platform_runtime_stack_operations.md` — runtime operations and ownership boundaries.
