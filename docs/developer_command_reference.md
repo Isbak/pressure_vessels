@@ -35,3 +35,29 @@ Use this table to mirror CI behavior before opening a PR:
 
 For full CI workflow coverage (including markdown lint, YAML validation, secret
 scan, and governance gate artifact checks), refer to `.github/workflows/ci.yml`.
+
+## Optional pre-commit hook installation
+
+DX-003 adds an optional local pre-commit baseline that runs fast checks before
+commits:
+
+- `make g` (README/governance anchor validation)
+- `make s` (runtime stack declaration + deployment-readiness file checks)
+
+Install and use the hooks:
+
+```bash
+python -m pip install pre-commit
+pre-commit install --hook-type pre-commit
+pre-commit run --all-files
+```
+
+Uninstall hooks (if needed):
+
+```bash
+pre-commit uninstall
+```
+
+The hook definitions live in `.pre-commit-config.yaml` and are intentionally
+limited to quick checks; keep `make v`/`make ci` in your normal PR workflow for
+full baseline validation.
