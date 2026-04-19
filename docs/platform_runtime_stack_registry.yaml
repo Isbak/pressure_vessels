@@ -50,7 +50,7 @@ components:
     notes: Approved base model family set.
   - key: search-opensearch
     capability: search-analytics
-    status: planned
+    status: deployed
     owner: retrieval-platform
     module_path: infra/platform/opensearch
     notes: Full-text search and analytics.

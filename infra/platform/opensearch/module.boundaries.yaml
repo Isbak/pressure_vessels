@@ -1,0 +1,65 @@
+version: 1
+kind: PlatformSearchAnalyticsOpenSearchModule
+metadata:
+  name: platform-search-analytics-opensearch-boundaries
+spec:
+  owner: retrieval-platform
+  engine:
+    family: opensearch
+    major_version: "2"
+  index_ownership:
+    - name: standards-search-index
+      owner: retrieval-platform
+      access_path:
+        - services/backend
+      lifecycle: ilm-rollover-managed
+    - name: design-audit-events-index
+      owner: platform-runtime
+      access_path:
+        - services/backend
+      lifecycle: time-partitioned-immutable-events
+  retention_policy:
+    index_classes:
+      - name: standards-search-index
+        policy_owner: retrieval-platform
+        rollover:
+          max_primary_shard_size_gb: 25
+          max_age_days: 7
+        retention_days:
+          dev: 14
+          staging: 90
+      - name: design-audit-events-index
+        policy_owner: platform-runtime
+        rollover:
+          max_primary_shard_size_gb: 20
+          max_age_days: 1
+        retention_days:
+          dev: 30
+          staging: 180
+  access_ownership:
+    roles:
+      - name: opensearch-admin
+        owner: retrieval-platform
+        privileges:
+          - index-template-admin
+          - ilm-policy-admin
+      - name: opensearch-writer
+        owner: platform-runtime
+        privileges:
+          - write-owned-indices
+      - name: opensearch-reader
+        owner: platform-runtime
+        privileges:
+          - query-approved-indices
+    direct_service_access:
+      allowed: false
+      path: backend-api-only
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    index_policy_owner: retrieval-platform
+    access_review_owner: security-platform
+    backup_owner: platform-runtime
+    recovery_testing_owner: platform-runtime
+  governance:
+    index_template_review_required: true
+    retention_policy_change_requires_approval: true
