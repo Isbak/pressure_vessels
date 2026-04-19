@@ -1,0 +1,61 @@
+version: 1
+kind: PlatformVectorRetrievalQdrantModule
+metadata:
+  name: platform-vector-retrieval-qdrant-boundaries
+spec:
+  owner: retrieval-platform
+  engine:
+    family: qdrant
+    major_version: "1"
+  collection_ownership:
+    - name: standards-clause-embeddings
+      owner: retrieval-platform
+      access_path:
+        - services/backend
+      lifecycle: append-and-reindex-versioned
+    - name: design-history-embeddings
+      owner: platform-runtime
+      access_path:
+        - services/backend
+      lifecycle: revision-linked-upsert
+  indexing_policy:
+    collections:
+      - name: standards-clause-embeddings
+        embedding_owner: retrieval-platform
+        index_owner: retrieval-platform
+        distance_metric: cosine
+        reindex_policy: staged-alias-cutover
+      - name: design-history-embeddings
+        embedding_owner: platform-runtime
+        index_owner: retrieval-platform
+        distance_metric: cosine
+        reindex_policy: approval-required-rebuild
+  access_ownership:
+    roles:
+      - name: qdrant-admin
+        owner: retrieval-platform
+        privileges:
+          - collection-admin
+          - index-policy-admin
+      - name: qdrant-writer
+        owner: platform-runtime
+        privileges:
+          - upsert-owned-collections
+      - name: qdrant-reader
+        owner: platform-runtime
+        privileges:
+          - query-approved-collections
+    direct_service_access:
+      allowed: false
+      path: backend-api-only
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    indexing_policy_owner: retrieval-platform
+    access_review_owner: security-platform
+    backup_owner: platform-runtime
+    retention_defaults:
+      dev_days: 7
+      staging_days: 30
+  governance:
+    deterministic_embedding_version_required: true
+    collection_schema_review_required: true
