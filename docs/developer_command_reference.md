@@ -41,6 +41,31 @@ scan, governance gate artifact checks, and governance checklist evidence generat
 
 Governance checklist evidence generated in CI is published in the `governance-gate-report` artifact bundle as `artifacts/ci/GovernanceChecklistEvidence.v1.json`.
 
+## PR risk label suggestion workflow (DX-008)
+
+CI includes an advisory `risk-label-suggestion` job on pull requests. It uses
+changed-file heuristics aligned to `AGENT_GOVERNANCE.md#4-change-classification-and-merge-gates`
+to suggest `low` / `medium` / `high` risk labels.
+
+Heuristic routing baseline:
+
+- **High** suggestion: compliance calculation paths, CI/governance control files,
+  or infrastructure-as-code primitives change.
+- **Medium** suggestion: application code, tests, scripts, or developer tooling
+  manifests change.
+- **Low** suggestion: docs/artifact metadata-only changes.
+
+Outputs and visibility:
+
+- PR workflow job summary includes the suggested risk and matched paths.
+- Artifact bundle `risk-label-suggestion` includes:
+  - `artifacts/ci/RiskLabelSuggestion.v1.json`
+  - `artifacts/ci/RiskLabelSuggestion.summary.md`
+  - `artifacts/ci/changed-paths.txt`
+
+Important: this job is **advisory only** and has no merge authority. Human
+reviewers remain responsible for final risk classification and approval routing.
+
 ## Optional pre-commit hook installation
 
 DX-003 adds an optional local pre-commit baseline that runs fast checks before
