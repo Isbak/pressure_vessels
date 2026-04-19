@@ -219,7 +219,28 @@ Use trends to improve prompts, review depth, and gate strictness.
 
 ---
 
-## 13) Is This "Best Practice" Yet?
+## 13) Cross-Project Adoption Policy
+
+When this platform baseline is reused in other projects, retain these controls as non-optional defaults:
+
+1. Keep a single local bootstrap command and a single baseline validation command.
+2. Ensure local baseline validation mirrors CI-required checks (tests, lint/docs checks, policy checks).
+3. Keep risk-based merge gates and required human approvals unchanged unless stricter controls are introduced.
+4. Keep secret/dependency scanning enabled and fail closed on violations.
+5. Document ownership boundaries for infrastructure/runtime modules in each project runbook.
+6. Record any control exceptions as policy-as-data with approver identity and expiration.
+
+Cross-project variations are allowed only in:
+
+- module/file paths,
+- toolchain invocation details,
+- domain-specific approval routing.
+
+Security and governance outcomes must remain equivalent or stronger than this baseline.
+
+---
+
+## 14) Is This "Best Practice" Yet?
 
 Short answer: **this is a strong starter baseline, not the final best-practice end state**.
 
@@ -241,7 +262,7 @@ You are close to best practice when all of the following are true:
 
 ---
 
-## 13) Repository Conventions for This Governance
+## 15) Repository Conventions for This Governance
 
 - Keep this file as the single source of governance baseline.
 - Reference this file from `README.md`.

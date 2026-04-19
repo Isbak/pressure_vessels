@@ -25,7 +25,7 @@ items:
   area: developer-onboarding
   phase: 'Phase 0: Quick Wins'
   priority: P0
-  status: todo
+  status: done
   effort: S
   depends_on: []
   references:
