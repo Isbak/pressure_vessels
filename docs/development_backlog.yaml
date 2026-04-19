@@ -1,6 +1,6 @@
 ---
 version: 1.0.0
-generated_on: '2026-04-18'
+generated_on: '2026-04-19'
 project: pressure_vessels
 description: Machine-readable development backlog derived from repository roadmap, architecture, and semantic workflow documents.
 status_values:
@@ -773,3 +773,199 @@ items:
   - infra/platform/model-catalog module skeleton
   - Approved model family documentation
   - Stack registry status update for models-llama-mistral-qwen
+- id: BL-034
+  title: Replace service placeholders with runnable API/UI vertical slice
+  area: platform
+  phase: 'Phase 6: Productization'
+  priority: P0
+  status: todo
+  effort: L
+  depends_on:
+  - BL-018
+  - BL-026
+  references:
+  - services/backend/src/main.ts
+  - services/frontend/app/page.tsx
+  - README.md#6-end-to-end-workflow
+  acceptance_criteria:
+  - Backend exposes versioned endpoints for starting a design run and retrieving run status/artifacts.
+  - Frontend can submit a basic pressure-vessel input payload and display workflow state and compliance summary.
+  - End-to-end contract test validates UI-to-API-to-orchestrator happy-path flow.
+  deliverables:
+  - Backend API routes and handlers
+  - Frontend design-run submission and status views
+  - End-to-end contract test coverage
+- id: BL-035
+  title: Persist traceability and workflow state in runtime datastores
+  area: traceability
+  phase: 'Phase 6: Productization'
+  priority: P0
+  status: todo
+  effort: L
+  depends_on:
+  - BL-006
+  - BL-016
+  - BL-024
+  - BL-029
+  references:
+  - README.md#8-certification-readiness-features
+  - docs/interfaces/traceability_pipeline_contract.md
+  - docs/interfaces/workflow_orchestrator_contract.md
+  acceptance_criteria:
+  - Workflow execution events are persisted in PostgreSQL with immutable revision IDs.
+  - Traceability graph writes are persisted in Neo4j with read/query API examples.
+  - Recovery test demonstrates run resume after process restart without evidence loss.
+  deliverables:
+  - Persistent workflow event store integration
+  - Neo4j-backed traceability write path
+  - Recovery and resume test suite
+- id: BL-036
+  title: Implement standards package lifecycle controls and migration tests
+  area: knowledge
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-005
+  - BL-008
+  references:
+  - README.md#5-standards-ingestion-new-codes-and-updates
+  - docs/runbooks/standards_ingestion_pipeline_runbook.md
+  acceptance_criteria:
+  - Version promotion flow supports draft-to-candidate-to-released transitions with approvals.
+  - Cross-version regression suite detects calculation/compliance drift before release.
+  - Impact analysis reports list affected projects and required selective re-verification scope.
+  deliverables:
+  - Standards package promotion workflow
+  - Cross-version migration regression suite
+  - Version impact analysis report template
+- id: BL-037
+  title: Add deterministic PDF generation and signature verification harness
+  area: reporting
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-015
+  references:
+  - README.md#8-certification-readiness-features
+  - docs/interfaces/dossier_export_pipeline_contract.md
+  acceptance_criteria:
+  - PDF outputs are byte-stable or normalized-hash stable for identical inputs.
+  - Signature validation checks pass for dossier and change-impact artifacts.
+  - CI fails on unsigned or tampered dossier payloads.
+  deliverables:
+  - Deterministic PDF rendering verifier
+  - Signature verification harness
+  - CI gate for dossier signature integrity
+- id: BL-038
+  title: Establish production security baseline for runtime interfaces
+  area: security
+  phase: 'Phase 6: Productization'
+  priority: P0
+  status: todo
+  effort: L
+  depends_on:
+  - BL-022
+  - BL-027
+  references:
+  - AGENT_GOVERNANCE.md
+  - docs/governance/ci_governance_policy.v1.json
+  - README.md#9-non-functional-requirements
+  acceptance_criteria:
+  - Backend endpoints require role-scoped auth tokens for engineer/reviewer/approver personas.
+  - Secrets are loaded through approved secrets module paths without plaintext fallbacks.
+  - Security audit trail captures actor, action, artifact, and decision for approval gates.
+  deliverables:
+  - Role-based API authorization policy
+  - Secrets integration hardening checklist and tests
+  - Security audit event schema and persistence
+- id: BL-039
+  title: Define SLOs, telemetry, and incident response automation
+  area: operations
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-023
+  - BL-026
+  references:
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/incidents/TEMPLATE.md
+  acceptance_criteria:
+  - SLOs are published for orchestration latency, run success rate, and artifact export success.
+  - RED/USE metrics and traces are instrumented for critical pipeline stages.
+  - Alert routing and incident runbook drill are validated in a simulated failure scenario.
+  deliverables:
+  - Service SLO definition and dashboards
+  - Pipeline telemetry instrumentation updates
+  - Incident automation drill report
+- id: BL-040
+  title: Implement performance and scale benchmark suite
+  area: quality
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-017
+  - BL-026
+  references:
+  - README.md#11-validation-strategy
+  - tests/golden_examples/benchmark_manifest.json
+  acceptance_criteria:
+  - Benchmark harness measures throughput and latency under concurrent workflow runs.
+  - Bottlenecks are identified with profiling artifacts and mitigation recommendations.
+  - Capacity envelope is documented with tested limits and safe operating guidance.
+  deliverables:
+  - Load and concurrency benchmark harness
+  - Profiling artifact bundle
+  - Capacity envelope report
+- id: BL-041
+  title: Expand engineering validation with independent references and edge envelopes
+  area: calculation
+  phase: 'Phase 6: Productization'
+  priority: P0
+  status: todo
+  effort: L
+  depends_on:
+  - BL-003e
+  - BL-017
+  references:
+  - README.md#11-validation-strategy
+  - docs/interfaces/calculation_pipeline_contract.md
+  - tests/golden_examples/README.md
+  acceptance_criteria:
+  - Independent reference cases cover additional ASME Div 1 edge conditions.
+  - Explicit reject tests enforce invalid-domain or extrapolated input handling.
+  - Discrepancy triage workflow is documented when model-vs-reference deltas exceed tolerance.
+  deliverables:
+  - Expanded reference-case dataset
+  - Domain-envelope reject test suite
+  - Validation discrepancy triage runbook
+- id: BL-042
+  title: Automate release pipeline and environment promotion gates
+  area: release
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: blocked
+  effort: M
+  depends_on:
+  - BL-012
+  - BL-026
+  - BL-038
+  references:
+  - AGENT_GOVERNANCE.md
+  - docs/governance/ci_governance_policy.v1.json
+  - docs/runbooks/platform_runtime_stack_operations.md
+  acceptance_criteria:
+  - Signed release artifacts and provenance attestations are generated on tagged builds.
+  - Promotion requires passing governance, security, and regression gates.
+  - Rollback automation restores the previous known-good release with audit evidence.
+  deliverables:
+  - Release provenance and signing workflow
+  - Environment promotion gate automation
+  - Rollback automation playbook and validation report
