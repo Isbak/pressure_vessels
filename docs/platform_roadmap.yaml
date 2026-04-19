@@ -130,7 +130,7 @@ items:
   area: governance
   phase: 'Phase 2: Governance Ergonomics'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - DX-003

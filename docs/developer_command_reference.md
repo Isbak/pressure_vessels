@@ -37,7 +37,9 @@ Use this table to mirror CI behavior before opening a PR:
 | _combined local baseline_ | multiple jobs above | `make ci` (or `make v`) |
 
 For full CI workflow coverage (including markdown lint, YAML validation, secret
-scan, and governance gate artifact checks), refer to `.github/workflows/ci.yml`.
+scan, governance gate artifact checks, and governance checklist evidence generation), refer to `.github/workflows/ci.yml`.
+
+Governance checklist evidence generated in CI is published in the `governance-gate-report` artifact bundle as `artifacts/ci/GovernanceChecklistEvidence.v1.json`.
 
 ## Optional pre-commit hook installation
 

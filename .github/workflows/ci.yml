@@ -267,6 +267,13 @@ jobs:
             .github/governance/policy_exceptions.v1.json \
             artifacts/ci/job-results.json \
             artifacts/ci/GovernanceGateReport.v1.json
+      - name: Build governance checklist evidence payload
+        if: always()
+        run: |
+          python scripts/generate_governance_checklist_evidence.py \
+            artifacts/ci/job-results.json \
+            artifacts/ci/GovernanceGateReport.v1.json \
+            artifacts/ci/GovernanceChecklistEvidence.v1.json
       - name: Upload governance audit artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -275,5 +282,6 @@ jobs:
           path: |
             artifacts/ci/job-results.json
             artifacts/ci/GovernanceGateReport.v1.json
+            artifacts/ci/GovernanceChecklistEvidence.v1.json
             artifacts/ci/changed-paths.txt
           retention-days: ${{ steps.policy.outputs.retention }}
