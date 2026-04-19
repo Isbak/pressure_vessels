@@ -14,6 +14,7 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 | `infra/platform/runtime` | Platform Runtime Team + Platform Experience Team | Docker/Kubernetes deployment target ownership, rollout lifecycle, and release evidence boundaries. |
 | `infra/platform/keycloak` | Security Platform Team + consuming service teams | Realm, client, and role ownership boundaries with promotion and break-glass lifecycle controls. |
 | `infra/platform/temporal` | Orchestration Platform Team + Platform Runtime Team | Temporal namespace, task queue, and worker ownership boundaries with rollout and recovery controls. |
+| `infra/platform/neo4j` | Knowledge Platform Team + Platform Runtime Team | Neo4j database, graph schema, and access ownership boundaries with revisioned write controls. |
 
 ## Environment Provisioning Inputs
 
@@ -27,8 +28,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 8. `infra/platform/runtime/module.boundaries.yaml` defines Docker/Kubernetes target ownership, rollout lifecycle, and release evidence boundaries.
 9. `infra/platform/keycloak/module.boundaries.yaml` defines Keycloak realm/client/role ownership and identity lifecycle boundaries.
 10. `infra/platform/temporal/module.boundaries.yaml` defines Temporal namespace, task queue, and worker ownership and lifecycle boundaries.
-11. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-12. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+11. `infra/platform/neo4j/module.boundaries.yaml` defines Neo4j database, graph schema, and access ownership and lifecycle boundaries.
+12. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+13. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -55,6 +57,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f infra/platform/keycloak/module.boundaries.yaml`
 - Confirm workflow orchestration boundary module exists:
   - `test -f infra/platform/temporal/module.boundaries.yaml`
+- Confirm knowledge graph boundary module exists:
+  - `test -f infra/platform/neo4j/module.boundaries.yaml`
 
 ## Incident Operations
 

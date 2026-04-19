@@ -26,7 +26,7 @@ components:
     notes: Redis module skeleton with queue/cache ownership and lifecycle boundaries committed in-repo.
   - key: graph-neo4j
     capability: knowledge-graph
-    status: planned
+    status: deployed
     owner: knowledge-platform
     module_path: infra/platform/neo4j
     notes: Traceability graph runtime.
