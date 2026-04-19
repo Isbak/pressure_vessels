@@ -9,10 +9,14 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
-def _run_make_dry_run(target: str) -> str:
-    """Return make dry-run output for a target."""
+def _run_make(target: str, *, dry_run: bool = False) -> str:
+    """Return output for a make target, optionally in dry-run mode."""
+    cmd = ["make"]
+    if dry_run:
+        cmd.append("-n")
+
     completed = subprocess.run(
-        ["make", "-n", target],
+        [*cmd, target],
         cwd=REPO_ROOT,
         check=True,
         capture_output=True,
@@ -21,14 +25,20 @@ def _run_make_dry_run(target: str) -> str:
     return completed.stdout
 
 
-def test_short_alias_targets_are_available() -> None:
-    """Short aliases should resolve without make errors."""
-    for target in ("t", "g", "s", "v", "ci"):
-        _run_make_dry_run(target)
+def test_short_aliases_execute_for_non_pytest_workflows() -> None:
+    """Run make aliases directly for governance and stack checks."""
+    _run_make("g")
+    _run_make("s")
 
 
 def test_aliases_expand_to_expected_workflows() -> None:
-    """Alias dry-runs should include canonical workflow commands."""
-    assert "pytest -q" in _run_make_dry_run("t")
-    assert "python scripts/check_readme_anchors.py" in _run_make_dry_run("g")
-    assert "python scripts/check_tech_stack.py" in _run_make_dry_run("s")
+    """Dry-runs should show canonical command wiring for each alias.
+
+    `make t`/`make v`/`make ci` are checked with dry-runs to avoid recursively
+    invoking pytest from inside pytest.
+    """
+    assert "pytest -q" in _run_make("t", dry_run=True)
+    assert "python scripts/check_readme_anchors.py" in _run_make("g", dry_run=True)
+    assert "python scripts/check_tech_stack.py" in _run_make("s", dry_run=True)
+    assert "pytest -q" in _run_make("v", dry_run=True)
+    assert "pytest -q" in _run_make("ci", dry_run=True)
