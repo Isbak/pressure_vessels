@@ -1,0 +1,557 @@
+{
+  "applied_defaults": {
+    "applied_geometry_defaults": false,
+    "applied_mvp_defaults": false,
+    "corrosion_allowance_policy": {
+      "description": "Use corrosion allowance directly from normalized RequirementSet input.",
+      "policy_id": "CA-INPUT-REQUIREMENT",
+      "source": "requirement_set.corrosion_allowance",
+      "value_mm": 3.0
+    },
+    "material_source": "materials_module.resolve_material_basis",
+    "source": "geometry-module+materials-module",
+    "values": {}
+  },
+  "cad_ready_parameter_export": {
+    "deterministic_hash": "49859f0af23016ad2ebfef084b84a71253f19ec5b77d417b3effce877d0dd9f3",
+    "geometry_revision_id": "REV-A",
+    "parameters": {
+      "head_inside_diameter_m": 2.0,
+      "head_provided_thickness_m": 0.03,
+      "nozzle_inside_diameter_m": 0.35,
+      "nozzle_provided_thickness_m": 0.012,
+      "shell_inside_diameter_m": 2.0,
+      "shell_provided_thickness_m": 0.035
+    },
+    "schema_version": "CadReadyParameterExport.v1",
+    "source_calculation_records_hash": "263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27",
+    "source_model_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source_system": "design_and_verify.py"
+  },
+  "checks": [
+    {
+      "check_id": "UG-27-shell",
+      "clause_id": "UG-27",
+      "component": "shell",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "inputs": {
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E": 0.85,
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0
+      },
+      "is_near_limit": false,
+      "margin_m": 0.016512132,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": null,
+      "parent_component": null,
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.035,
+      "reproducibility": {
+        "canonical_payload_sha256": "bc231be02a5cb7ed511952be95056e61a20c1f00f3cb2850c51e83e6b687c607",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.018487868,
+      "utilization_ratio": 0.5282248,
+      "validity_envelope": {
+        "bounds": {
+          "allowable_stress_pa": {
+            "max": 500000000.0,
+            "min": 50000000.0
+          },
+          "corrosion_allowance_m": {
+            "max": 0.02,
+            "min": 0.0
+          },
+          "internal_pressure_pa": {
+            "max": 20000000.0,
+            "min": 1.0
+          },
+          "joint_efficiency": {
+            "max": 1.0,
+            "min": 0.5
+          },
+          "shell_inside_diameter_m": {
+            "max": 8.0,
+            "min": 0.25
+          }
+        },
+        "evaluated_inputs": {
+          "allowable_stress_pa": 138000000.0,
+          "corrosion_allowance_m": 0.003,
+          "internal_pressure_pa": 1800000.0,
+          "joint_efficiency": 0.85,
+          "shell_inside_diameter_m": 2.0
+        },
+        "model_id": "ug27_shell_thickness_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-32-head",
+      "clause_id": "UG-32",
+      "component": "head",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "inputs": {
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E": 0.85,
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0
+      },
+      "is_near_limit": false,
+      "margin_m": 0.013398566,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": null,
+      "parent_component": null,
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.03,
+      "reproducibility": {
+        "canonical_payload_sha256": "816ea55e069172efa46ed0184484a7e2c41ebbff3f02e5a029fa447358d30940",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.016601434,
+      "utilization_ratio": 0.553381133,
+      "validity_envelope": {
+        "bounds": {
+          "allowable_stress_pa": {
+            "max": 500000000.0,
+            "min": 50000000.0
+          },
+          "corrosion_allowance_m": {
+            "max": 0.02,
+            "min": 0.0
+          },
+          "head_inside_diameter_m": {
+            "max": 8.0,
+            "min": 0.25
+          },
+          "internal_pressure_pa": {
+            "max": 20000000.0,
+            "min": 1.0
+          },
+          "joint_efficiency": {
+            "max": 1.0,
+            "min": 0.5
+          }
+        },
+        "evaluated_inputs": {
+          "allowable_stress_pa": 138000000.0,
+          "corrosion_allowance_m": 0.003,
+          "head_inside_diameter_m": 2.0,
+          "internal_pressure_pa": 1800000.0,
+          "joint_efficiency": 0.85
+        },
+        "model_id": "ug32_head_thickness_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-45-nozzle",
+      "clause_id": "UG-45",
+      "component": "nozzle",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "inputs": {
+        "CA_m": 0.003,
+        "E": 0.85,
+        "P_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "d_m": 0.35
+      },
+      "is_near_limit": false,
+      "margin_m": 0.006297993,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": null,
+      "parent_component": null,
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.012,
+      "reproducibility": {
+        "canonical_payload_sha256": "cbaf97c2db5d3f698e57c6a471dfc6b5506048f016ed9ee0c365ff18653d5f5a",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.005702007,
+      "utilization_ratio": 0.47516725,
+      "validity_envelope": {
+        "bounds": {
+          "allowable_stress_pa": {
+            "max": 500000000.0,
+            "min": 50000000.0
+          },
+          "corrosion_allowance_m": {
+            "max": 0.02,
+            "min": 0.0
+          },
+          "internal_pressure_pa": {
+            "max": 20000000.0,
+            "min": 1.0
+          },
+          "joint_efficiency": {
+            "max": 1.0,
+            "min": 0.5
+          },
+          "nozzle_inside_diameter_m": {
+            "max": 2.0,
+            "min": 0.05
+          }
+        },
+        "evaluated_inputs": {
+          "allowable_stress_pa": 138000000.0,
+          "corrosion_allowance_m": 0.003,
+          "internal_pressure_pa": 1800000.0,
+          "joint_efficiency": 0.85,
+          "nozzle_inside_diameter_m": 0.35
+        },
+        "model_id": "ug45_nozzle_thickness_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "component": "shell",
+      "computed_mawp_pa": 3682888.540031397,
+      "design_pressure_pa": 1800000.0,
+      "formula": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "inputs": {
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E": 0.85,
+        "P_design_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "t_m": 0.035
+      },
+      "is_near_limit": true,
+      "margin_m": -1799999.965,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": null,
+      "parent_component": null,
+      "pass_status": true,
+      "pressure_margin_pa": 1882888.540031397,
+      "provided_thickness_m": 0.035,
+      "reproducibility": {
+        "canonical_payload_sha256": "86ad5cbef3fd97eb343495d31daff57018b00c8d105c2a021c73076100a70984",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 1800000.0,
+      "utilization_ratio": 51428571.428571425,
+      "validity_envelope": {
+        "bounds": {
+          "allowable_stress_pa": {
+            "max": 500000000.0,
+            "min": 50000000.0
+          },
+          "corrosion_allowance_m": {
+            "max": 0.02,
+            "min": 0.0
+          },
+          "joint_efficiency": {
+            "max": 1.0,
+            "min": 0.5
+          },
+          "shell_inside_diameter_m": {
+            "max": 8.0,
+            "min": 0.25
+          },
+          "shell_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.002
+          }
+        },
+        "evaluated_inputs": {
+          "allowable_stress_pa": 138000000.0,
+          "corrosion_allowance_m": 0.003,
+          "joint_efficiency": 0.85,
+          "shell_inside_diameter_m": 2.0,
+          "shell_provided_thickness_m": 0.035
+        },
+        "model_id": "ug27_shell_mawp_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "component": "head",
+      "computed_mawp_pa": 3567759.3781683,
+      "design_pressure_pa": 1800000.0,
+      "formula": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "inputs": {
+        "CA_m": 0.003,
+        "D_m": 2.0,
+        "E": 0.85,
+        "P_design_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "t_m": 0.03
+      },
+      "is_near_limit": true,
+      "margin_m": -1799999.97,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": null,
+      "parent_component": null,
+      "pass_status": true,
+      "pressure_margin_pa": 1767759.3781683,
+      "provided_thickness_m": 0.03,
+      "reproducibility": {
+        "canonical_payload_sha256": "909ded8b546a9cd9e9cac1a656729334327cb5bce07cf458ab3e4f3f4855e52c",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 1800000.0,
+      "utilization_ratio": 60000000.0,
+      "validity_envelope": {
+        "bounds": {
+          "allowable_stress_pa": {
+            "max": 500000000.0,
+            "min": 50000000.0
+          },
+          "corrosion_allowance_m": {
+            "max": 0.02,
+            "min": 0.0
+          },
+          "head_inside_diameter_m": {
+            "max": 8.0,
+            "min": 0.25
+          },
+          "head_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.002
+          },
+          "joint_efficiency": {
+            "max": 1.0,
+            "min": 0.5
+          }
+        },
+        "evaluated_inputs": {
+          "allowable_stress_pa": 138000000.0,
+          "corrosion_allowance_m": 0.003,
+          "head_inside_diameter_m": 2.0,
+          "head_provided_thickness_m": 0.03,
+          "joint_efficiency": 0.85
+        },
+        "model_id": "ug32_head_mawp_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "component": "nozzle",
+      "computed_mawp_pa": 5910974.244120942,
+      "design_pressure_pa": 1800000.0,
+      "formula": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "inputs": {
+        "CA_m": 0.003,
+        "E": 0.85,
+        "P_design_Pa": 1800000.0,
+        "S_Pa": 138000000.0,
+        "d_m": 0.35,
+        "t_m": 0.012
+      },
+      "is_near_limit": true,
+      "margin_m": -1799999.988,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": null,
+      "parent_component": null,
+      "pass_status": true,
+      "pressure_margin_pa": 4110974.244120942,
+      "provided_thickness_m": 0.012,
+      "reproducibility": {
+        "canonical_payload_sha256": "f3ad7cae7b0a0861a1f32e9e6ec22dad9ba930055ee26c4cb63727cb4c2022f9",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 1800000.0,
+      "utilization_ratio": 150000000.0,
+      "validity_envelope": {
+        "bounds": {
+          "allowable_stress_pa": {
+            "max": 500000000.0,
+            "min": 50000000.0
+          },
+          "corrosion_allowance_m": {
+            "max": 0.02,
+            "min": 0.0
+          },
+          "joint_efficiency": {
+            "max": 1.0,
+            "min": 0.5
+          },
+          "nozzle_inside_diameter_m": {
+            "max": 2.0,
+            "min": 0.05
+          },
+          "nozzle_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.001
+          }
+        },
+        "evaluated_inputs": {
+          "allowable_stress_pa": 138000000.0,
+          "corrosion_allowance_m": 0.003,
+          "joint_efficiency": 0.85,
+          "nozzle_inside_diameter_m": 0.35,
+          "nozzle_provided_thickness_m": 0.012
+        },
+        "model_id": "ug45_nozzle_mawp_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "component": "nozzle",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "inputs": {
+        "A_available_m2": 0.00798354375,
+        "CA_m": 0.003,
+        "D_parent_m": 2.0,
+        "d_opening_m": 0.35,
+        "t_nozzle_m": 0.012,
+        "t_parent_m": 0.035,
+        "t_required_nozzle_m": 0.005702007,
+        "t_required_parent_m": 0.018487868,
+        "w_effective_m": 0.175
+      },
+      "is_near_limit": false,
+      "margin_m": 0.00151279,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": "UG-27-shell",
+      "parent_component": "shell",
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.007983544,
+      "reproducibility": {
+        "canonical_payload_sha256": "ae6e3ef4cf67611bcc2263104094a05e5c259915fc9fcb0f58621ec8f5a621a2",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.006470754,
+      "utilization_ratio": 0.810511472,
+      "validity_envelope": {
+        "bounds": {
+          "nozzle_inside_diameter_m": {
+            "max": 2.0,
+            "min": 0.05
+          },
+          "nozzle_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.001
+          },
+          "shell_inside_diameter_m": {
+            "max": 8.0,
+            "min": 0.25
+          },
+          "shell_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.002
+          }
+        },
+        "evaluated_inputs": {
+          "nozzle_inside_diameter_m": 0.35,
+          "nozzle_provided_thickness_m": 0.012,
+          "shell_inside_diameter_m": 2.0,
+          "shell_provided_thickness_m": 0.035
+        },
+        "model_id": "ug37_nozzle_shell_reinforcement_v1",
+        "status": "in_envelope"
+      }
+    },
+    {
+      "check_id": "UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "component": "nozzle",
+      "computed_mawp_pa": null,
+      "design_pressure_pa": null,
+      "formula": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "inputs": {
+        "A_available_m2": 0.0068937956499999994,
+        "CA_m": 0.003,
+        "D_parent_m": 2.0,
+        "d_opening_m": 0.35,
+        "t_nozzle_m": 0.012,
+        "t_parent_m": 0.03,
+        "t_required_nozzle_m": 0.005702007,
+        "t_required_parent_m": 0.016601434,
+        "w_effective_m": 0.175
+      },
+      "is_near_limit": false,
+      "margin_m": 0.001083294,
+      "near_limit_threshold": 0.9,
+      "parent_check_id": "UG-32-head",
+      "parent_component": "head",
+      "pass_status": true,
+      "pressure_margin_pa": null,
+      "provided_thickness_m": 0.006893796,
+      "reproducibility": {
+        "canonical_payload_sha256": "a9a29435e15c2913e54478bcde6c3e525a2b88963587dfd4075dc98ee5da3b94",
+        "hash_algorithm": "sha256"
+      },
+      "required_thickness_m": 0.005810502,
+      "utilization_ratio": 0.84285958,
+      "validity_envelope": {
+        "bounds": {
+          "head_inside_diameter_m": {
+            "max": 8.0,
+            "min": 0.25
+          },
+          "head_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.002
+          },
+          "nozzle_inside_diameter_m": {
+            "max": 2.0,
+            "min": 0.05
+          },
+          "nozzle_provided_thickness_m": {
+            "max": 0.25,
+            "min": 0.001
+          }
+        },
+        "evaluated_inputs": {
+          "head_inside_diameter_m": 2.0,
+          "head_provided_thickness_m": 0.03,
+          "nozzle_inside_diameter_m": 0.35,
+          "nozzle_provided_thickness_m": 0.012
+        },
+        "model_id": "ug37_nozzle_head_reinforcement_v1",
+        "status": "in_envelope"
+      }
+    }
+  ],
+  "deterministic_hash": "263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27",
+  "generated_at_utc": "2026-04-19T12:00:00+00:00",
+  "geometry_basis": {
+    "geometry_revision_id": "REV-A",
+    "source": "geometry_module.GeometryInput.v1",
+    "source_model_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source_system": "design_and_verify.py"
+  },
+  "material_basis": {
+    "allowable_stress_pa": 138000000.0,
+    "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+    "corrosion_allowance_m": 0.003,
+    "corrosion_allowance_policy": {
+      "description": "Use corrosion allowance directly from normalized RequirementSet input.",
+      "policy_id": "CA-INPUT-REQUIREMENT",
+      "source": "requirement_set.corrosion_allowance",
+      "value_mm": 3.0
+    },
+    "joint_efficiency": 0.85,
+    "material_spec": "SA-516 Gr.70",
+    "schema_version": "MaterialBasis.v1",
+    "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023"
+  },
+  "schema_version": "CalculationRecords.v1",
+  "source_applicability_matrix_hash": "a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8",
+  "source_design_basis_signature": "42ec18932a8bb38ca507dd0852323a7e6699fe8413e787904e5e1fccf153df66",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
+}

@@ -1,0 +1,334 @@
+{
+  "applied_defaults": {
+    "applied_geometry_defaults": false,
+    "applied_mvp_defaults": false,
+    "corrosion_allowance_policy": {
+      "description": "Use corrosion allowance directly from normalized RequirementSet input.",
+      "policy_id": "CA-INPUT-REQUIREMENT",
+      "source": "requirement_set.corrosion_allowance",
+      "value_mm": 3.0
+    },
+    "material_source": "materials_module.resolve_material_basis",
+    "source": "geometry-module+materials-module",
+    "values": {}
+  },
+  "cad_ready_parameter_export": {
+    "deterministic_hash": "49859f0af23016ad2ebfef084b84a71253f19ec5b77d417b3effce877d0dd9f3",
+    "geometry_revision_id": "REV-A",
+    "parameters": {
+      "head_inside_diameter_m": 2.0,
+      "head_provided_thickness_m": 0.03,
+      "nozzle_inside_diameter_m": 0.35,
+      "nozzle_provided_thickness_m": 0.012,
+      "shell_inside_diameter_m": 2.0,
+      "shell_provided_thickness_m": 0.035
+    },
+    "schema_version": "CadReadyParameterExport.v1",
+    "source_calculation_records_hash": "263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27",
+    "source_model_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source_system": "design_and_verify.py"
+  },
+  "compliance_matrix": [
+    {
+      "applicable": true,
+      "check_ids": [],
+      "clause_id": "UG-16",
+      "justification": "Applicable because design pressure is defined for pressure boundary sizing.",
+      "status": "not_evaluated"
+    },
+    {
+      "applicable": true,
+      "check_ids": [],
+      "clause_id": "UG-20",
+      "justification": "Applicable because design temperature is defined for material selection limits.",
+      "status": "not_evaluated"
+    },
+    {
+      "applicable": true,
+      "check_ids": [],
+      "clause_id": "UG-25",
+      "justification": "Applicable because corrosion allowance input is provided.",
+      "status": "not_evaluated"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-27-shell",
+        "UG-27-shell-mawp"
+      ],
+      "clause_id": "UG-27",
+      "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified.",
+      "status": "pass"
+    },
+    {
+      "applicable": false,
+      "check_ids": [],
+      "clause_id": "UG-28",
+      "justification": "Not applicable because external pressure service is not declared and internal pressure basis is assumed.",
+      "status": "not_applicable"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-32-head",
+        "UG-32-head-mawp"
+      ],
+      "clause_id": "UG-32",
+      "justification": "Applicable because head thickness under internal pressure must be verified.",
+      "status": "pass"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-37-nozzle-head-reinforcement",
+        "UG-37-nozzle-shell-reinforcement"
+      ],
+      "clause_id": "UG-37",
+      "justification": "Applicable because nozzle openings require reinforcement-area replacement checks against parent components.",
+      "status": "pass"
+    },
+    {
+      "applicable": true,
+      "check_ids": [
+        "UG-45-nozzle",
+        "UG-45-nozzle-mawp"
+      ],
+      "clause_id": "UG-45",
+      "justification": "Applicable because nozzle neck minimum thickness must be verified.",
+      "status": "pass"
+    },
+    {
+      "applicable": false,
+      "check_ids": [],
+      "clause_id": "UCS-66",
+      "justification": "Not applicable because design temperature is above low-temperature impact-test threshold.",
+      "status": "not_applicable"
+    }
+  ],
+  "compliance_matrix_schema_version": "ComplianceMatrix.v1",
+  "deterministic_hash": "6a413e70101dd761e15c8ecbd036f23e918eeefd85c59d2d80041a5d59ad5cfe",
+  "evidence_link_set_schema_version": "EvidenceLinkSet.v1",
+  "evidence_links": [
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UG-16",
+      "clause_id": "UG-16",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "code_standard",
+      "result_id": "UG-16:applicable=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UG-20",
+      "clause_id": "UG-20",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "code_standard",
+      "result_id": "UG-20:applicable=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "model_id": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-27-shell-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-27-shell",
+      "clause_id": "UG-27",
+      "model_id": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "requirement_field": "code_standard",
+      "result_id": "UG-27-shell:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "model_id": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-32-head-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-32-head",
+      "clause_id": "UG-32",
+      "model_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "requirement_field": "code_standard",
+      "result_id": "UG-32-head:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-37-nozzle-head-reinforcement:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-37-nozzle-shell-reinforcement:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "model_id": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "requirement_field": "code_standard",
+      "result_id": "UG-45-nozzle-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-45-nozzle",
+      "clause_id": "UG-45",
+      "model_id": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "requirement_field": "code_standard",
+      "result_id": "UG-45-nozzle:pass=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UG-25",
+      "clause_id": "UG-25",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "corrosion_allowance",
+      "result_id": "UG-25:applicable=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UG-16",
+      "clause_id": "UG-16",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-16:applicable=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-27-shell-mawp",
+      "clause_id": "UG-27",
+      "model_id": "MAWP = (2*S*E*(t-CA))/(D+1.2*(t-CA))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-27-shell-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-27-shell",
+      "clause_id": "UG-27",
+      "model_id": "t = (P*D)/(2*(S*E-0.6P)) + CA",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-27-shell:pass=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UG-28",
+      "clause_id": "UG-28",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-28:applicable=false"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-32-head-mawp",
+      "clause_id": "UG-32",
+      "model_id": "MAWP = (2*S*E*(t-CA))/((0.885*D)+0.2*(t-CA))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-32-head-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-32-head",
+      "clause_id": "UG-32",
+      "model_id": "t = (0.885*P*D)/(2*S*E-0.2P) + CA",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-32-head:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-37-nozzle-head-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-37-nozzle-head-reinforcement:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-37-nozzle-shell-reinforcement",
+      "clause_id": "UG-37",
+      "model_id": "UG-37/UG-45 reinforcement area: A_req=d*t_r_parent; A_avail=d*max(t_parent-t_r_parent,0)+2*w*max(t_nozzle-t_r_nozzle,0), w=min(d/2,sqrt(d*D_parent))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-37-nozzle-shell-reinforcement:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-45-nozzle-mawp",
+      "clause_id": "UG-45",
+      "model_id": "MAWP = (S*E*(t-CA))/((0.5*d)+0.4*(t-CA))",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-45-nozzle-mawp:pass=true"
+    },
+    {
+      "artifact_ref": "CalculationRecords.v1#263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27:UG-45-nozzle",
+      "clause_id": "UG-45",
+      "model_id": "t = (0.5*P*d)/(S*E-0.4P) + CA",
+      "requirement_field": "design_pressure",
+      "result_id": "UG-45-nozzle:pass=true"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UCS-66",
+      "clause_id": "UCS-66",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_temperature",
+      "result_id": "UCS-66:applicable=false"
+    },
+    {
+      "artifact_ref": "ApplicabilityMatrix.v1#a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8:UG-20",
+      "clause_id": "UG-20",
+      "model_id": "ApplicabilityModel.v1",
+      "requirement_field": "design_temperature",
+      "result_id": "UG-20:applicable=true"
+    }
+  ],
+  "generated_at_utc": "2026-04-19T12:00:00+00:00",
+  "geometry_basis": {
+    "geometry_revision_id": "REV-A",
+    "source": "geometry_module.GeometryInput.v1",
+    "source_model_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source_system": "design_and_verify.py"
+  },
+  "material_basis": {
+    "allowable_stress_pa": 138000000.0,
+    "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+    "corrosion_allowance_m": 0.003,
+    "corrosion_allowance_policy": {
+      "description": "Use corrosion allowance directly from normalized RequirementSet input.",
+      "policy_id": "CA-INPUT-REQUIREMENT",
+      "source": "requirement_set.corrosion_allowance",
+      "value_mm": 3.0
+    },
+    "joint_efficiency": 0.85,
+    "material_spec": "SA-516 Gr.70",
+    "schema_version": "MaterialBasis.v1",
+    "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023"
+  },
+  "reproducibility": {
+    "canonicalization": "json.sort_keys+compact",
+    "hash_algorithm": "sha256"
+  },
+  "review_checklist": [
+    {
+      "evidence_refs": [
+        "evidence_links"
+      ],
+      "item_id": "CHK-001",
+      "prompt": "Confirm requirement-to-clause evidence links cover all applicable clauses.",
+      "required": true
+    },
+    {
+      "evidence_refs": [
+        "compliance_matrix",
+        "non_conformance_list"
+      ],
+      "item_id": "CHK-002",
+      "prompt": "Review all failed clause checks and verify non-conformance severity assignments.",
+      "required": true
+    },
+    {
+      "evidence_refs": [
+        "applied_defaults"
+      ],
+      "item_id": "CHK-003",
+      "prompt": "Confirm applied default assumptions are acceptable for release.",
+      "required": false
+    }
+  ],
+  "review_checklist_schema_version": "ReviewChecklist.v1",
+  "schema_version": "ComplianceDossierMachine.v1",
+  "source_applicability_matrix_hash": "a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8",
+  "source_calculation_records_hash": "263b1c1f15558aa229081c29e716aba1dcdf1ce093d1c27782547556a69d5c27",
+  "source_design_basis_signature": "42ec18932a8bb38ca507dd0852323a7e6699fe8413e787904e5e1fccf153df66",
+  "source_non_conformance_hash": "bbd27d58b3a317a8bfdf4f515d853cb22914b17ec379ad9dd94f663d1e20de99",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
+}

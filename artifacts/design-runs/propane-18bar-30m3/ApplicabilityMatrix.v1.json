@@ -1,0 +1,98 @@
+{
+  "deterministic_hash": "a37decccc9af90032b888fd551ce028a1ff87700adf819a612878a79f37cddc8",
+  "generated_at_utc": "2026-04-19T12:00:00+00:00",
+  "primary_standard": "ASME Section VIII Division 1",
+  "primary_standard_version": "ASME_BPVC_2023",
+  "records": [
+    {
+      "applicable": true,
+      "clause_id": "UG-16",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ],
+      "justification": "Applicable because design pressure is defined for pressure boundary sizing.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": true,
+      "clause_id": "UG-20",
+      "evidence_fields": [
+        "design_temperature",
+        "code_standard"
+      ],
+      "justification": "Applicable because design temperature is defined for material selection limits.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": true,
+      "clause_id": "UG-25",
+      "evidence_fields": [
+        "corrosion_allowance"
+      ],
+      "justification": "Applicable because corrosion allowance input is provided.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": true,
+      "clause_id": "UG-27",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ],
+      "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": false,
+      "clause_id": "UG-28",
+      "evidence_fields": [
+        "design_pressure"
+      ],
+      "justification": "Not applicable because external pressure service is not declared and internal pressure basis is assumed.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": true,
+      "clause_id": "UG-32",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ],
+      "justification": "Applicable because head thickness under internal pressure must be verified.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": true,
+      "clause_id": "UG-37",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ],
+      "justification": "Applicable because nozzle openings require reinforcement-area replacement checks against parent components.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": true,
+      "clause_id": "UG-45",
+      "evidence_fields": [
+        "design_pressure",
+        "code_standard"
+      ],
+      "justification": "Applicable because nozzle neck minimum thickness must be verified.",
+      "standard_route_id": "route_asme_viii_div1"
+    },
+    {
+      "applicable": false,
+      "clause_id": "UCS-66",
+      "evidence_fields": [
+        "design_temperature"
+      ],
+      "justification": "Not applicable because design temperature is above low-temperature impact-test threshold.",
+      "standard_route_id": "route_asme_viii_div1"
+    }
+  ],
+  "schema_version": "ApplicabilityMatrix.v1",
+  "selected_route_id": "route_asme_viii_div1",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
+}

@@ -1,0 +1,36 @@
+{
+  "assumptions": [
+    "Deterministic route selection uses priority then route_id tie-break with canonical code_standard aliases.",
+    "Internal pressure basis is assumed unless external pressure input is provided."
+  ],
+  "deterministic_signature": "42ec18932a8bb38ca507dd0852323a7e6699fe8413e787904e5e1fccf153df66",
+  "generated_at_utc": "2026-04-19T12:00:00+00:00",
+  "primary_standard": "ASME Section VIII Division 1",
+  "primary_standard_version": "ASME_BPVC_2023",
+  "route_selection_audit": [
+    {
+      "matched_input": true,
+      "route_id": "route_asme_viii_div1",
+      "route_priority": 100,
+      "selected": true,
+      "selection_reason": "Selected: matched input and won deterministic priority/order tie-break.",
+      "standard_name": "ASME Section VIII Division 1",
+      "standard_version": "ASME_BPVC_2023"
+    },
+    {
+      "matched_input": false,
+      "route_id": "route_ped_en13445",
+      "route_priority": 200,
+      "selected": false,
+      "selection_reason": "Configured route did not match canonical code_standard input.",
+      "standard_name": "PED (EN 13445)",
+      "standard_version": "PED_2014_68_EU_EN13445_2021"
+    }
+  ],
+  "schema_version": "DesignBasis.v1",
+  "secondary_standards": [
+    "PED (EN 13445):PED_2014_68_EU_EN13445_2021"
+  ],
+  "selected_route_id": "route_asme_viii_div1",
+  "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc"
+}

@@ -1,0 +1,40 @@
+{
+  "deterministic_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+  "downstream_blocked": false,
+  "generated_at_utc": "2026-04-19T12:00:00+00:00",
+  "input_prompt": "Design a horizontal pressure vessel for propane storage, 18 bar design pressure, 65\u00b0C design temperature, 30 m3 capacity, ASME Section VIII Div 1, corrosion allowance 3 mm.",
+  "requirements": {
+    "capacity": {
+      "source_text": "30 m3 capacity",
+      "unit": "m3",
+      "value": 30.0
+    },
+    "code_standard": {
+      "source_text": "asme section viii div 1",
+      "unit": null,
+      "value": "ASME SECTION VIII DIV 1"
+    },
+    "corrosion_allowance": {
+      "source_text": "corrosion allowance 3 mm",
+      "unit": "mm",
+      "value": 3.0
+    },
+    "design_pressure": {
+      "source_text": "18 bar design pressure",
+      "unit": "Pa",
+      "value": 1800000.0
+    },
+    "design_temperature": {
+      "source_text": "65\u00b0c design temperature",
+      "unit": "C",
+      "value": 65.0
+    },
+    "fluid": {
+      "source_text": "for propane storage",
+      "unit": null,
+      "value": "propane"
+    }
+  },
+  "schema_version": "RequirementSet.v1",
+  "unresolved_gaps": []
+}
