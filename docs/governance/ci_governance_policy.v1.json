@@ -2,13 +2,14 @@
   "schema_version": "CIGovernancePolicy.v1",
   "artifact_retention_days": 30,
   "required_gates": [
+    "agent-governance",
     "docs-check",
     "markdown-lint",
-    "yaml-validate",
-    "python-tests",
-    "tech-stack-check",
-    "readme-anchor-check",
     "markdown-links",
-    "secret-scan"
+    "python-tests",
+    "readme-anchor-check",
+    "secret-scan",
+    "tech-stack-check",
+    "yaml-validate"
   ]
 }

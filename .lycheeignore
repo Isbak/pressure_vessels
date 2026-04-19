@@ -1,0 +1,2 @@
+# URLs listed here are skipped by the markdown-links CI gate.
+# Prefer narrow patterns over broad wildcards, and document why each entry is ignored.
