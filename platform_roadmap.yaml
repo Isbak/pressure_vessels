@@ -1,0 +1,197 @@
+---
+version: 1.0.0
+generated_on: '2026-04-19'
+project: pressure_vessels
+description: Machine-readable developer experience roadmap for platform delivery, aligned to backlog schema conventions.
+status_values:
+- todo
+- in_progress
+- blocked
+- done
+priority_values:
+- P0
+- P1
+- P2
+- P3
+effort_values:
+- XS
+- S
+- M
+- L
+- XL
+items:
+- id: DX-001
+  title: Add 10-minute contributor quickstart
+  area: developer-onboarding
+  phase: 'Phase 0: Quick Wins'
+  priority: P0
+  status: todo
+  effort: S
+  depends_on: []
+  references:
+  - docs/developer_experience_principles.md
+  - README.md#system-architecture-modular
+  - AGENT_GOVERNANCE.md#6-required-controls-baseline
+  acceptance_criteria:
+  - Single documented bootstrap command exists.
+  - Single documented baseline validation command exists.
+  - Quickstart references core governance checks.
+  deliverables:
+  - docs/developer_quickstart.md
+  - Root-level command entrypoint (Makefile or equivalent)
+- id: DX-002
+  title: Add unified local task runner aliases
+  area: tooling
+  phase: 'Phase 0: Quick Wins'
+  priority: P0
+  status: todo
+  effort: S
+  depends_on:
+  - DX-001
+  references:
+  - docs/runbooks/platform_runtime_stack_operations.md#deployment-readiness-checklist
+  acceptance_criteria:
+  - Common workflows (test, governance checks, stack checks) use short aliases.
+  - CI command parity documented for local runs.
+  deliverables:
+  - Task runner config
+  - Developer command reference
+- id: DX-003
+  title: Add pre-commit baseline checks
+  area: quality
+  phase: 'Phase 0: Quick Wins'
+  priority: P1
+  status: todo
+  effort: S
+  depends_on:
+  - DX-002
+  references:
+  - AGENT_GOVERNANCE.md#6-required-controls-baseline
+  acceptance_criteria:
+  - Fast local checks execute before commit.
+  - Hooks are documented and optionally installable.
+  deliverables:
+  - pre-commit configuration
+  - Hook installation instructions
+- id: DX-004
+  title: Implement minimal runnable frontend path
+  area: frontend
+  phase: 'Phase 1: Core Runtime Developer Loop'
+  priority: P0
+  status: todo
+  effort: M
+  depends_on:
+  - DX-001
+  references:
+  - services/frontend/README.md#frontend-service-skeleton
+  acceptance_criteria:
+  - Frontend can collect prompt input and render backend response.
+  - Local dev server supports hot reload.
+  deliverables:
+  - Frontend route(s) for prompt and result view
+  - Frontend run instructions
+- id: DX-005
+  title: Implement minimal runnable backend API path
+  area: backend
+  phase: 'Phase 1: Core Runtime Developer Loop'
+  priority: P0
+  status: todo
+  effort: M
+  depends_on:
+  - DX-004
+  references:
+  - services/backend/README.md#backend-service-skeleton
+  acceptance_criteria:
+  - Backend exposes health endpoint and one deterministic pipeline route.
+  - API contract documented for frontend consumption.
+  deliverables:
+  - Backend endpoints
+  - API contract document
+- id: DX-006
+  title: Add local integration profile for runtime services
+  area: runtime
+  phase: 'Phase 1: Core Runtime Developer Loop'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - DX-005
+  references:
+  - docs/tech-stack.md#current
+  - docs/runbooks/platform_runtime_stack_operations.md#service-ownership-boundaries
+  acceptance_criteria:
+  - One-command local startup for frontend/backend integration profile.
+  - Environment variables and service dependencies documented.
+  deliverables:
+  - Local runtime profile (compose/devcontainer/or equivalent)
+  - Local runtime troubleshooting guide
+- id: DX-007
+  title: Automate governance checklist population
+  area: governance
+  phase: 'Phase 2: Governance Ergonomics'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - DX-003
+  - DX-006
+  references:
+  - AGENT_GOVERNANCE.md#10-starter-governance-checklist
+  acceptance_criteria:
+  - CI emits machine-readable checklist/evidence outputs.
+  - PR templates can consume or link generated evidence.
+  deliverables:
+  - Governance automation scripts
+  - Updated PR template guidance
+- id: DX-008
+  title: Add risk-label suggestion automation
+  area: governance
+  phase: 'Phase 2: Governance Ergonomics'
+  priority: P2
+  status: todo
+  effort: S
+  depends_on:
+  - DX-007
+  references:
+  - AGENT_GOVERNANCE.md#4-change-classification-and-merge-gates
+  acceptance_criteria:
+  - Changed-file heuristics suggest low/medium/high risk labels.
+  - Suggestions are visible in PR workflow without auto-merging authority.
+  deliverables:
+  - Risk suggestion workflow job
+  - Risk routing documentation
+- id: DX-009
+  title: Add contract tests across service boundaries
+  area: integration
+  phase: 'Phase 3: Multi-Team Scale DX'
+  priority: P1
+  status: todo
+  effort: L
+  depends_on:
+  - DX-006
+  references:
+  - docs/interfaces/workflow_orchestrator_contract.md
+  - docs/interfaces/requirements_pipeline_contract.md
+  acceptance_criteria:
+  - Contract tests validate core frontend/backend and pipeline interfaces.
+  - Contract drift fails CI before merge.
+  deliverables:
+  - Contract test suite
+  - CI job wiring for contract tests
+- id: DX-010
+  title: Add ephemeral preview environments per PR
+  area: platform-operations
+  phase: 'Phase 3: Multi-Team Scale DX'
+  priority: P2
+  status: todo
+  effort: L
+  depends_on:
+  - DX-009
+  references:
+  - infra/platform/runtime/README.md
+  acceptance_criteria:
+  - Pull requests can launch isolated preview environment links.
+  - Preview teardown policy is deterministic and documented.
+  deliverables:
+  - Preview environment workflow
+  - Preview lifecycle operations runbook
