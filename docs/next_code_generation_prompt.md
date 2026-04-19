@@ -1,8 +1,6 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-All items in `docs/development_backlog.yaml` are currently marked **done** as of 2026-04-18.
-
-Use this maintenance prompt if additional roadmap items are added in a future update.
+A new Phase 5 runtime-deployment tranche (BL-027..BL-033) was queued on 2026-04-19 to cover the remaining `planned` components in `docs/platform_runtime_stack_registry.yaml`.
 
 ```text
 You are working from `docs/development_backlog.yaml` for the `pressure_vessels` repository.
@@ -16,4 +14,17 @@ You are working from `docs/development_backlog.yaml` for the `pressure_vessels` 
 
 ## Upcoming queue
 
-No additional backlog items are currently queued.
+The following items are queued in dependency order. Each delivers a runtime
+module skeleton (`infra/platform/<component>/`), wires the module into
+`infra/platform/environment.bootstrap.yaml` for the targeted environments, and
+flips the corresponding entry in `docs/platform_runtime_stack_registry.yaml`
+and the `## Current` section of `docs/tech-stack.md` from `planned` to
+`deployed`.
+
+- **BL-027** Deliver identity (Keycloak) runtime module — depends on BL-018, BL-021, BL-022.
+- **BL-028** Deliver workflow orchestration (Temporal) runtime module — depends on BL-016, BL-018, BL-021.
+- **BL-029** Deliver knowledge graph (Neo4j) runtime module — depends on BL-006, BL-018, BL-021.
+- **BL-030** Deliver vector retrieval (Qdrant) runtime module — depends on BL-018, BL-021.
+- **BL-031** Deliver search/analytics (OpenSearch) runtime module — depends on BL-018, BL-021.
+- **BL-032** Deliver LLM serving (vLLM) runtime module — depends on BL-018, BL-021, BL-022.
+- **BL-033** Deliver model catalog (Llama/Mistral/Qwen) runtime module — depends on BL-018, BL-032.

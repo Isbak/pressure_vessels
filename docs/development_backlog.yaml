@@ -615,3 +615,161 @@ items:
   - infra/platform/runtime module skeleton
   - Deployment target documentation for platform services
   - Stack registry status update for runtime-docker-kubernetes
+- id: BL-027
+  title: Deliver identity (Keycloak) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P1
+  status: todo
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  - BL-022
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Identity module under infra/platform/keycloak documents realm, client, and role ownership and lifecycle.
+  - Module is referenced from environment.bootstrap.yaml dev and staging environments.
+  - Stack registry entry for auth-keycloak reflects deployment status accurately.
+  deliverables:
+  - infra/platform/keycloak module skeleton
+  - Realm, client, and role ownership documentation
+  - Stack registry status update for auth-keycloak
+- id: BL-028
+  title: Deliver workflow orchestration (Temporal) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P2
+  status: todo
+  effort: M
+  depends_on:
+  - BL-016
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Workflow module under infra/platform/temporal documents namespace, task queue, and worker ownership.
+  - Module is referenced from environment.bootstrap.yaml staging environment.
+  - Stack registry entry for workflow-temporal reflects deployment status accurately.
+  deliverables:
+  - infra/platform/temporal module skeleton
+  - Namespace and task-queue ownership documentation
+  - Stack registry status update for workflow-temporal
+- id: BL-029
+  title: Deliver knowledge graph (Neo4j) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P2
+  status: todo
+  effort: M
+  depends_on:
+  - BL-006
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Knowledge graph module under infra/platform/neo4j documents database, graph schema, and access ownership.
+  - Module is referenced from environment.bootstrap.yaml staging environment.
+  - Stack registry entry for graph-neo4j reflects deployment status accurately.
+  deliverables:
+  - infra/platform/neo4j module skeleton
+  - Graph database ownership and schema documentation
+  - Stack registry status update for graph-neo4j
+- id: BL-030
+  title: Deliver vector retrieval (Qdrant) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P2
+  status: todo
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Vector retrieval module under infra/platform/qdrant documents collection ownership and indexing lifecycle.
+  - Module is referenced from environment.bootstrap.yaml staging environment.
+  - Stack registry entry for retrieval-qdrant reflects deployment status accurately.
+  deliverables:
+  - infra/platform/qdrant module skeleton
+  - Collection and indexing policy documentation
+  - Stack registry status update for retrieval-qdrant
+- id: BL-031
+  title: Deliver search/analytics (OpenSearch) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P3
+  status: todo
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Search module under infra/platform/opensearch documents index ownership, retention, and access boundaries.
+  - Module is referenced from environment.bootstrap.yaml staging environment.
+  - Stack registry entry for search-opensearch reflects deployment status accurately.
+  deliverables:
+  - infra/platform/opensearch module skeleton
+  - Index and retention policy documentation
+  - Stack registry status update for search-opensearch
+- id: BL-032
+  title: Deliver LLM serving (vLLM) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P3
+  status: todo
+  effort: M
+  depends_on:
+  - BL-018
+  - BL-021
+  - BL-022
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - LLM serving module under infra/platform/vllm documents endpoint ownership, capacity envelope, and access boundaries.
+  - Module is referenced from environment.bootstrap.yaml staging environment.
+  - Stack registry entry for llm-serving-vllm reflects deployment status accurately.
+  deliverables:
+  - infra/platform/vllm module skeleton
+  - Endpoint and capacity envelope documentation
+  - Stack registry status update for llm-serving-vllm
+- id: BL-033
+  title: Deliver model catalog (Llama/Mistral/Qwen) runtime module
+  area: platform
+  phase: 'Phase 5: Runtime Deployment'
+  priority: P3
+  status: todo
+  effort: S
+  depends_on:
+  - BL-018
+  - BL-032
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/tech-stack.md
+  acceptance_criteria:
+  - Model catalog module under infra/platform/model-catalog documents approved model families and versioning policy.
+  - Module is referenced from the llm-serving-vllm consumption path.
+  - Stack registry entry for models-llama-mistral-qwen reflects deployment status accurately.
+  deliverables:
+  - infra/platform/model-catalog module skeleton
+  - Approved model family documentation
+  - Stack registry status update for models-llama-mistral-qwen
