@@ -1,0 +1,53 @@
+version: 1
+kind: PlatformModelCatalogModule
+metadata:
+  name: platform-model-catalog-boundaries
+spec:
+  owner: ai-platform
+  approved_model_families:
+    - family: llama
+      owner: ai-platform
+      version_policy: semver-immutable-approved-revisions
+    - family: mistral
+      owner: ai-platform
+      version_policy: semver-immutable-approved-revisions
+    - family: qwen
+      owner: ai-platform
+      version_policy: semver-immutable-approved-revisions
+  versioning_policy:
+    scheme: semver
+    allowed_labels:
+      - stable
+      - candidate
+    immutability: approved-revisions-immutable
+    deprecation_requires:
+      - compatibility-review
+      - rollback-plan
+  access_ownership:
+    roles:
+      - name: model-catalog-admin
+        owner: ai-platform
+        privileges:
+          - family-approval-admin
+          - version-promotion-admin
+          - deprecation-admin
+      - name: model-catalog-consumer
+        owner: platform-runtime
+        privileges:
+          - approved-version-read
+    publication_path:
+      allowed: true
+      path: ai-platform-change-managed
+    direct_model_artifact_publish:
+      allowed: false
+      path: catalog-contract-only
+  lifecycle_boundaries:
+    approval_owner: ai-platform
+    publication_owner: ai-platform
+    consumption_contract_owner: ai-platform
+    access_review_owner: security-platform
+    rollback_owner: ai-platform
+  consumption_contracts:
+    required_by:
+      - module: infra/platform/vllm
+        contract: approved-model-catalog-only

@@ -44,7 +44,7 @@ components:
     notes: Self-hosted model serving endpoint.
   - key: models-llama-mistral-qwen
     capability: model-family
-    status: planned
+    status: deployed
     owner: ai-platform
     module_path: infra/platform/model-catalog
     notes: Approved base model family set.
