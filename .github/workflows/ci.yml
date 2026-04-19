@@ -114,7 +114,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
       - name: Validate tech stack and infra boundary manifests
         run: |
           make s
@@ -150,7 +149,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
       - name: Validate backlog README anchor consistency
         run: |
           python scripts/check_readme_anchors.py
