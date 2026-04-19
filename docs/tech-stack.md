@@ -28,6 +28,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `graph-neo4j`
 - Component: `retrieval-qdrant`
 - Component: `search-opensearch`
+- Component: `llm-serving-vllm`
 
 ## Planned
 
@@ -35,7 +36,6 @@ The technologies below are documented target-state components and are **not** cu
 
 ### Runtime stack components (planned)
 
-- Component: `llm-serving-vllm`
 - Component: `models-llama-mistral-qwen`
 
 ### Runtime mapping source of truth

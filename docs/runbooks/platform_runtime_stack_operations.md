@@ -17,6 +17,7 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 | `infra/platform/neo4j` | Knowledge Platform Team + Platform Runtime Team | Neo4j database, graph schema, and access ownership boundaries with revisioned write controls. |
 | `infra/platform/qdrant` | Retrieval Platform Team + Platform Runtime Team | Qdrant collection, indexing lifecycle, and access ownership boundaries with deterministic embedding version controls. |
 | `infra/platform/opensearch` | Retrieval Platform Team + Platform Runtime Team | OpenSearch index, retention, and access ownership boundaries with deterministic lifecycle policy controls. |
+| `infra/platform/vllm` | AI Platform Team + Platform Runtime Team | vLLM endpoint, capacity envelope, and access ownership boundaries with deterministic inference policy controls. |
 
 ## Environment Provisioning Inputs
 
@@ -33,8 +34,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 11. `infra/platform/neo4j/module.boundaries.yaml` defines Neo4j database, graph schema, and access ownership and lifecycle boundaries.
 12. `infra/platform/qdrant/module.boundaries.yaml` defines Qdrant collection, indexing lifecycle, and access ownership and lifecycle boundaries.
 13. `infra/platform/opensearch/module.boundaries.yaml` defines OpenSearch index ownership, retention lifecycle, and access ownership boundaries.
-14. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-15. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+14. `infra/platform/vllm/module.boundaries.yaml` defines vLLM endpoint ownership, capacity envelope, and access ownership boundaries.
+15. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+16. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -67,6 +69,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f infra/platform/qdrant/module.boundaries.yaml`
 - Confirm search/analytics boundary module exists:
   - `test -f infra/platform/opensearch/module.boundaries.yaml`
+- Confirm LLM serving boundary module exists:
+  - `test -f infra/platform/vllm/module.boundaries.yaml`
 
 ## Incident Operations
 
