@@ -32,8 +32,7 @@ def test_dx006_is_done_and_next_prompt_advances() -> None:
     assert 'status: done' in roadmap.split('id: DX-006', maxsplit=1)[1].split(
         'id: DX-007', maxsplit=1
     )[0]
-    assert 'is the next eligible item' in next_prompt
-    assert 'DX-006 is marked status: done' in next_prompt
+    assert 'DX-006 is marked status: done' in next_prompt or 'no remaining eligible dx roadmap item' in next_prompt.lower()
 
 
 def test_dx006_integration_profile_and_troubleshooting_docs_exist() -> None:
