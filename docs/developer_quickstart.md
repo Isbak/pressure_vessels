@@ -81,6 +81,7 @@ For CI-specific governance gate enforcement details, see:
 - `.github/workflows/ci.yml`
 - `scripts/check_ci_governance.py`
 - `docs/governance/ci_governance_policy.v1.json`
+- `docs/developer_command_reference.md` (local aliases + CI parity map)
 
 For infra ownership and deployment-readiness context, see
 `docs/runbooks/platform_runtime_stack_operations.md`.
