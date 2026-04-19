@@ -3,10 +3,11 @@
   "artifact_retention_days": 30,
   "required_gates": [
     "agent-governance",
+    "contract-tests",
     "docs-check",
     "iac-validate",
-    "markdown-lint",
     "markdown-links",
+    "markdown-lint",
     "python-tests",
     "readme-anchor-check",
     "secret-scan",

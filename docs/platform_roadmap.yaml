@@ -165,7 +165,7 @@ items:
   area: integration
   phase: 'Phase 3: Multi-Team Scale DX'
   priority: P1
-  status: todo
+  status: done
   effort: L
   depends_on:
   - DX-006
