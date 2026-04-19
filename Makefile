@@ -1,4 +1,4 @@
-.PHONY: bootstrap validate
+.PHONY: bootstrap validate ci test governance stack t g s v
 
 PYTHON ?= python
 PIP ?= pip
@@ -24,12 +24,28 @@ bootstrap:
 	$(PYTHON) -m pip install --upgrade pip
 	$(PIP) install -e . pytest
 
-validate:
+test:
 	pytest -q
-	$(PYTHON) scripts/check_tech_stack.py
+
+governance:
 	$(PYTHON) scripts/check_readme_anchors.py
+
+stack:
+	$(PYTHON) scripts/check_tech_stack.py
 	@if [ "$(VALIDATE_INFRA)" = "1" ]; then \
 		for file in $(INFRA_BOUNDARY_FILES); do \
 			test -f "$$file" || { echo "Missing required infra file: $$file"; exit 1; }; \
 		done; \
 	fi
+
+validate: test governance stack
+
+ci: validate
+
+t: test
+
+g: governance
+
+s: stack
+
+v: validate
