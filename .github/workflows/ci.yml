@@ -5,6 +5,13 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   docs-check:
     runs-on: ubuntu-latest
@@ -16,13 +23,24 @@ jobs:
           test -f AGENT_GOVERNANCE.md
           test -f docs/development_backlog.yaml
 
+  agent-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure governance artifacts exist
+        run: |
+          test -f .github/pull_request_template.md
+          test -f .agents/codex/AGENTS.md
+          test -f .agents/claude/CLAUDE.md
+
   markdown-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Lint Markdown
-        run: |
-          npx --yes markdownlint-cli2@0.22.0 "**/*.md"
+        uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: '**/*.md'
 
   yaml-validate:
     runs-on: ubuntu-latest
@@ -34,15 +52,21 @@ jobs:
           require "find"
           require "yaml"
 
+          roots = [".github", "docs", "infra"]
+          single_files = [".markdownlint-cli2.yaml", ".pre-commit-config.yaml"]
+
           yaml_files = []
-          Find.find(".") do |path|
-            next if File.directory?(path)
-            next unless path.end_with?(".yml", ".yaml")
-
-            yaml_files << path
+          roots.each do |root|
+            next unless File.directory?(root)
+            Find.find(root) do |path|
+              next if File.directory?(path)
+              next unless path.end_with?(".yml", ".yaml")
+              yaml_files << path
+            end
           end
+          single_files.each { |file| yaml_files << file if File.file?(file) }
 
-          yaml_files.sort.each do |path|
+          yaml_files.sort.uniq.each do |path|
             YAML.safe_load(File.read(path), permitted_classes: [], aliases: true)
           end
 
@@ -51,6 +75,10 @@ jobs:
 
   python-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - name: Read CI governance policy
@@ -58,10 +86,11 @@ jobs:
         run: |
           retention="$(jq -r '.artifact_retention_days' docs/governance/ci_governance_policy.v1.json)"
           echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
+          cache: pip
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
@@ -73,7 +102,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-junit
+          name: pytest-junit-py${{ matrix.python-version }}
           path: artifacts/ci/pytest-junit.xml
           retention-days: ${{ steps.policy.outputs.retention }}
 
@@ -85,14 +114,43 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Validate tech stack documentation consistency
+          cache: pip
+      - name: Validate tech stack and infra boundary manifests
         run: |
-          python scripts/check_tech_stack.py
+          make s
+
+  iac-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_wrapper: false
+      - name: Set up tflint
+        uses: terraform-linters/setup-tflint@v4
+      - name: Check OpenTofu formatting
+        run: |
+          tofu fmt -check -recursive infra/platform/iac
+      - name: Lint HCL under infra/platform/iac
+        run: |
+          # The gate is wired now so it activates the moment real HCL lands,
+          # but tflint behavior on empty trees is noisy, so skip explicitly.
+          if [ -n "$(find infra/platform/iac -type f -name '*.tf' -print -quit 2>/dev/null)" ]; then
+            tflint --chdir infra/platform/iac --recursive
+          else
+            echo "No HCL under infra/platform/iac yet; tflint gate is a no-op."
+          fi
 
   readme-anchor-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
       - name: Validate backlog README anchor consistency
         run: |
           python scripts/check_readme_anchors.py
@@ -114,29 +172,37 @@ jobs:
 
   secret-scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Scan for hardcoded secrets
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: trufflesecurity/trufflehog@main
+        with:
+          base: ${{ github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event.pull_request.head.sha || github.sha }}
+          extra_args: --results=verified,unknown
 
   governance-gate:
     if: always()
     needs:
+      - agent-governance
       - docs-check
+      - iac-validate
       - markdown-lint
-      - yaml-validate
-      - python-tests
-      - tech-stack-check
-      - readme-anchor-check
       - markdown-links
+      - python-tests
+      - readme-anchor-check
       - secret-scan
+      - tech-stack-check
+      - yaml-validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Read CI governance policy
         id: policy
         run: |
@@ -146,10 +212,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
       - name: Install package
         run: |
           python -m pip install --upgrade pip
           pip install -e .
+      - name: Determine changed paths
+        id: changes
+        run: |
+          mkdir -p artifacts/ci
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+          if [ -n "$base_sha" ] && git cat-file -e "$base_sha" 2>/dev/null; then
+            git diff --name-only "$base_sha" "$head_sha" > artifacts/ci/changed-paths.txt
+          else
+            : > artifacts/ci/changed-paths.txt
+          fi
       - name: Build deterministic CI gate result payload
         run: |
           mkdir -p artifacts/ci
@@ -162,8 +245,20 @@ jobs:
 
           raw = json.loads(Path("artifacts/ci/raw-needs.json").read_text(encoding="utf-8"))
           gate_results = {job_name: details["result"] for job_name, details in sorted(raw.items())}
+
+          changed_paths_file = Path("artifacts/ci/changed-paths.txt")
+          changed_paths: list[str] = []
+          if changed_paths_file.exists():
+              changed_paths = [
+                  line.strip()
+                  for line in changed_paths_file.read_text(encoding="utf-8").splitlines()
+                  if line.strip()
+              ]
+
+          payload: dict[str, object] = dict(gate_results)
+          payload["_changed_paths"] = changed_paths
           Path("artifacts/ci/job-results.json").write_text(
-              json.dumps(gate_results, indent=2, sort_keys=True) + "\n",
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
               encoding="utf-8",
           )
           PY
@@ -182,4 +277,5 @@ jobs:
           path: |
             artifacts/ci/job-results.json
             artifacts/ci/GovernanceGateReport.v1.json
+            artifacts/ci/changed-paths.txt
           retention-days: ${{ steps.policy.outputs.retention }}
