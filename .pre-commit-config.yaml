@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: readme-anchor-check
+        name: Readme anchor governance check
+        entry: make g
+        language: system
+        pass_filenames: false
+      - id: runtime-stack-check
+        name: Runtime stack baseline check
+        entry: make s
+        language: system
+        pass_filenames: false

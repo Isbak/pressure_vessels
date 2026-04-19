@@ -61,7 +61,7 @@ items:
   area: quality
   phase: 'Phase 0: Quick Wins'
   priority: P1
-  status: todo
+  status: done
   effort: S
   depends_on:
   - DX-002
