@@ -183,6 +183,46 @@ jobs:
           head: ${{ github.event.pull_request.head.sha || github.sha }}
           extra_args: --results=verified,unknown
 
+  risk-label-suggestion:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read CI governance policy
+        id: policy
+        run: |
+          retention="$(jq -r '.artifact_retention_days' docs/governance/ci_governance_policy.v1.json)"
+          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
+      - name: Determine changed paths
+        run: |
+          mkdir -p artifacts/ci
+          git diff --name-only \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}" \
+            > artifacts/ci/changed-paths.txt
+      - name: Build advisory risk label suggestion
+        run: |
+          python scripts/suggest_risk_label.py \
+            artifacts/ci/changed-paths.txt \
+            artifacts/ci/RiskLabelSuggestion.v1.json \
+            artifacts/ci/RiskLabelSuggestion.summary.md
+      - name: Publish risk suggestion summary
+        run: |
+          cat artifacts/ci/RiskLabelSuggestion.summary.md >> "${GITHUB_STEP_SUMMARY}"
+      - name: Upload risk suggestion artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: risk-label-suggestion
+          path: |
+            artifacts/ci/changed-paths.txt
+            artifacts/ci/RiskLabelSuggestion.v1.json
+            artifacts/ci/RiskLabelSuggestion.summary.md
+          retention-days: ${{ steps.policy.outputs.retention }}
+
   governance-gate:
     if: always()
     needs:

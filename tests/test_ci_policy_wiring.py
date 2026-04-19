@@ -34,7 +34,7 @@ def test_ci_artifact_retention_is_sourced_from_policy_file() -> None:
     workflow = _load_workflow()
     jobs = workflow["jobs"]
 
-    for job_name in ("python-tests", "governance-gate"):
+    for job_name in ("python-tests", "governance-gate", "risk-label-suggestion"):
         steps = jobs[job_name]["steps"]
         policy_steps = [step for step in steps if step.get("id") == "policy"]
         assert len(policy_steps) == 1
@@ -98,3 +98,36 @@ def test_governance_gate_emits_checklist_evidence_artifact() -> None:
     assert len(upload_steps) == 1
     uploaded_paths = upload_steps[0]["with"]["path"]
     assert "artifacts/ci/GovernanceChecklistEvidence.v1.json" in uploaded_paths
+
+
+def test_risk_label_suggestion_job_is_advisory_and_publishes_artifacts() -> None:
+    workflow = _load_workflow()
+    job = workflow["jobs"]["risk-label-suggestion"]
+
+    assert job["if"] == "github.event_name == 'pull_request'"
+
+    steps = job["steps"]
+    build_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Build advisory risk label suggestion"
+    ]
+    assert len(build_steps) == 1
+    assert "python scripts/suggest_risk_label.py" in build_steps[0]["run"]
+
+    publish_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Publish risk suggestion summary"
+    ]
+    assert len(publish_steps) == 1
+    assert "GITHUB_STEP_SUMMARY" in publish_steps[0]["run"]
+
+    upload_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Upload risk suggestion artifact"
+    ]
+    assert len(upload_steps) == 1
+    uploaded_paths = upload_steps[0]["with"]["path"]
+    assert "artifacts/ci/RiskLabelSuggestion.v1.json" in uploaded_paths
