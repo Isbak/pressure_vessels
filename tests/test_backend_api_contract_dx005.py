@@ -21,15 +21,30 @@ def test_backend_api_contract_documented_for_frontend_consumption() -> None:
     assert 'Primary consumer: `services/frontend`' in contract
 
 
-def test_dx005_is_done_and_next_prompt_points_to_dx006() -> None:
+def test_dx006_is_done_and_next_prompt_points_to_dx007() -> None:
     roadmap = Path('docs/platform_roadmap.yaml').read_text(encoding='utf-8')
     next_prompt = Path('docs/next_dx_generation_prompt.md').read_text(
         encoding='utf-8'
     )
 
     assert 'id: DX-005' in roadmap
-    assert 'id: DX-005\n  title: Implement minimal runnable backend API path' in roadmap
-    assert 'status: done' in roadmap.split('id: DX-005', maxsplit=1)[1].split(
-        'id: DX-006', maxsplit=1
+    assert 'id: DX-006\n  title: Add local integration profile for runtime services' in roadmap
+    assert 'status: done' in roadmap.split('id: DX-006', maxsplit=1)[1].split(
+        'id: DX-007', maxsplit=1
     )[0]
-    assert 'DX-006 is the next eligible item' in next_prompt
+    assert 'DX-007 is the next eligible item' in next_prompt
+
+
+def test_dx006_integration_profile_and_troubleshooting_docs_exist() -> None:
+    compose_profile = Path('infra/local/docker-compose.integration.yml').read_text(
+        encoding='utf-8'
+    )
+    troubleshooting = Path(
+        'docs/runbooks/local_runtime_integration_troubleshooting.md'
+    ).read_text(encoding='utf-8')
+
+    assert 'services:' in compose_profile
+    assert 'frontend:' in compose_profile
+    assert 'backend:' in compose_profile
+    assert 'make integration-up' in troubleshooting
+    assert 'BACKEND_API_BASE_URL' in troubleshooting

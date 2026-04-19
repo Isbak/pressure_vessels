@@ -112,7 +112,7 @@ items:
   area: runtime
   phase: 'Phase 1: Core Runtime Developer Loop'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - DX-005
