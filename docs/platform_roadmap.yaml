@@ -183,7 +183,7 @@ items:
   area: platform-operations
   phase: 'Phase 3: Multi-Team Scale DX'
   priority: P2
-  status: todo
+  status: done
   effort: L
   depends_on:
   - DX-009

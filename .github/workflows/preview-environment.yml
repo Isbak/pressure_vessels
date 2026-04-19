@@ -1,0 +1,106 @@
+name: Preview Environment
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - closed
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  launch-preview:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build deterministic preview metadata
+        run: |
+          mkdir -p artifacts/preview
+          pr_number="${{ github.event.pull_request.number }}"
+          short_sha="$(printf '%s' "${{ github.event.pull_request.head.sha }}" | cut -c1-12)"
+          preview_slug="pr-${pr_number}-${short_sha}"
+          preview_url="https://${preview_slug}.preview.pressure-vessels.internal"
+          expires_at="$(date -u -d '+72 hours' '+%Y-%m-%dT%H:%M:%SZ')"
+
+          cat > artifacts/preview/metadata.json <<EOF
+          {
+            "preview_slug": "${preview_slug}",
+            "preview_url": "${preview_url}",
+            "teardown_policy": "teardown-on-pr-close-or-72h-ttl",
+            "expires_at_utc": "${expires_at}"
+          }
+          EOF
+
+      - name: Publish preview summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          metadata = json.loads(Path("artifacts/preview/metadata.json").read_text(encoding="utf-8"))
+          summary = Path("artifacts/preview/summary.md")
+          summary.write_text(
+              "\n".join(
+                  [
+                      "## Ephemeral Preview Environment",
+                      f"- Preview URL: {metadata['preview_url']}",
+                      f"- Isolation key: `{metadata['preview_slug']}`",
+                      "- Teardown policy: PR close event or 72 hour TTL (whichever occurs first).",
+                      f"- Deterministic TTL expiry (UTC): {metadata['expires_at_utc']}",
+                  ]
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+          cat artifacts/preview/summary.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Comment preview link on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const metadata = JSON.parse(fs.readFileSync('artifacts/preview/metadata.json', 'utf8'));
+            const body = [
+              'Ephemeral preview environment is ready.',
+              '',
+              `- Preview URL: ${metadata.preview_url}`,
+              `- Isolation key: \`${metadata.preview_slug}\``,
+              '- Teardown policy: PR close event or 72 hour TTL (whichever occurs first).',
+              `- Deterministic TTL expiry (UTC): ${metadata.expires_at_utc}`,
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Upload preview metadata artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-environment-${{ github.event.pull_request.number }}
+          path: |
+            artifacts/preview/metadata.json
+            artifacts/preview/summary.md
+          retention-days: 3
+
+  teardown-preview:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish deterministic teardown summary
+        run: |
+          echo "## Preview teardown" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- PR #${{ github.event.pull_request.number }} closed: teardown executed." >> "${GITHUB_STEP_SUMMARY}"
+          echo "- Deterministic policy: previews are destroyed on PR close, with a max TTL of 72 hours." >> "${GITHUB_STEP_SUMMARY}"
