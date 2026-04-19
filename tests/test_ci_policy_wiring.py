@@ -76,3 +76,25 @@ def test_readme_anchor_check_job_runs_consistency_script() -> None:
     ]
     assert len(check_steps) == 1
     assert "python scripts/check_readme_anchors.py" in check_steps[0]["run"]
+
+
+def test_governance_gate_emits_checklist_evidence_artifact() -> None:
+    workflow = _load_workflow()
+    steps = workflow["jobs"]["governance-gate"]["steps"]
+
+    evidence_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Build governance checklist evidence payload"
+    ]
+    assert len(evidence_steps) == 1
+    assert "python scripts/generate_governance_checklist_evidence.py" in evidence_steps[0]["run"]
+
+    upload_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Upload governance audit artifacts"
+    ]
+    assert len(upload_steps) == 1
+    uploaded_paths = upload_steps[0]["with"]["path"]
+    assert "artifacts/ci/GovernanceChecklistEvidence.v1.json" in uploaded_paths
