@@ -33,7 +33,7 @@ DX-001 deliverables:
 Required close-out actions in the same PR:
 1) Update docs/platform_roadmap.yaml and set DX-001 status to done once
    acceptance criteria are met.
-2) Regenerate/update next_dx_generation_prompt.md so it points to the next
+2) Regenerate/update docs/next_dx_generation_prompt.md so it points to the next
    eligible roadmap item (expected next: DX-002 after DX-001 is done).
 ```
 
