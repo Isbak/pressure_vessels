@@ -78,7 +78,7 @@ items:
   area: frontend
   phase: 'Phase 1: Core Runtime Developer Loop'
   priority: P0
-  status: todo
+  status: done
   effort: M
   depends_on:
   - DX-001
