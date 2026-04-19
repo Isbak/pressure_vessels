@@ -13,6 +13,9 @@ Run from repository root:
 | Governance docs/anchor checks | `make governance` | `make g` |
 | Runtime stack checks | `make stack` | `make s` |
 | Baseline validation bundle | `make validate` | `make v` |
+| Local runtime integration profile up | `make integration-up` | `make up` |
+| Local runtime integration profile down | `make integration-down` | `make down` |
+| Local runtime integration profile logs | `make integration-logs` | `make logs` |
 | CI-parity baseline bundle | `make ci` | _n/a_ |
 
 Notes:
@@ -61,3 +64,27 @@ pre-commit uninstall
 The hook definitions live in `.pre-commit-config.yaml` and are intentionally
 limited to quick checks; keep `make v`/`make ci` in your normal PR workflow for
 full baseline validation.
+
+## Local runtime integration profile (DX-006)
+
+Use the Docker Compose profile at `infra/local/docker-compose.integration.yml` for a one-command frontend/backend startup:
+
+```bash
+make integration-up
+```
+
+Environment variables used by the integration profile:
+
+| Variable | Default | Used by | Purpose |
+| --- | --- | --- | --- |
+| `FRONTEND_PORT` | `3000` | frontend container + host port map | Host/browser entrypoint for Next.js dev server. |
+| `BACKEND_PORT` | `8000` | backend container + host port map | Host API port for backend health and prompt routes. |
+| `BACKEND_API_BASE_URL` | `http://backend:8000` | frontend container | Internal Docker-network backend URL used by frontend BFF route. |
+| `BACKEND_HOST` | `0.0.0.0` | backend container | Bind address for backend local integration server. |
+
+Service dependencies and ownership boundaries:
+
+- `frontend` depends on `backend` health status before startup, matching frontend→backend ownership boundaries in the runtime operations runbook.
+- `frontend` has no direct datastore wiring in this local profile (backend is the only data-plane boundary).
+
+For startup issues and recovery commands, see `docs/runbooks/local_runtime_integration_troubleshooting.md`.

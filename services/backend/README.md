@@ -22,3 +22,13 @@ This directory is the bootstrap skeleton for the BL-018 platform backend runtime
   - Deterministic pipeline route used by frontend integration in DX-005.
 
 See `docs/interfaces/backend_prompt_api_contract.md` for request/response details.
+
+## Local integration profile server
+
+DX-006 adds `local-integration-server.js` as a dependency-free local runtime entrypoint for Docker Compose integration runs.
+
+Run directly (without compose) from repository root:
+
+```bash
+BACKEND_HOST=0.0.0.0 BACKEND_PORT=8000 node services/backend/local-integration-server.js
+```

@@ -1,4 +1,4 @@
-.PHONY: bootstrap validate ci test governance stack t g s v
+.PHONY: bootstrap validate ci test governance stack integration-up integration-down integration-logs t g s v up down logs
 
 PYTHON ?= python
 PIP ?= pip
@@ -42,6 +42,15 @@ validate: test governance stack
 
 ci: validate
 
+integration-up:
+	docker compose -f infra/local/docker-compose.integration.yml up
+
+integration-down:
+	docker compose -f infra/local/docker-compose.integration.yml down
+
+integration-logs:
+	docker compose -f infra/local/docker-compose.integration.yml logs -f
+
 t: test
 
 g: governance
@@ -49,3 +58,9 @@ g: governance
 s: stack
 
 v: validate
+
+up: integration-up
+
+down: integration-down
+
+logs: integration-logs
