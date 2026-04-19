@@ -32,7 +32,7 @@ components:
     notes: Traceability graph runtime.
   - key: retrieval-qdrant
     capability: vector-retrieval
-    status: planned
+    status: deployed
     owner: retrieval-platform
     module_path: infra/platform/qdrant
     notes: Vector index and retrieval runtime.

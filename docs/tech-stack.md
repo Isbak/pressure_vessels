@@ -26,6 +26,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `auth-keycloak`
 - Component: `workflow-temporal`
 - Component: `graph-neo4j`
+- Component: `retrieval-qdrant`
 
 ## Planned
 
@@ -33,7 +34,6 @@ The technologies below are documented target-state components and are **not** cu
 
 ### Runtime stack components (planned)
 
-- Component: `retrieval-qdrant`
 - Component: `llm-serving-vllm`
 - Component: `models-llama-mistral-qwen`
 - Component: `search-opensearch`
