@@ -1,0 +1,60 @@
+version: 1
+kind: PlatformWorkflowTemporalModule
+metadata:
+  name: platform-workflow-temporal-boundaries
+spec:
+  owner: orchestration-platform
+  engine:
+    family: temporal
+    namespace_defaults:
+      staging: pressure-vessels-staging
+  workflow_ownership:
+    namespaces:
+      - name: pressure-vessels-staging
+        owner: orchestration-platform
+        allowed_environments:
+          - staging
+        retention_days: 14
+    task_queues:
+      - name: workflow-orchestration
+        owner: orchestration-platform
+        namespace: pressure-vessels-staging
+        workflow_producers:
+          - services/backend
+        worker_operators:
+          - orchestration-platform
+      - name: evidence-assembly
+        owner: compliance-platform
+        namespace: pressure-vessels-staging
+        workflow_producers:
+          - services/backend
+        worker_operators:
+          - compliance-platform
+    workers:
+      - name: orchestration-runtime-worker
+        owner: orchestration-platform
+        queues:
+          - workflow-orchestration
+        rollout_path:
+          - runtime-docker-kubernetes
+      - name: compliance-evidence-worker
+        owner: compliance-platform
+        queues:
+          - evidence-assembly
+        rollout_path:
+          - runtime-docker-kubernetes
+  lifecycle_boundaries:
+    provisioning_owner: platform-runtime
+    namespace_policy_owner: orchestration-platform
+    worker_rollout_owner: orchestration-platform
+    rollback_owner: platform-runtime
+    environment_promotion_policy:
+      staging: approval-required
+  governance:
+    direct_namespace_mutation:
+      allowed: false
+      path: ci-cd-controlled
+    required_release_evidence:
+      - workflow-build-id
+      - worker-image-digest
+      - rollback-plan-id
