@@ -42,6 +42,7 @@ The technologies below are documented target-state components and are **not** cu
 
 - `docs/platform_runtime_stack_registry.yaml` maps each component to ownership, module path, and deployment status.
 - `infra/platform/environment.bootstrap.yaml` maps component modules to deployable environments.
+- `docs/platform_setup_guide.md` documents local and cloud setup for each platform module and the IaC contract that binds them.
 
 ## Stack Change Policy
 

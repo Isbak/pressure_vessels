@@ -60,6 +60,11 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 - Confirm knowledge graph boundary module exists:
   - `test -f infra/platform/neo4j/module.boundaries.yaml`
 
+## Environment Setup Guide
+
+- See `docs/platform_setup_guide.md` for per-module local and cloud setup
+  procedures and the IaC contract that binds them.
+
 ## Incident Operations
 
 - Required incident signals exposed by observability module:
