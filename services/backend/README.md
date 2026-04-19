@@ -11,5 +11,14 @@ This directory is the bootstrap skeleton for the BL-018 platform backend runtime
 
 ## Bootstrap structure
 
-- `src/main.ts`: NestJS-style entrypoint placeholder.
+- `src/main.ts`: Minimal backend API handlers with deterministic local behavior.
 - `package.json`: Placeholder package metadata for deterministic bootstrapping.
+
+## Backend API skeleton (DX-005)
+
+- `GET /health`
+  - Returns backend service liveliness for local/runtime checks.
+- `GET /api/prompt?prompt=<text>`
+  - Deterministic pipeline route used by frontend integration in DX-005.
+
+See `docs/interfaces/backend_prompt_api_contract.md` for request/response details.
