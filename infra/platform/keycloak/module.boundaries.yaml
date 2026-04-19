@@ -1,0 +1,62 @@
+version: 1
+kind: PlatformIdentityModule
+metadata:
+  name: platform-identity-keycloak-boundaries
+spec:
+  owner: security-platform
+  provider:
+    engine: keycloak
+    contract_version: "24.x"
+  realm_ownership:
+    - realm: pressure-vessels
+      owning_team: security-platform
+      lifecycle: policy-versioned
+      responsibilities:
+        - authentication-flows
+        - password-and-mfa-policies
+        - token-session-lifetimes
+  client_ownership:
+    - client_id: pressure-vessels-frontend
+      owning_team: platform-experience
+      protocol: oidc
+      lifecycle: release-versioned
+      redirect_uri_policy: frontend-managed-approved-list
+    - client_id: pressure-vessels-backend
+      owning_team: platform-runtime
+      protocol: oidc
+      lifecycle: service-contract-versioned
+      credential_mode: confidential-client-secret-reference
+  role_ownership:
+    realm_roles:
+      owner: security-platform
+      lifecycle: approval-gated
+      roles:
+        - pv-admin
+        - pv-operator
+        - pv-auditor
+    client_roles:
+      - client_id: pressure-vessels-frontend
+        owner: platform-experience
+        lifecycle: release-versioned
+      - client_id: pressure-vessels-backend
+        owner: platform-runtime
+        lifecycle: api-contract-versioned
+  lifecycle_boundaries:
+    provisioning_owner: security-platform
+    configuration_delivery_path: ci-cd-declarative-manifests
+    environment_promotion_policy:
+      dev: continuous
+      staging: approval-required
+    break_glass_access:
+      allowed: true
+      owner: security-platform
+      session_ttl_minutes: 30
+      post_incident_review_required: true
+  governance:
+    direct_console_mutation:
+      allowed: false
+      exception: break-glass
+    required_release_evidence:
+      - realm-config-revision
+      - client-config-diff
+      - role-mapping-audit-record

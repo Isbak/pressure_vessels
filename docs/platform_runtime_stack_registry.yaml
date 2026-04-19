@@ -62,10 +62,10 @@ components:
     notes: Workflow orchestration runtime.
   - key: auth-keycloak
     capability: authn-authz
-    status: planned
+    status: deployed
     owner: security-platform
     module_path: infra/platform/keycloak
-    notes: Identity and access management.
+    notes: Keycloak identity module skeleton with realm/client/role ownership and lifecycle boundaries committed in-repo.
   - key: observability-prometheus-grafana-loki-tempo
     capability: observability
     status: deployed

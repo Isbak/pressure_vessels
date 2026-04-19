@@ -12,6 +12,7 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 | `infra/platform/postgresql` | Data Platform Team + owning domain teams | Relational schema ownership boundaries, migration approvals, backup lifecycle defaults. |
 | `infra/platform/redis` | Data Platform Team + owning domain teams | Cache namespace and queue stream ownership boundaries, retention defaults, and persistence mode by environment. |
 | `infra/platform/runtime` | Platform Runtime Team + Platform Experience Team | Docker/Kubernetes deployment target ownership, rollout lifecycle, and release evidence boundaries. |
+| `infra/platform/keycloak` | Security Platform Team + consuming service teams | Realm, client, and role ownership boundaries with promotion and break-glass lifecycle controls. |
 
 ## Environment Provisioning Inputs
 
@@ -23,8 +24,9 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 6. `infra/platform/postgresql/module.boundaries.yaml` defines datastore schema ownership, migration approval, and backup lifecycle boundaries.
 7. `infra/platform/redis/module.boundaries.yaml` defines queue/cache ownership, retention defaults, and persistence boundaries.
 8. `infra/platform/runtime/module.boundaries.yaml` defines Docker/Kubernetes target ownership, rollout lifecycle, and release evidence boundaries.
-9. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-10. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+9. `infra/platform/keycloak/module.boundaries.yaml` defines Keycloak realm/client/role ownership and identity lifecycle boundaries.
+10. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
+11. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
 
 ## Deployment Readiness Checklist
 
@@ -47,6 +49,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `test -f infra/platform/redis/module.boundaries.yaml`
 - Confirm runtime deployment boundary module exists:
   - `test -f infra/platform/runtime/module.boundaries.yaml`
+- Confirm identity boundary module exists:
+  - `test -f infra/platform/keycloak/module.boundaries.yaml`
 
 ## Incident Operations
 
