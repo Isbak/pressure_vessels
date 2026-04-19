@@ -21,7 +21,7 @@ def test_backend_api_contract_documented_for_frontend_consumption() -> None:
     assert 'Primary consumer: `services/frontend`' in contract
 
 
-def test_dx006_is_done_and_next_prompt_points_to_dx007() -> None:
+def test_dx006_is_done_and_next_prompt_advances() -> None:
     roadmap = Path('docs/platform_roadmap.yaml').read_text(encoding='utf-8')
     next_prompt = Path('docs/next_dx_generation_prompt.md').read_text(
         encoding='utf-8'
@@ -32,7 +32,8 @@ def test_dx006_is_done_and_next_prompt_points_to_dx007() -> None:
     assert 'status: done' in roadmap.split('id: DX-006', maxsplit=1)[1].split(
         'id: DX-007', maxsplit=1
     )[0]
-    assert 'DX-007 is the next eligible item' in next_prompt
+    assert 'is the next eligible item' in next_prompt
+    assert 'DX-006 is marked status: done' in next_prompt
 
 
 def test_dx006_integration_profile_and_troubleshooting_docs_exist() -> None:
