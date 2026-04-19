@@ -115,9 +115,32 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - name: Validate tech stack documentation consistency
+      - name: Validate tech stack and infra boundary manifests
         run: |
-          python scripts/check_tech_stack.py
+          make s
+
+  iac-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_wrapper: false
+      - name: Set up tflint
+        uses: terraform-linters/setup-tflint@v4
+      - name: Check OpenTofu formatting
+        run: |
+          tofu fmt -check -recursive infra/platform/iac
+      - name: Lint HCL under infra/platform/iac
+        run: |
+          # The gate is wired now so it activates the moment real HCL lands,
+          # but tflint behavior on empty trees is noisy, so skip explicitly.
+          if [ -n "$(find infra/platform/iac -type f -name '*.tf' -print -quit 2>/dev/null)" ]; then
+            tflint --chdir infra/platform/iac --recursive
+          else
+            echo "No HCL under infra/platform/iac yet; tflint gate is a no-op."
+          fi
 
   readme-anchor-check:
     runs-on: ubuntu-latest
@@ -167,6 +190,7 @@ jobs:
     needs:
       - agent-governance
       - docs-check
+      - iac-validate
       - markdown-lint
       - markdown-links
       - python-tests

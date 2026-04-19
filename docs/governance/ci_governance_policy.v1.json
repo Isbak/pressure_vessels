@@ -4,6 +4,7 @@
   "required_gates": [
     "agent-governance",
     "docs-check",
+    "iac-validate",
     "markdown-lint",
     "markdown-links",
     "python-tests",
