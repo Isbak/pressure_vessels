@@ -23,6 +23,7 @@ Technologies below are present in this repository today via imports and/or direc
 - Component: `secrets-vault-or-sops-age`
 - Component: `observability-prometheus-grafana-loki-tempo`
 - Component: `runtime-docker-kubernetes`
+- Component: `auth-keycloak`
 
 ## Planned
 
@@ -36,7 +37,6 @@ The technologies below are documented target-state components and are **not** cu
 - Component: `models-llama-mistral-qwen`
 - Component: `search-opensearch`
 - Component: `workflow-temporal`
-- Component: `auth-keycloak`
 
 ### Runtime mapping source of truth
 
