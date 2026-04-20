@@ -88,6 +88,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
       - name: Validate backlog README anchor consistency
         run: |
           pv-check-readme-anchors "${{ inputs.backlog_path }}"
@@ -100,6 +105,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
       - name: Validate tech stack and infra boundary manifests
         run: |
           pv-check-tech-stack \
@@ -131,6 +141,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
       - name: Read CI governance policy
         id: policy
         run: |
