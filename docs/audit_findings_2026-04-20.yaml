@@ -1,0 +1,534 @@
+---
+version: 1.0.0
+generated_on: '2026-04-20'
+project: pressure_vessels
+description: >-
+  Machine-readable audit findings derived from the full-repo code audit on
+  2026-04-20. Intended to be consumed by a prompt-generation step that emits
+  self-contained remediation prompts (see docs/audit_remediation_prompts_*.md
+  for the prior iteration's format).
+source_audit: Full-repo audit 2026-04-20 (conversational, branch claude/audit-codebase-WDZti)
+severity_values:
+- critical
+- high
+- medium
+- low
+status_values:
+- todo
+- in_progress
+- blocked
+- done
+prompt_conventions:
+  branch_pattern: claude/fix-<finding-id>
+  required_checks:
+  - pytest
+  - ./markdownlint-cli2 "**/*.md"
+  - python scripts/check_ci_governance.py
+  backlog_update_rule: >-
+    Add or update docs/development_backlog.yaml only if the finding requires a
+    tracked backlog entry. Otherwise cite the finding id in the commit body.
+  dependency_rule: >-
+    Do not introduce new runtime dependencies without adding them to
+    pyproject.toml.
+findings:
+
+# ---------------------------------------------------------------------------
+# CRITICAL
+# ---------------------------------------------------------------------------
+- id: AF-001
+  title: Harden concurrent standards-package writes
+  severity: critical
+  area: knowledge
+  status: todo
+  file_path: src/pressure_vessels/standards_ingestion_pipeline.py
+  line_numbers: [180]
+  depends_on: []
+  references:
+  - docs/runbooks/standards_ingestion_pipeline_runbook.md
+  - BL-005
+  problem: >-
+    Immutable package artifacts are created with open(path, "x"). Two concurrent
+    ingestion runs for the same package_id race; the second raises
+    FileExistsError mid-write without cleanup or locking, leaving the artifact
+    store in an ambiguous state.
+  risk: >-
+    Concurrent ingestion can corrupt the artifact store or leave half-written
+    files, undermining the immutability guarantee relied on by downstream
+    calculation and compliance pipelines.
+  recommendation: >-
+    Replace the raw exclusive-create call with an atomic write pattern
+    (write-to-temp then os.replace) plus a filesystem lock or pre-write
+    existence check that returns a typed collision error.
+  acceptance_criteria:
+  - Concurrent writes for the same package_id never leave partial files.
+  - Collisions produce a typed, documented exception (not a bare FileExistsError).
+  - A new concurrency stress test (see AF-009) passes deterministically.
+  deliverables:
+  - Atomic write helper with documented semantics
+  - Updated standards ingestion pipeline call site
+  - Regression test in tests/
+
+- id: AF-002
+  title: Validate geometry adapter inputs with typed errors
+  severity: critical
+  area: geometry
+  status: todo
+  file_path: src/pressure_vessels/geometry_module.py
+  line_numbers: [56, 66]
+  depends_on: []
+  references:
+  - docs/interfaces/calculation_pipeline_contract.md
+  - BL-014
+  problem: >-
+    float(geometry_input.shell_inside_diameter_m) and sibling casts raise bare
+    ValueError when a non-numeric value is supplied. There is no field-level
+    error message and no upstream schema gate, so malformed inputs crash the
+    pipeline with unclear provenance.
+  risk: >-
+    Users cannot diagnose bad geometry inputs; pipeline failure modes are
+    undifferentiated from genuine calculation errors, eroding trust and
+    complicating the handoff gate for strict sizing input mode.
+  recommendation: >-
+    Introduce a GeometryInputValidationError and a validator that checks every
+    required numeric field, returning an aggregated error artifact naming each
+    offending field.
+  acceptance_criteria:
+  - All geometry float conversions go through the new validator.
+  - Invalid inputs raise GeometryInputValidationError with field-level detail.
+  - Tests cover non-numeric, None, and out-of-range values.
+  deliverables:
+  - GeometryInputValidationError class
+  - Validator helper and wiring
+  - Test coverage in tests/
+
+- id: AF-003
+  title: Document and justify safety-critical rounding precision
+  severity: critical
+  area: calculation
+  status: todo
+  file_path: src/pressure_vessels/calculation_pipeline.py
+  line_numbers: [933, 988]
+  depends_on: []
+  references:
+  - docs/interfaces/calculation_pipeline_contract.md
+  - docs/decision-log/ADR-0005-bl-003-sizing-check-scope-and-defaults.md
+  - BL-003
+  problem: >-
+    Thickness, pressure, and utilization checks apply round(x, 9) throughout
+    without a docstring or ADR explaining why nine decimals is correct,
+    sufficient, or auditable against ASME code intent.
+  risk: >-
+    Rounding choices in safety-critical pass/fail logic are not defensible
+    during certification review. Silent behavior changes if the precision is
+    later adjusted without an ADR.
+  recommendation: >-
+    Extract rounding into a named helper with a docstring that states the
+    rationale (e.g., nanometer-scale tolerance below manufacturing precision),
+    add an ADR entry, and cover the boundary with regression tests.
+  acceptance_criteria:
+  - All round() calls in calculation_pipeline.py route through the helper.
+  - Helper docstring cites the precision rationale and ADR.
+  - New regression test pins the rounding behavior with reference values.
+  deliverables:
+  - Rounding helper + docstring
+  - ADR entry in docs/decision-log/
+  - Regression test in tests/
+
+- id: AF-004
+  title: Fail closed on MVP geometry defaults in production mode
+  severity: critical
+  area: calculation
+  status: todo
+  file_path: src/pressure_vessels/calculation_pipeline.py
+  line_numbers: [570, 575]
+  depends_on: []
+  references:
+  - src/pressure_vessels/calculation_pipeline.py
+  - docs/architecture.md
+  - BL-014
+  problem: >-
+    When sizing_input is missing, MVP defaults are applied and only a
+    warnings.warn is emitted. Test runs already generate ~41 warnings, training
+    users to ignore them; a production run can silently certify placeholder
+    geometry.
+  risk: >-
+    Designs emitted with placeholder geometry may be treated as real by
+    downstream compliance/dossier steps, invalidating any certification
+    evidence tied to them.
+  recommendation: >-
+    Raise a typed MissingGeometryInputError by default; keep MVP defaults
+    behind an explicit use_mvp_defaults opt-in kwarg that emits a logged,
+    non-silent event and tags the resulting artifact as non-production.
+  acceptance_criteria:
+  - Default behavior with missing sizing input raises
+    MissingGeometryInputError.
+  - use_mvp_defaults=True tags the calculation record with a
+    non_production_flag and logs an audit event.
+  - Existing tests updated to opt in explicitly where MVP defaults are
+    intentional.
+  deliverables:
+  - MissingGeometryInputError class
+  - Opt-in flag wiring and audit tag
+  - Updated tests + docs/architecture.md breaking-change note
+
+# ---------------------------------------------------------------------------
+# HIGH
+# ---------------------------------------------------------------------------
+- id: AF-005
+  title: Version and source material allowables from standards packages
+  severity: high
+  area: materials
+  status: todo
+  file_path: src/pressure_vessels/materials_module.py
+  line_numbers: [14, 26]
+  depends_on:
+  - AF-001
+  references:
+  - docs/interfaces/compliance_pipeline_contract.md
+  - BL-013
+  - BL-005
+  problem: >-
+    Material rules (propane, ammonia, …) are a hardcoded in-module dict with no
+    standards_version or effective_date metadata. When ASME Section II updates
+    allowables, the dict drifts silently until manually patched.
+  risk: >-
+    Certifications may rely on stale allowables with no traceability back to a
+    versioned standards package, breaking audit claims made in BL-005.
+  recommendation: >-
+    Load allowables from the active standards package by version; attach
+    standards_package_id and effective_date metadata to every material record
+    and surface them in calculation/compliance artifacts.
+  acceptance_criteria:
+  - No hardcoded allowables remain in materials_module.py.
+  - Each material record carries standards_package_id + effective_date.
+  - Calculation and compliance artifacts record the same metadata.
+  deliverables:
+  - Standards-backed materials provider
+  - Updated artifact schema fields
+  - Tests covering missing/expired package paths
+
+- id: AF-006
+  title: Validate governance exception date ordering
+  severity: high
+  area: governance
+  status: todo
+  file_path: scripts/check_ci_governance.py
+  line_numbers: [181, 187, 249, 264]
+  depends_on: []
+  references:
+  - docs/governance/ci_governance_policy.v1.json
+  - .github/governance/policy_exceptions.v1.json
+  - AGENT_GOVERNANCE.md
+  problem: >-
+    ISO-8601 parsing catches ValueError but never asserts that
+    approved_at <= expires_at on exception entries. A nonsensical window
+    (approved tomorrow, expires yesterday) is accepted.
+  risk: >-
+    Governance exceptions can be recorded with invalid lifetimes, defeating the
+    waiver audit trail and potentially re-opening gates that should block.
+  recommendation: >-
+    Add a validator in _validate_exception_item asserting approved_at strictly
+    precedes expires_at, both are ISO-8601, and neither is in the far future.
+  acceptance_criteria:
+  - Invalid date ordering produces a validation error with a clear message.
+  - Tests cover approved_at == expires_at, approved_at > expires_at, and
+    non-ISO values.
+  - No existing exception config is silently normalized.
+  deliverables:
+  - Date-ordering validator
+  - tests/test_policy_exceptions.py additions
+
+- id: AF-007
+  title: Document and test design_basis deterministic_signature
+  severity: high
+  area: compliance
+  status: todo
+  file_path: src/pressure_vessels/design_basis_pipeline.py
+  line_numbers: []
+  depends_on: []
+  references:
+  - docs/interfaces/compliance_pipeline_contract.md
+  - BL-002
+  problem: >-
+    design_basis.deterministic_signature is consumed by downstream calculation
+    logic but its construction (input fields, hashing algorithm, ordering
+    rules) is not documented. The name implies cryptographic intent that is
+    not substantiated.
+  risk: >-
+    Auditors cannot verify design-basis integrity; the algorithm could drift
+    across versions without any regression gate catching it.
+  recommendation: >-
+    Add a docstring and interface contract describing the signature inputs and
+    algorithm; add a stability test comparing against a frozen reference
+    fixture; consider renaming to deterministic_hash if cryptographic
+    properties are not required.
+  acceptance_criteria:
+  - Signature construction documented in-module and in interfaces/.
+  - Stability regression test pins the output for a canonical design basis.
+  - Any rename is backward-compatible (alias retained for one release).
+  deliverables:
+  - Docstring + interface update
+  - Regression test fixture and test
+  - Optional alias for rename
+
+- id: AF-008
+  title: Replace inf utilization sentinel with explicit invalid record
+  severity: high
+  area: calculation
+  status: todo
+  file_path: src/pressure_vessels/calculation_pipeline.py
+  line_numbers: [936]
+  depends_on:
+  - AF-003
+  references:
+  - docs/interfaces/calculation_pipeline_contract.md
+  - BL-003d
+  problem: >-
+    utilization is set to float('inf') when provided thickness is zero. Callers
+    that compare against thresholds with operators like > may silently treat
+    inf as passing or serialize it inconsistently (JSON inf is non-standard).
+  risk: >-
+    Downstream tooling may accept invalid designs, or crash during artifact
+    export because of non-JSON-compatible inf values.
+  recommendation: >-
+    Emit an explicit validation record (utilization_ratio = null,
+    reason = "provided_thickness_is_zero") instead of inf; update the
+    JSON schema and any threshold comparison logic to handle the sentinel.
+  acceptance_criteria:
+  - No float('inf') values appear in calculation records.
+  - JSON serialization of records is stable and spec-compliant.
+  - Threshold comparisons surface a validation failure rather than a pass.
+  deliverables:
+  - Updated record builder
+  - Schema update
+  - Tests covering zero/negative thickness paths
+
+# ---------------------------------------------------------------------------
+# MEDIUM
+# ---------------------------------------------------------------------------
+- id: AF-009
+  title: Add concurrent-write stress test for standards ingestion
+  severity: medium
+  area: quality
+  status: todo
+  file_path: tests/
+  line_numbers: []
+  depends_on:
+  - AF-001
+  references:
+  - BL-005
+  problem: >-
+    199 unit tests pass but none exercise concurrent ingestion of the same
+    package_id. The race condition described in AF-001 is latent until load.
+  risk: >-
+    Regression in the atomic-write path for AF-001 would not be caught by CI.
+  recommendation: >-
+    Add a test that spawns at least two concurrent run_standards_ingestion
+    calls for the same package_id and asserts exactly one succeeds while the
+    other raises the documented collision exception with no partial artifact.
+  acceptance_criteria:
+  - Test is deterministic across at least 100 local reruns.
+  - Test uses tmp_path; no global artifact store is touched.
+  - Failure modes on broken AF-001 behavior are detected by CI.
+  deliverables:
+  - tests/test_standards_ingestion_concurrency.py
+
+- id: AF-010
+  title: Bound temperature conversions with physical reasonability check
+  severity: medium
+  area: requirements
+  status: todo
+  file_path: src/pressure_vessels/requirements_pipeline.py
+  line_numbers: [35, 41]
+  depends_on: []
+  references:
+  - BL-001
+  problem: >-
+    TEMPERATURE_CONVERTERS accepts any value once normalized. Extreme or
+    physically implausible design temperatures (e.g., 10 K, 5000 C) are
+    silently accepted.
+  risk: >-
+    Unrealistic inputs can produce calculation records that look valid,
+    violating the fail-closed intent of the validity envelope.
+  recommendation: >-
+    After conversion, enforce a configurable bounds range (sensible default:
+    -196 C to 650 C) and emit a validation warning/error outside the bounds.
+    Bounds live alongside the validity envelope config.
+  acceptance_criteria:
+  - Out-of-range temperatures raise a validation error by default.
+  - Bounds and override mechanism are documented.
+  - Tests cover boundary, interior, and out-of-range values.
+  deliverables:
+  - Validator + config
+  - Tests
+
+- id: AF-011
+  title: Replace clause applicability status strings with an enum
+  severity: medium
+  area: compliance
+  status: todo
+  file_path: src/pressure_vessels/compliance_pipeline.py
+  line_numbers: []
+  depends_on: []
+  references:
+  - docs/interfaces/compliance_pipeline_contract.md
+  - BL-002
+  problem: >-
+    The status field uses magic strings including not_evaluated with no
+    authoritative enumeration. Downstream consumers can misinterpret values or
+    propagate typos.
+  risk: >-
+    Compliance audit trails become inconsistent; new status values can be
+    introduced without a gate.
+  recommendation: >-
+    Define ClauseApplicabilityStatus enum (applicable, not_applicable,
+    not_evaluated). Enforce it in compliance_pipeline.py and the design basis
+    applicability matrix writer.
+  acceptance_criteria:
+  - All status fields are enum values (or their serialized names).
+  - Schema/contract document lists the allowed values.
+  - Tests cover invalid status rejection.
+  deliverables:
+  - Enum + serializer
+  - Updated contract doc
+  - Tests
+
+- id: AF-012
+  title: Bound workflow orchestrator retry configuration
+  severity: medium
+  area: orchestration
+  status: todo
+  file_path: src/pressure_vessels/workflow_orchestrator.py
+  line_numbers: []
+  depends_on: []
+  references:
+  - docs/interfaces/workflow_orchestrator_contract.md
+  - BL-016
+  problem: >-
+    WorkflowStageSpec accepts arbitrary max_retries and fail_first_attempts
+    values with no sanity limit. Pathological configs (max_retries=999999) can
+    consume resources and trigger unnecessary escalations.
+  risk: >-
+    Misconfiguration at the stage level can destabilize orchestration and
+    page human approvers unnecessarily.
+  recommendation: >-
+    Add __post_init__ validation with documented upper bounds (suggested
+    max_retries <= 10, fail_first_attempts <= max_retries) and typed errors
+    on violation.
+  acceptance_criteria:
+  - Invalid configs raise at construction time.
+  - Bounds are documented in the interface contract.
+  - Tests cover the new validations.
+  deliverables:
+  - Validation + tests
+  - Contract doc update
+
+# ---------------------------------------------------------------------------
+# LOW
+# ---------------------------------------------------------------------------
+- id: AF-013
+  title: Cite source spec for README anchor-slug algorithm
+  severity: low
+  area: tooling
+  status: todo
+  file_path: scripts/check_readme_anchors.py
+  line_numbers: [23, 40]
+  depends_on: []
+  references:
+  - BL-020
+  problem: >-
+    The GitHub anchor-slug algorithm is reimplemented manually with no comment
+    linking to the upstream spec or documenting the de-dup suffix rule.
+  risk: >-
+    Future GitHub rendering changes may silently break anchor checks; readers
+    cannot quickly verify the implementation.
+  recommendation: >-
+    Add a docstring citing the GitHub rendering spec and describing the
+    duplicate-suffix (-1, -2, …) rule. Optionally add a property test.
+  acceptance_criteria:
+  - Docstring with spec reference is present.
+  - Behavior is unchanged.
+  deliverables:
+  - Docstring update
+  - Optional property test
+
+- id: AF-014
+  title: Add clause-citation docstrings to sizing-check helpers
+  severity: low
+  area: calculation
+  status: todo
+  file_path: src/pressure_vessels/calculation_pipeline.py
+  line_numbers: []
+  depends_on: []
+  references:
+  - docs/decision-log/ADR-0005-bl-003-sizing-check-scope-and-defaults.md
+  problem: >-
+    _build_shell_check, _build_head_check, and sibling helpers have no
+    docstrings linking the formula to its ASME clause (UG-27, UG-32, UG-37,
+    etc.). Traceability requires cross-referencing the ADR by hand.
+  risk: >-
+    Maintainers may modify formulas without noticing the governing clause,
+    slowing audit review.
+  recommendation: >-
+    Add a one-line docstring per helper naming the clause and the formula it
+    implements.
+  acceptance_criteria:
+  - Each _build_*_check has a docstring citing its ASME clause.
+  - No behavior changes.
+  deliverables:
+  - Docstring-only patch
+
+- id: AF-015
+  title: Expand CI Python matrix to cover future versions
+  severity: low
+  area: ci
+  status: todo
+  file_path: .github/workflows/ci.yml
+  line_numbers: [81, 117]
+  depends_on: []
+  references:
+  - pyproject.toml
+  problem: >-
+    CI tests run on 3.11 and 3.12 only. pyproject.toml declares >=3.11 with no
+    upper bound, so 3.13+ users run on an untested version.
+  risk: >-
+    Silent breakage on newer Python releases until manually discovered.
+  recommendation: >-
+    Either add 3.13 to the matrix or pin the pyproject upper bound and
+    document the policy in AGENT_GOVERNANCE.md.
+  acceptance_criteria:
+  - CI matrix and pyproject bound are aligned and documented.
+  - CI remains green across all matrix cells.
+  deliverables:
+  - Workflow + pyproject update
+  - Docs note
+
+# ---------------------------------------------------------------------------
+# SUGGESTED EXECUTION ORDER
+# ---------------------------------------------------------------------------
+execution_order:
+- step: 1
+  group: [AF-001, AF-009]
+  rationale: >-
+    Fix the atomicity bug and lock it in with the concurrency stress test;
+    unblocks downstream materials-versioning work.
+- step: 2
+  group: [AF-002, AF-004]
+  rationale: >-
+    Input validation and fail-closed behavior are prerequisites for trusting
+    any subsequent calculation output.
+- step: 3
+  group: [AF-003, AF-008]
+  rationale: >-
+    Precision + sentinel handling in calculation_pipeline; AF-008 depends on
+    AF-003's rounding helper being in place.
+- step: 4
+  group: [AF-005, AF-006, AF-007]
+  rationale: >-
+    Governance + compliance traceability hardening; independent of each other.
+- step: 5
+  group: [AF-010, AF-011, AF-012]
+  rationale: Medium-severity contract tightening; parallelizable.
+- step: 6
+  group: [AF-013, AF-014, AF-015]
+  rationale: Low-severity documentation and CI hygiene; batch when convenient.
