@@ -35,6 +35,7 @@ from .geometry_module import (
     GEOMETRY_INPUT_VERSION,
     CadReadyParameterExport,
     GeometryInput,
+    GeometryInputValidationError,
     adapt_geometry_input,
     build_cad_ready_parameter_export,
 )
@@ -190,6 +191,7 @@ __all__ = [
     "GEOMETRY_INPUT_VERSION",
     "CadReadyParameterExport",
     "GeometryInput",
+    "GeometryInputValidationError",
     "adapt_geometry_input",
     "build_cad_ready_parameter_export",
     "BASELINE_UPDATE_STATUS_VERSION",
