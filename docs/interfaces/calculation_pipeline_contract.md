@@ -127,6 +127,7 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
       "provided_thickness_m": 0.02,
       "margin_m": 0.001512132,
       "utilization_ratio": 0.9243934,
+      "utilization_invalid_reason": null,
       "near_limit_threshold": 0.9,
       "is_near_limit": true,
       "parent_component": null,
@@ -196,8 +197,9 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
   - `formula` string (human-readable)
   - `inputs` snapshot in canonical SI units (`Pa`, `m`, dimensionless)
   - `required_thickness_m`, `provided_thickness_m`, `margin_m`, `utilization_ratio`
+  - `utilization_invalid_reason` (`null` for valid provided thicknesses; deterministic string reason when utilization is undefined, e.g. `"provided_thickness_non_positive"`)
   - `near_limit_threshold` (default `0.9`, configurable per pipeline invocation)
-  - `is_near_limit` (`true` only when `pass_status == true` and `utilization_ratio >= near_limit_threshold`)
+  - `is_near_limit` (`true` only when `pass_status == true` and `utilization_ratio` is a number `>= near_limit_threshold`)
   - `parent_component`, `parent_check_id` (set for routed checks such as nozzle reinforcement linked to shell/head parent checks)
   - `design_pressure_pa`, `computed_mawp_pa`, `pressure_margin_pa` (populated for pressure-capacity checks such as MAWP and UG-28 external-pressure)
   - `validity_envelope` metadata:

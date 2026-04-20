@@ -409,7 +409,42 @@ def test_rounding_policy_stabilizes_boundary_sensitive_pass_fail():
     assert record.provided_thickness_m == 1.0
     assert record.margin_m == 0.0
     assert record.utilization_ratio == 1.0
+    assert record.utilization_invalid_reason is None
     assert record.pass_status is True
+
+
+def test_non_positive_provided_thickness_marks_utilization_as_invalid():
+    record = _to_record(
+        check_id="UG-27-shell",
+        component="shell",
+        formula="invalid-utilization-test",
+        inputs={"P_Pa": 1_800_000.0, "S_Pa": 138_000_000.0, "E": 0.85, "D_m": 2.0, "CA_m": 0.003},
+        required=0.01,
+        provided=0.0,
+        near_limit_threshold=0.5,
+    )
+
+    assert record.pass_status is False
+    assert record.utilization_ratio is None
+    assert record.utilization_invalid_reason == "provided_thickness_non_positive"
+    assert record.is_near_limit is False
+
+
+def test_negative_provided_thickness_does_not_trigger_near_limit_threshold():
+    record = _to_record(
+        check_id="UG-27-shell",
+        component="shell",
+        formula="invalid-utilization-test",
+        inputs={"P_Pa": 1_800_000.0, "S_Pa": 138_000_000.0, "E": 0.85, "D_m": 2.0, "CA_m": 0.003},
+        required=0.01,
+        provided=-0.005,
+        near_limit_threshold=0.01,
+    )
+
+    assert record.pass_status is False
+    assert record.utilization_ratio is None
+    assert record.utilization_invalid_reason == "provided_thickness_non_positive"
+    assert record.is_near_limit is False
 
 
 def test_near_limit_threshold_is_configurable_and_persisted_on_records():
