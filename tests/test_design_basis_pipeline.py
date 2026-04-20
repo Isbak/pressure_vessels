@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -9,6 +10,7 @@ from pressure_vessels.requirements_pipeline import Gap, RequirementSet, Requirem
 
 
 FIXED_NOW = datetime(2026, 4, 18, 0, 0, 0, tzinfo=timezone.utc)
+SIGNATURE_FIXTURE_PATH = Path("tests/fixtures/design_basis_signature_v1_asme_route.json")
 
 def _override_code_standard(requirement_set: RequirementSet, code_standard: str) -> RequirementSet:
     requirements = dict(requirement_set.requirements)
@@ -152,3 +154,20 @@ def test_matrix_includes_non_applicable_justification():
     assert ug25.applicable is False
     assert "Not applicable" in ug25.justification
     assert ug25.evidence_fields
+
+
+def test_design_basis_deterministic_signature_matches_frozen_canonical_fixture():
+    fixture = json.loads(SIGNATURE_FIXTURE_PATH.read_text(encoding="utf-8"))
+    requirement_set = parse_prompt_to_requirement_set(
+        fixture["input"]["prompt"],
+        now_utc=datetime.fromisoformat(fixture["input"]["now_utc"]),
+    )
+
+    design_basis, _ = build_design_basis(requirement_set, now_utc=FIXED_NOW)
+    unsigned_payload = design_basis.to_json_dict()
+    unsigned_payload.pop("deterministic_signature")
+
+    assert fixture["hash_algorithm"] == "sha256"
+    assert fixture["canonicalization"] == "json.sort_keys+compact"
+    assert unsigned_payload == fixture["canonical_unsigned_payload"]
+    assert design_basis.deterministic_signature == fixture["expected_deterministic_signature"]

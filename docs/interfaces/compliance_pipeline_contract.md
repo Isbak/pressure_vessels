@@ -29,6 +29,33 @@ BL-004 proceeds only if all are true:
 
 If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed).
 
+## Upstream Dependency Contract: `DesignBasis.deterministic_signature`
+
+Because BL-004 validates `CalculationRecords.source_design_basis_signature`
+against `DesignBasis.deterministic_signature`, the signature-construction
+contract is frozen as:
+
+- Hash algorithm: `sha256`
+- Canonicalization:
+  `json.dumps(payload, sort_keys=True, separators=(",", ":"))`
+- Unsigned payload keys (exactly):
+  - `schema_version`
+  - `generated_at_utc`
+  - `source_requirement_set_hash`
+  - `primary_standard`
+  - `primary_standard_version`
+  - `selected_route_id`
+  - `secondary_standards`
+  - `route_selection_audit`
+  - `assumptions`
+- Ordering rules:
+  - `secondary_standards` order follows deterministic route order sorted by
+    `(route_priority, route_id)` after removing the selected route.
+  - `route_selection_audit` order follows the same deterministic route order.
+
+Any change to these fields, canonicalization, or ordering requires a schema
+version bump and coordinated downstream migration.
+
 ## Output Artifacts
 
 `generate_compliance_dossier` returns a tuple:
