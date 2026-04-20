@@ -17,6 +17,7 @@ baseline.
 - `make` (GNU Make 3.81+ recommended)
 - Python 3.11+
 - `pip`
+- Node.js 20+ (with `npm`)
 
 ## 1) Bootstrap (single command)
 
@@ -31,11 +32,15 @@ What it does:
 - Upgrades `pip`
 - Installs the package in editable mode
 - Installs `pytest` for local baseline checks
+- Verifies that the Node.js toolchain is present before any JS install work
+- Installs frontend dependencies (`services/frontend/package.json`)
+- Installs backend dependencies (`services/backend/package.json`)
 
 Override variables when needed:
 
 - `PYTHON` (default: `python`)
 - `PIP` (default: `pip`)
+- `NPM` (default: `npm`)
 
 ## 2) Baseline validation (single command)
 
