@@ -147,6 +147,8 @@ def test_applied_defaults_are_surfaced_when_sizing_input_is_absent():
 
     assert calc.applied_defaults["applied_mvp_defaults"] is True
     assert calc.applied_defaults["applied_geometry_defaults"] is True
+    assert calc.applied_defaults["non_production_flag"] is True
+    assert calc.applied_defaults["audit_event"]["event_type"] == "non_production_mvp_defaults_opt_in"
     values = calc.applied_defaults["values"]
     assert "allowable_stress_Pa" not in values
     assert "joint_efficiency" not in values
@@ -179,6 +181,8 @@ def test_explicit_mvp_defaults_opt_in_uses_expected_values_and_emits_warning():
             req, design_basis, matrix, now_utc=FIXED_NOW, use_mvp_defaults=True
         )
 
+    assert calc.applied_defaults["audit_event"]["event_id"] == "BL-003-MVP-GEOMETRY-DEFAULTS-NON-PRODUCTION"
+    assert "NON-PRODUCTION ONLY" in calc.applied_defaults["audit_event"]["message"]
     assert calc.applied_defaults["values"]["shell_inside_diameter_m"] == _MVP_DEFAULTS["shell_inside_diameter_m"]
     assert calc.applied_defaults["values"]["shell_provided_thickness_m"] == _MVP_DEFAULTS["shell_provided_thickness_m"]
     assert calc.applied_defaults["values"]["head_inside_diameter_m"] == _MVP_DEFAULTS["head_inside_diameter_m"]
@@ -213,6 +217,7 @@ def test_applied_defaults_are_not_flagged_when_caller_supplies_sizing_input():
     )
 
     assert calc.applied_defaults["applied_mvp_defaults"] is False
+    assert calc.applied_defaults["non_production_flag"] is False
     assert calc.applied_defaults["values"] == {}
     assert calc.material_basis["material_spec"] == "SA-516 Gr.70"
     assert calc.geometry_basis["source"] == "sizing_input"
