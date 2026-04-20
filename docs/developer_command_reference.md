@@ -13,6 +13,7 @@ Run from repository root:
 | Unit tests | `make test` | `make t` |
 | Governance docs/anchor checks | `make governance` | `make g` |
 | Runtime stack checks | `make stack` | `make s` |
+| JS service validation checks | `make validate-js` | _n/a_ |
 | Baseline validation bundle | `make validate` | `make v` |
 | Local runtime integration profile up | `make integration-up` | `make up` |
 | Local runtime integration profile down | `make integration-down` | `make down` |
@@ -26,6 +27,11 @@ Notes:
   boundary files are intentionally out of scope.
 - `make bootstrap` fails fast when `node`/`npm` are missing and installs
   dependencies for both `services/frontend` and `services/backend`.
+- `make validate` includes `make validate-js`, which runs
+  `npm --prefix services/frontend run smoke` and
+  `npm --prefix services/backend run smoke`.
+- JS checks fail fast when `node`/`npm` are missing; set `JS_VALIDATE=0` to
+  explicitly skip JS checks in local environments without Node tooling.
 
 ## CI parity mapping for local runs
 
@@ -36,8 +42,9 @@ Use this table to mirror CI behavior before opening a PR:
 | `python-tests` | `pytest -q --junitxml artifacts/ci/pytest-junit.xml` | `make t` |
 | `readme-anchor-check` | `python scripts/check_readme_anchors.py` | `make g` |
 | `tech-stack-check` | `python scripts/check_tech_stack.py` | `make s` |
+| `js-validate` | `make validate-js` | `make validate-js` |
 | _deployment-readiness subset_ | file existence checks in runbook checklist | `make s` |
-| _combined local baseline_ | multiple jobs above | `make ci` (or `make v`) |
+| _combined local baseline_ | `python-tests` + `readme-anchor-check` + `tech-stack-check` + `js-validate` | `make ci` (or `make v`) |
 
 For full CI workflow coverage (including markdown lint, YAML validation, secret
 scan, governance gate artifact checks, and governance checklist evidence generation), refer to `.github/workflows/ci.yml`.

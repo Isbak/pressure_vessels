@@ -1,9 +1,10 @@
-.PHONY: bootstrap bootstrap-py bootstrap-js validate ci test governance stack integration-up integration-down integration-logs t g s v up down logs
+.PHONY: bootstrap bootstrap-py bootstrap-js validate-js validate ci test governance stack integration-up integration-down integration-logs t g s v up down logs
 
 PYTHON ?= python
 PIP ?= pip
 NPM ?= npm
 VALIDATE_INFRA ?= 1
+JS_VALIDATE ?= 1
 
 INFRA_BOUNDARY_FILES ?= \
 	infra/platform/environment.bootstrap.yaml \
@@ -47,7 +48,17 @@ stack:
 		done; \
 	fi
 
-validate: test governance stack
+validate-js:
+	@if [ "$(JS_VALIDATE)" = "0" ]; then \
+		echo "Skipping JS validation because JS_VALIDATE=0."; \
+	else \
+		command -v node >/dev/null 2>&1 || { echo "Node.js is required for JS validation. Install Node.js (npm included), then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
+		command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS validation. Install npm, then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
+		$(NPM) --prefix services/frontend run smoke; \
+		$(NPM) --prefix services/backend run smoke; \
+	fi
+
+validate: test governance stack validate-js
 
 ci: validate
 

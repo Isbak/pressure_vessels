@@ -1,19 +1,18 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-002 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-003 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-002 in the `pressure_vessels` repo.
+You are implementing DXR-003 in the `pressure_vessels` repo.
 
 Problem:
-`make validate` currently runs pytest plus governance/stack checks, but
-it does not run any JS-side checks for `services/frontend` or
-`services/backend`. This leaves TypeScript/service runtime drift
-undetected in the baseline local feedback loop and breaks local/CI parity
-expectations in docs/developer_command_reference.md.
+`services/frontend` and `services/backend` declare Node dependencies but no
+committed lockfiles. This weakens deterministic local/CI installs and drifts
+from the reproducibility expectations in README.md and
+`docs/developer_experience_principles.md`.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-002` branched from `main`.
+- Work on a new branch `claude/fix-DXR-003` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -21,35 +20,29 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-002 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-003 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Audit `Makefile` and both service manifests to identify the lightest
-   JS check that can run in baseline validation for each service.
-2. Extend `make validate` (or add a documented companion target invoked
-   by it) so both JS services receive at least one JS check (typecheck,
-   build, or smoke boot) without changing governance ownership boundaries.
-3. Ensure local execution has a clear behavior for environments without
-   Node tooling (fail-fast or explicit skip override), and document the
-   behavior.
-4. Update `docs/developer_command_reference.md` parity mapping so CI/local
-   equivalence remains accurate.
-5. Update CI workflow wiring as needed to preserve parity with the local
-   command path.
-6. Add/extend tests proving the canonical entrypoint still covers the JS
-   checks.
-7. Last step before opening/merging the PR: update
+1. Generate and commit deterministic lockfiles for `services/frontend` and
+   `services/backend` using the repository’s current package manager path.
+2. Ensure bootstrap/CI install commands consume those lockfiles in a
+   deterministic mode.
+3. Document lockfile hygiene (regeneration command and reviewer expectations).
+4. Update docs/developer_command_reference.md parity notes if command behavior
+   changes.
+5. Add or extend tests that assert lockfiles are present and referenced by the
+   canonical bootstrap/validation path.
+6. Last step before opening/merging the PR: update
    `docs/next_dx_generation_prompt.md` to the next eligible DXR item and
-   set DXR-002 status to `done` in
+   set DXR-003 status to `done` in
    `docs/dx_reusability_audit_2026-04-20.yaml`.
 
-Out of scope (tracked separately as DXR-003 … DXR-015):
-- Committing lockfiles (DXR-003).
+Out of scope (tracked separately):
 - Providing `.env.example` (DXR-004).
 - Formatter/linter baseline (DXR-005).
 - Pinning the Node version (DXR-006).
 
-Deliverable: one PR touching only the files needed for DXR-002
+Deliverable: one PR touching only the files needed for DXR-003
 remediation plus the prompt/status files in the final step.
 ```
 
@@ -58,7 +51,7 @@ remediation plus the prompt/status files in the final step.
 Pick the first item with `status: todo` whose dependencies are all `done`.
 
 1. **DXR-001** — Extend bootstrap to install JS service toolchains deterministically (`done`, deps: none)
-2. **DXR-002** — Add JS service test/lint parity to the baseline validate bundle (`todo`, deps: DXR-001)
+2. **DXR-002** — Add JS service test/lint parity to the baseline validate bundle (`done`, deps: DXR-001)
 3. **DXR-003** — Commit deterministic lockfiles for frontend and backend services (`todo`, deps: DXR-001)
 4. **DXR-004** — Provide .env.example scaffolding for local runtime profile (`todo`, deps: none)
 5. **DXR-005** — Baseline formatting and linting configuration (editorconfig + formatters) (`todo`, deps: none)

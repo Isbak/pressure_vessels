@@ -136,6 +136,21 @@ jobs:
         run: |
           make s
 
+  js-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install JS service dependencies
+        run: |
+          make bootstrap-js
+      - name: Run JS validation checks
+        run: |
+          make validate-js
+
   iac-validate:
     runs-on: ubuntu-latest
     steps:
@@ -250,6 +265,7 @@ jobs:
       - iac-validate
       - markdown-lint
       - markdown-links
+      - js-validate
       - python-tests
       - readme-anchor-check
       - secret-scan
