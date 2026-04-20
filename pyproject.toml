@@ -20,3 +20,4 @@ pv-generate-governance-checklist-evidence = "pressure_vessels.governance_checks:
 pv-check-readme-anchors = "pressure_vessels.dev_cli:check_readme_anchors_main"
 pv-check-tech-stack = "pressure_vessels.dev_cli:check_tech_stack_main"
 pv-suggest-risk-label = "pressure_vessels.dev_cli:suggest_risk_label_main"
+pv-scaffold-governance-baseline = "pressure_vessels.governance_scaffold:scaffold_governance_baseline_main"

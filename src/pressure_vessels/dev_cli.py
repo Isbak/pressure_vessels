@@ -19,6 +19,12 @@ def check_tech_stack_main(argv: list[str] | None = None) -> int:
     return _run_repo_script("check_tech_stack.py", argv)
 
 
+def scaffold_governance_baseline_main(argv: list[str] | None = None) -> int:
+    from pressure_vessels.governance_scaffold import scaffold_governance_baseline_main as _main
+
+    return _main(argv)
+
+
 def check_readme_anchors_main(argv: list[str] | None = None) -> int:
     normalized_args = list(argv or [])
     if normalized_args and not normalized_args[0].startswith("-"):
@@ -54,7 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     args = list(argv or sys.argv[1:])
     if not args:
         print(
-            "usage: python -m pressure_vessels.dev_cli <check-readme-anchors|check-tech-stack|suggest-risk-label> [args...]",
+            "usage: python -m pressure_vessels.dev_cli <check-readme-anchors|check-tech-stack|suggest-risk-label|scaffold-governance-baseline> [args...]",
             file=sys.stderr,
         )
         return 2
@@ -66,6 +72,8 @@ def main(argv: list[str] | None = None) -> int:
         return check_tech_stack_main(command_args)
     if command == "suggest-risk-label":
         return suggest_risk_label_main(command_args)
+    if command == "scaffold-governance-baseline":
+        return scaffold_governance_baseline_main(command_args)
 
     print(f"unknown command: {command}", file=sys.stderr)
     return 2

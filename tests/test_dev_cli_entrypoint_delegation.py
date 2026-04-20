@@ -36,3 +36,16 @@ def test_readme_entry_point_accepts_backlog_positional_for_ci_compat(monkeypatch
     assert called == [
         ("check_readme_anchors.py", ["--backlog", "docs/development_backlog.yaml"]),
     ]
+
+
+def test_dev_cli_main_dispatches_governance_scaffold(monkeypatch) -> None:
+    called: list[list[str] | None] = []
+
+    def fake_scaffold(argv: list[str] | None = None) -> int:
+        called.append(argv)
+        return 0
+
+    monkeypatch.setattr(dev_cli, "scaffold_governance_baseline_main", fake_scaffold)
+
+    assert dev_cli.main(["scaffold-governance-baseline", "--target", "repo"]) == 0
+    assert called == [["--target", "repo"]]

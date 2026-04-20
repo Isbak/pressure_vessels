@@ -20,6 +20,7 @@ Run from repository root:
 | Local runtime integration profile down | `make integration-down` | `make down` |
 | Local runtime integration profile logs | `make integration-logs` | `make logs` |
 | CI-parity baseline bundle | `make ci` | _n/a_ |
+| Governance baseline scaffold installer | `pv-scaffold-governance-baseline --target /path/to/repo` | _n/a_ |
 
 Notes:
 
@@ -43,6 +44,7 @@ Notes:
   major is older than the minimum in `tools/versions.json`; set
   `JS_VALIDATE=0` to explicitly skip JS checks in local environments without
   Node tooling.
+- `pv-scaffold-governance-baseline --target /path/to/repo` installs the cross-project governance baseline files and writes drift metadata at `.governance/baseline_source.v1.json`; rerun with `--force` to refresh an existing scaffold.
 - Lockfile hygiene: regenerate lockfiles with
   `npm --prefix services/frontend install --package-lock-only` and
   `npm --prefix services/backend install --package-lock-only`, and require

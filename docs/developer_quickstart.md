@@ -97,13 +97,32 @@ For infra ownership and deployment-readiness context, see
 
 ## Reusing this DX baseline in other projects
 
-To apply this workflow in other repositories while preserving governance-by-default:
+To apply this workflow in other repositories while preserving governance-by-default,
+use the baseline scaffold command instead of manually copying files:
 
-1. Copy the `Makefile` bootstrap/validate targets.
-2. Keep `validate` as the single local baseline command.
-3. Point `INFRA_BOUNDARY_FILES` at that project's boundary manifests.
-4. Keep policy checks in `validate` aligned with CI-required checks.
-5. If infra does not apply, set `VALIDATE_INFRA=0` and document why in the
+```bash
+pv-scaffold-governance-baseline --target /path/to/target-repo
+```
+
+What this scaffolds:
+
+- `AGENT_GOVERNANCE.md`
+- `docs/governance/ci_governance_policy.v1.json`
+- `docs/governance/policy_exceptions_schema.v1.json`
+- `docs/governance/risk_label_heuristics.v1.json`
+- `.github/workflows/reusable-governance-core.yml`
+- `scripts/check_ci_governance.py`
+
+The command also writes `.governance/baseline_source.v1.json` with source repository,
+baseline version, commit SHA, generation timestamp, and per-file SHA-256 values so
+downstream repositories can track drift from this baseline.
+
+After scaffolding, wire your project-specific paths and commands:
+
+1. Keep `validate` as the single local baseline command.
+2. Point `INFRA_BOUNDARY_FILES` at that project's boundary manifests.
+3. Keep policy checks in `validate` aligned with CI-required checks.
+4. If infra does not apply, set `VALIDATE_INFRA=0` and document why in the
    project quickstart.
 
 For CI reuse, prefer calling the reusable governance workflow and pass your
