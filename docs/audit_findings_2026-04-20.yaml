@@ -397,7 +397,7 @@ findings:
   title: Bound workflow orchestrator retry configuration
   severity: medium
   area: orchestration
-  status: todo
+  status: done
   file_path: src/pressure_vessels/workflow_orchestrator.py
   line_numbers: []
   depends_on: []
