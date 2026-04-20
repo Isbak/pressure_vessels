@@ -178,7 +178,7 @@ findings:
   title: Version and source material allowables from standards packages
   severity: high
   area: materials
-  status: todo
+  status: done
   file_path: src/pressure_vessels/materials_module.py
   line_numbers: [14, 26]
   depends_on:

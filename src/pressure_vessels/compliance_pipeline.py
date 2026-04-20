@@ -238,6 +238,8 @@ def generate_compliance_dossier(
         "material_basis_ref": (
             f"{calculation_records.material_basis['schema_version']}:"
             f"{calculation_records.material_basis['standards_package_ref']}:"
+            f"{calculation_records.material_basis['standards_package_id']}:"
+            f"{calculation_records.material_basis['effective_date']}:"
             f"{calculation_records.material_basis['allowables_version']}"
         ),
         "geometry_basis_ref": (
@@ -250,7 +252,9 @@ def generate_compliance_dossier(
             (
                 "Material basis: "
                 f"{calculation_records.material_basis['material_spec']} "
-                f"[{calculation_records.material_basis['allowables_version']}]"
+                f"[{calculation_records.material_basis['allowables_version']}; "
+                f"package={calculation_records.material_basis['standards_package_id']}; "
+                f"effective={calculation_records.material_basis['effective_date']}]"
             ),
             (
                 "Clause outcomes: "

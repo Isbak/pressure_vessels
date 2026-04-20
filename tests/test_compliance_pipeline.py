@@ -187,8 +187,12 @@ def test_material_basis_and_corrosion_policy_are_persisted_to_compliance_artifac
 
     assert machine.material_basis["material_spec"] == "SA-516 Gr.70"
     assert machine.material_basis["allowables_version"] == "ASME_BPVC_2023.materials.2026-04"
+    assert machine.material_basis["standards_package_id"] == "ASME_BPVC_2023_MATERIALS_2026-04"
+    assert machine.material_basis["effective_date"] == "2026-04-01"
     assert machine.material_basis["corrosion_allowance_policy"]["policy_id"] == "CA-INPUT-REQUIREMENT"
     assert "Material basis:" in human.summary_lines[1]
+    assert "package=ASME_BPVC_2023_MATERIALS_2026-04" in human.summary_lines[1]
+    assert ":2026-04-01:" in human.material_basis_ref
 
 
 def test_handoff_gate_rejects_hash_mismatch():
