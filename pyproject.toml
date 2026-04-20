@@ -12,3 +12,8 @@ dependencies = []
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+
+[project.scripts]
+pv-check-ci-governance = "pressure_vessels.governance_checks:check_ci_governance_main"
+pv-generate-governance-checklist-evidence = "pressure_vessels.governance_checks:generate_governance_checklist_evidence_main"

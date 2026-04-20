@@ -59,7 +59,7 @@ Behavior:
 
 - CI runs required gate jobs for docs checks, lint, tests, README-anchor consistency, link reporting, and secret scanning.
 - CI converts upstream job results into deterministic gate result JSON.
-- CI invokes `scripts/check_ci_governance.py` to enforce policy and write `GovernanceGateReport.v1.json`.
+- CI invokes `pv-check-ci-governance` (with an explicit `--exceptions-schema` input) to enforce policy and write `GovernanceGateReport.v1.json`.
 - CI uploads governance report plus test report artifacts with explicit retention (`30` days in BL-012 baseline policy).
 - CI also runs an advisory `risk-label-suggestion` PR job that emits
   `RiskLabelSuggestion.v1.json` and a workflow summary based on changed-file

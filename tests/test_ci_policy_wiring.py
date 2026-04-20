@@ -82,13 +82,22 @@ def test_governance_gate_emits_checklist_evidence_artifact() -> None:
     workflow = _load_workflow()
     steps = workflow["jobs"]["governance-gate"]["steps"]
 
+    enforce_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Enforce governance policy gates"
+    ]
+    assert len(enforce_steps) == 1
+    assert "pv-check-ci-governance" in enforce_steps[0]["run"]
+    assert "--exceptions-schema docs/governance/policy_exceptions_schema.v1.json" in enforce_steps[0]["run"]
+
     evidence_steps = [
         step
         for step in steps
         if step.get("name") == "Build governance checklist evidence payload"
     ]
     assert len(evidence_steps) == 1
-    assert "python scripts/generate_governance_checklist_evidence.py" in evidence_steps[0]["run"]
+    assert "pv-generate-governance-checklist-evidence" in evidence_steps[0]["run"]
 
     upload_steps = [
         step
