@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from pressure_vessels.design_basis_pipeline import StandardRouteConfig, build_design_basis
+from pressure_vessels.clause_applicability import ClauseApplicabilityStatus
+from pressure_vessels.design_basis_pipeline import (
+    ClauseApplicabilityRecord,
+    StandardRouteConfig,
+    build_design_basis,
+)
 from pressure_vessels.requirements_pipeline import Gap, RequirementSet, RequirementValue, parse_prompt_to_requirement_set
 
 
@@ -152,8 +157,33 @@ def test_matrix_includes_non_applicable_justification():
 
     ug25 = next(record for record in matrix.records if record.clause_id == "UG-25")
     assert ug25.applicable is False
+    assert ug25.applicability_status is ClauseApplicabilityStatus.NOT_APPLICABLE
     assert "Not applicable" in ug25.justification
     assert ug25.evidence_fields
+
+
+def test_clause_applicability_record_rejects_invalid_status():
+    with pytest.raises(ValueError, match="Invalid ClauseApplicabilityStatus"):
+        ClauseApplicabilityRecord(
+            clause_id="UG-28",
+            standard_route_id="route_asme_viii_div1",
+            applicable=False,
+            applicability_status="bad",
+            justification="test",
+            evidence_fields=["design_pressure"],
+        )
+
+
+def test_clause_applicability_record_rejects_mismatched_boolean_and_status():
+    with pytest.raises(ValueError, match="must match applicable boolean"):
+        ClauseApplicabilityRecord(
+            clause_id="UG-28",
+            standard_route_id="route_asme_viii_div1",
+            applicable=False,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
+            justification="test",
+            evidence_fields=["design_pressure"],
+        )
 
 
 def test_design_basis_deterministic_signature_matches_frozen_canonical_fixture():

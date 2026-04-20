@@ -86,6 +86,7 @@ version bump and coordinated downstream migration.
       "clause_id": "UG-27",
       "applicable": true,
       "check_ids": ["UG-27-shell", "UG-27-shell-mawp"],
+      "applicability_status": "applicable",
       "status": "pass",
       "justification": "Applicable because cylindrical shell thickness under internal pressure must be verified."
     }
@@ -135,6 +136,12 @@ version bump and coordinated downstream migration.
   "deterministic_hash": "<sha256 over canonical unsigned ComplianceDossierMachine payload>"
 }
 ```
+
+Authoritative allowed values for `compliance_matrix[].applicability_status`:
+
+- `applicable`
+- `not_applicable`
+- `not_evaluated`
 
 ### Schema: `ComplianceDossierHuman.v1`
 

@@ -9,6 +9,7 @@ import json
 from typing import Any
 
 from .requirements_pipeline import RequirementSet
+from .clause_applicability import ClauseApplicabilityStatus
 
 DESIGN_BASIS_VERSION = "DesignBasis.v1"
 APPLICABILITY_MATRIX_VERSION = "ApplicabilityMatrix.v1"
@@ -50,14 +51,29 @@ class ClauseApplicabilityRecord:
     clause_id: str
     standard_route_id: str
     applicable: bool
+    applicability_status: ClauseApplicabilityStatus
     justification: str
     evidence_fields: list[str]
+
+    def __post_init__(self) -> None:
+        status = ClauseApplicabilityStatus.parse(self.applicability_status)
+        object.__setattr__(self, "applicability_status", status)
+        expected = (
+            ClauseApplicabilityStatus.APPLICABLE
+            if self.applicable
+            else ClauseApplicabilityStatus.NOT_APPLICABLE
+        )
+        if status != expected:
+            raise ValueError(
+                "ClauseApplicabilityRecord applicability_status must match applicable boolean."
+            )
 
     def to_json_dict(self) -> dict[str, Any]:
         return {
             "clause_id": self.clause_id,
             "standard_route_id": self.standard_route_id,
             "applicable": self.applicable,
+            "applicability_status": self.applicability_status.value,
             "justification": self.justification,
             "evidence_fields": self.evidence_fields,
         }
@@ -315,6 +331,7 @@ def _build_asme_clause_records(
             clause_id="UG-16",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because design pressure is defined for pressure boundary sizing.",
             evidence_fields=["design_pressure", "code_standard"],
         ),
@@ -322,6 +339,7 @@ def _build_asme_clause_records(
             clause_id="UG-20",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because design temperature is defined for material selection limits.",
             evidence_fields=["design_temperature", "code_standard"],
         ),
@@ -329,6 +347,11 @@ def _build_asme_clause_records(
             clause_id="UG-25",
             standard_route_id=route_id,
             applicable=has_corrosion_allowance,
+            applicability_status=(
+                ClauseApplicabilityStatus.APPLICABLE
+                if has_corrosion_allowance
+                else ClauseApplicabilityStatus.NOT_APPLICABLE
+            ),
             justification=(
                 "Applicable because corrosion allowance input is provided."
                 if has_corrosion_allowance
@@ -340,6 +363,7 @@ def _build_asme_clause_records(
             clause_id="UG-27",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because cylindrical shell thickness under internal pressure must be verified.",
             evidence_fields=["design_pressure", "code_standard"],
         ),
@@ -347,6 +371,11 @@ def _build_asme_clause_records(
             clause_id="UG-28",
             standard_route_id=route_id,
             applicable=has_external_pressure,
+            applicability_status=(
+                ClauseApplicabilityStatus.APPLICABLE
+                if has_external_pressure
+                else ClauseApplicabilityStatus.NOT_APPLICABLE
+            ),
             justification=(
                 "Applicable because external pressure service is declared."
                 if has_external_pressure
@@ -358,6 +387,7 @@ def _build_asme_clause_records(
             clause_id="UG-32",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because head thickness under internal pressure must be verified.",
             evidence_fields=["design_pressure", "code_standard"],
         ),
@@ -365,6 +395,7 @@ def _build_asme_clause_records(
             clause_id="UG-37",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification=(
                 "Applicable because nozzle openings require reinforcement-area replacement checks against parent components."
             ),
@@ -374,6 +405,7 @@ def _build_asme_clause_records(
             clause_id="UG-45",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because nozzle neck minimum thickness must be verified.",
             evidence_fields=["design_pressure", "code_standard"],
         ),
@@ -381,6 +413,11 @@ def _build_asme_clause_records(
             clause_id="UCS-66",
             standard_route_id=route_id,
             applicable=temperature < -29.0,
+            applicability_status=(
+                ClauseApplicabilityStatus.APPLICABLE
+                if temperature < -29.0
+                else ClauseApplicabilityStatus.NOT_APPLICABLE
+            ),
             justification=(
                 "Applicable because low-temperature service triggers impact-test considerations."
                 if temperature < -29.0
@@ -413,6 +450,7 @@ def _build_ped_clause_records(
             clause_id="PED-Article-4",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because pressure equipment categorization requires Article 4 scope checks.",
             evidence_fields=["design_pressure", "capacity", "fluid", "code_standard"],
         ),
@@ -420,6 +458,7 @@ def _build_ped_clause_records(
             clause_id="EN13445-3-6.2",
             standard_route_id=route_id,
             applicable=True,
+            applicability_status=ClauseApplicabilityStatus.APPLICABLE,
             justification="Applicable because shell thickness checks are required for unfired pressure vessels.",
             evidence_fields=["design_pressure", "design_temperature", "code_standard"],
         ),
@@ -427,6 +466,11 @@ def _build_ped_clause_records(
             clause_id="EN13445-3-6.6",
             standard_route_id=route_id,
             applicable=has_corrosion_allowance,
+            applicability_status=(
+                ClauseApplicabilityStatus.APPLICABLE
+                if has_corrosion_allowance
+                else ClauseApplicabilityStatus.NOT_APPLICABLE
+            ),
             justification=(
                 "Applicable because corrosion allowance is explicitly provided."
                 if has_corrosion_allowance
@@ -438,6 +482,11 @@ def _build_ped_clause_records(
             clause_id="PED-Annex-I-2.2.3",
             standard_route_id=route_id,
             applicable=("steam" in fluid or "water" in fluid),
+            applicability_status=(
+                ClauseApplicabilityStatus.APPLICABLE
+                if "steam" in fluid or "water" in fluid
+                else ClauseApplicabilityStatus.NOT_APPLICABLE
+            ),
             justification=(
                 "Applicable because stated fluid is a Group 2 service candidate and requires fluid-group traceability."
                 if "steam" in fluid or "water" in fluid

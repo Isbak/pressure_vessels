@@ -83,6 +83,7 @@ If any condition fails, the pipeline raises a deterministic `ValueError`.
       "clause_id": "UG-28",
       "standard_route_id": "route_asme_viii_div1",
       "applicable": false,
+      "applicability_status": "not_applicable",
       "justification": "Not applicable because external pressure service is not declared and internal pressure basis is assumed.",
       "evidence_fields": ["design_pressure"]
     }
@@ -91,11 +92,16 @@ If any condition fails, the pipeline raises a deterministic `ValueError`.
 }
 ```
 
+Authoritative allowed values for `records[].applicability_status`:
+
+- `applicable`
+- `not_applicable`
+
 ## Deterministic Controls
 
 - Standards and routes are selected using canonicalized input and deterministic route ordering.
 - Clause sets are route-specific and deterministic for ASME and PED defaults.
-- Every clause record includes `clause_id`, `standard_route_id`, `applicable`, `justification`, and `evidence_fields`.
+- Every clause record includes `clause_id`, `standard_route_id`, `applicable`, `applicability_status`, `justification`, and `evidence_fields`.
 - `generated_at_utc` supports injection via `now_utc` for reproducible testing.
 - `DesignBasis` includes deterministic SHA-256 signature over canonicalized unsigned payload.
 - `ApplicabilityMatrix` includes deterministic SHA-256 hash over canonicalized payload.

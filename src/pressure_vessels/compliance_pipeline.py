@@ -22,6 +22,7 @@ from .design_basis_pipeline import (
     DesignBasis,
 )
 from .requirements_pipeline import REQUIREMENT_SET_VERSION, RequirementSet
+from .clause_applicability import ClauseApplicabilityStatus
 
 COMPLIANCE_MATRIX_VERSION = "ComplianceMatrix.v1"
 EVIDENCE_LINK_SET_VERSION = "EvidenceLinkSet.v1"
@@ -35,11 +36,18 @@ class ClauseComplianceRecord:
     clause_id: str
     applicable: bool
     check_ids: list[str]
+    applicability_status: ClauseApplicabilityStatus
     status: str
     justification: str
 
+    def __post_init__(self) -> None:
+        parsed = ClauseApplicabilityStatus.parse(self.applicability_status)
+        object.__setattr__(self, "applicability_status", parsed)
+
     def to_json_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["applicability_status"] = self.applicability_status.value
+        return payload
 
 
 @dataclass(frozen=True)
@@ -396,12 +404,14 @@ def _build_clause_matrix(
             checks_by_clause.get(clause.clause_id, []),
             key=lambda check: check.check_id,
         )
-        status = _resolve_status(clause.applicable, clause_checks)
+        applicability_status = _resolve_applicability_status(clause.applicable, clause_checks)
+        status = _resolve_status(applicability_status, clause_checks)
         matrix.append(
             ClauseComplianceRecord(
                 clause_id=clause.clause_id,
                 applicable=clause.applicable,
                 check_ids=[check.check_id for check in clause_checks],
+                applicability_status=applicability_status,
                 status=status,
                 justification=clause.justification,
             )
@@ -410,10 +420,21 @@ def _build_clause_matrix(
     return matrix
 
 
-def _resolve_status(applicable: bool, checks: list[Any]) -> str:
+def _resolve_applicability_status(
+    applicable: bool,
+    checks: list[Any],
+) -> ClauseApplicabilityStatus:
     if not applicable:
-        return "not_applicable"
+        return ClauseApplicabilityStatus.NOT_APPLICABLE
     if not checks:
+        return ClauseApplicabilityStatus.NOT_EVALUATED
+    return ClauseApplicabilityStatus.APPLICABLE
+
+
+def _resolve_status(applicability_status: ClauseApplicabilityStatus, checks: list[Any]) -> str:
+    if applicability_status is ClauseApplicabilityStatus.NOT_APPLICABLE:
+        return "not_applicable"
+    if applicability_status is ClauseApplicabilityStatus.NOT_EVALUATED:
         return "not_evaluated"
     if all(check.pass_status for check in checks):
         return "pass"
@@ -443,7 +464,9 @@ def _build_evidence_links(
                         requirement_field=field,
                         clause_id=clause.clause_id,
                         model_id="ApplicabilityModel.v1",
-                        result_id=f"{clause.clause_id}:applicable={str(clause.applicable).lower()}",
+                        result_id=(
+                            f"{clause.clause_id}:applicability_status={clause.applicability_status.value}"
+                        ),
                         artifact_ref=(
                             f"{APPLICABILITY_MATRIX_VERSION}#{applicability_matrix.deterministic_hash}:"
                             f"{clause.clause_id}"

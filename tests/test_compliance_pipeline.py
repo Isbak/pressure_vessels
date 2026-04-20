@@ -6,9 +6,11 @@ import pytest
 
 from pressure_vessels.calculation_pipeline import run_calculation_pipeline
 from pressure_vessels.compliance_pipeline import (
+    ClauseComplianceRecord,
     generate_compliance_dossier,
     write_compliance_artifacts,
 )
+from pressure_vessels.clause_applicability import ClauseApplicabilityStatus
 from pressure_vessels.design_basis_pipeline import build_design_basis
 from pressure_vessels.requirements_pipeline import parse_prompt_to_requirement_set
 
@@ -89,6 +91,7 @@ def test_clause_matrix_and_evidence_cover_all_applicable_clauses():
 
     ug37 = next(record for record in machine.compliance_matrix if record.clause_id == "UG-37")
     assert ug37.check_ids
+    assert ug37.applicability_status is ClauseApplicabilityStatus.APPLICABLE
 
 
 def test_evidence_wiring_maps_requirement_clause_model_result_artifact_and_hash_links():
@@ -270,3 +273,28 @@ def test_write_compliance_artifacts_persists_canonical_json(tmp_path):
 
     assert human_on_disk == human.to_json_dict()
     assert machine_on_disk == machine.to_json_dict()
+
+
+def test_clause_compliance_record_rejects_invalid_applicability_status():
+    with pytest.raises(ValueError, match="Invalid ClauseApplicabilityStatus"):
+        ClauseComplianceRecord(
+            clause_id="UG-16",
+            applicable=True,
+            check_ids=[],
+            applicability_status="invalid-status",
+            status="not_evaluated",
+            justification="test",
+        )
+
+
+def test_clause_compliance_record_serializes_enum_value():
+    record = ClauseComplianceRecord(
+        clause_id="UG-16",
+        applicable=True,
+        check_ids=[],
+        applicability_status=ClauseApplicabilityStatus.NOT_EVALUATED,
+        status="not_evaluated",
+        justification="Pending checks.",
+    )
+
+    assert record.to_json_dict()["applicability_status"] == "not_evaluated"
