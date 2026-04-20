@@ -1,4 +1,4 @@
-.PHONY: bootstrap bootstrap-py bootstrap-js validate-js validate ci test governance stack integration-up integration-down integration-logs t g s v up down logs
+.PHONY: bootstrap bootstrap-py bootstrap-js validate-js validate-style validate ci test governance stack integration-up integration-down integration-logs lint-py lint-js format-py format-js t g s v up down logs
 
 PYTHON ?= python
 PIP ?= pip
@@ -58,7 +58,21 @@ validate-js:
 		$(NPM) --prefix services/backend run smoke; \
 	fi
 
-validate: test governance stack validate-js
+lint-py:
+	$(PYTHON) scripts/check_python_style.py
+
+format-py:
+	@echo "No standalone Python formatter is wired yet; use your editor .editorconfig integration."
+
+lint-js:
+	$(PYTHON) scripts/check_js_ts_style.py
+
+format-js:
+	@echo "No standalone JS/TS formatter is wired yet; use your editor .editorconfig integration."
+
+validate-style: lint-py lint-js
+
+validate: test governance stack validate-js validate-style
 
 ci: validate
 

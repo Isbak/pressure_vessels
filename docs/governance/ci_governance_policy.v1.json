@@ -11,6 +11,7 @@
     "python-tests",
     "readme-anchor-check",
     "secret-scan",
+    "style-baseline",
     "tech-stack-check",
     "js-validate",
     "yaml-validate"

@@ -151,6 +151,22 @@ jobs:
         run: |
           make validate-js
 
+  style-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package with dev tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Run style baseline checks
+        run: |
+          make validate-style
+
   iac-validate:
     runs-on: ubuntu-latest
     steps:
@@ -266,6 +282,7 @@ jobs:
       - markdown-lint
       - markdown-links
       - js-validate
+      - style-baseline
       - python-tests
       - readme-anchor-check
       - secret-scan
