@@ -55,8 +55,8 @@ Use this table to mirror CI behavior before opening a PR:
 | CI workflow job | CI command | Local equivalent |
 | --- | --- | --- |
 | `python-tests` | `pytest -q --junitxml artifacts/ci/pytest-junit.xml` | `make t` |
-| `readme-anchor-check` | `python scripts/check_readme_anchors.py` | `make g` |
-| `tech-stack-check` | `python scripts/check_tech_stack.py` | `make s` |
+| `readme-anchor-check` | `pv-check-readme-anchors --backlog docs/development_backlog.yaml` | `make g` |
+| `tech-stack-check` | `pv-check-tech-stack` | `make s` |
 | `js-validate` | `make validate-js` | `make validate-js` |
 | `style-baseline` | `make validate-style` | `make validate-style` |
 | _deployment-readiness subset_ | file existence checks in runbook checklist | `make s` |

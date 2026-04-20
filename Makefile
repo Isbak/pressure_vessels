@@ -47,10 +47,10 @@ test:
 	pytest -q
 
 governance:
-	$(PYTHON) scripts/check_readme_anchors.py
+	PYTHONPATH=src $(PYTHON) -m pressure_vessels.dev_cli check-readme-anchors
 
 stack:
-	$(PYTHON) scripts/check_tech_stack.py
+	PYTHONPATH=src $(PYTHON) -m pressure_vessels.dev_cli check-tech-stack
 	@if [ "$(VALIDATE_INFRA)" = "1" ]; then \
 		for file in $(INFRA_BOUNDARY_FILES); do \
 			test -f "$$file" || { echo "Missing required infra file: $$file"; exit 1; }; \
