@@ -158,6 +158,8 @@ def test_applied_defaults_are_surfaced_when_sizing_input_is_absent():
     assert calc.material_basis["allowable_stress_pa"] == 138_000_000.0
     assert calc.material_basis["joint_efficiency"] == 0.85
     assert calc.material_basis["standards_package_ref"] == "ASME Section VIII Division 1:ASME_BPVC_2023"
+    assert calc.material_basis["standards_package_id"] == "ASME_BPVC_2023_MATERIALS_2026-04"
+    assert calc.material_basis["effective_date"] == "2026-04-01"
 
 
 def test_missing_geometry_input_raises_without_explicit_opt_in():

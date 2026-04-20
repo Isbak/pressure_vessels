@@ -1,0 +1,25 @@
+{
+  "schema_version": "MaterialAllowablesPackage.v1",
+  "standards_package_id": "ASME_BPVC_2023_MATERIALS_2026-04",
+  "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023",
+  "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+  "effective_date": "2026-04-01",
+  "expires_on": "2027-04-01",
+  "materials": {
+    "propane": {
+      "material_spec": "SA-516 Gr.70",
+      "allowable_stress_pa": 138000000.0,
+      "joint_efficiency": 0.85
+    },
+    "ammonia": {
+      "material_spec": "SA-516 Gr.70N",
+      "allowable_stress_pa": 130000000.0,
+      "joint_efficiency": 0.85
+    },
+    "__default__": {
+      "material_spec": "SA-516 Gr.70",
+      "allowable_stress_pa": 138000000.0,
+      "joint_efficiency": 0.85
+    }
+  }
+}

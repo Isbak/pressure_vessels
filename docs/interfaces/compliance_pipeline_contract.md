@@ -83,7 +83,9 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
   "material_basis": {
     "schema_version": "MaterialBasis.v1",
     "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023",
+    "standards_package_id": "ASME_BPVC_2023_MATERIALS_2026-04",
     "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+    "effective_date": "2026-04-01",
     "material_spec": "SA-516 Gr.70",
     "corrosion_allowance_policy": {"policy_id": "CA-INPUT-REQUIREMENT"}
   },
@@ -119,7 +121,7 @@ If any condition fails, BL-004 raises a deterministic `ValueError` (fail closed)
   "source_applicability_matrix_hash": "<ApplicabilityMatrix.deterministic_hash>",
   "source_calculation_records_hash": "<CalculationRecords.deterministic_hash>",
   "source_non_conformance_hash": "<NonConformanceList.deterministic_hash>",
-  "material_basis_ref": "MaterialBasis.v1:ASME Section VIII Division 1:ASME_BPVC_2023:ASME_BPVC_2023.materials.2026-04",
+  "material_basis_ref": "MaterialBasis.v1:ASME Section VIII Division 1:ASME_BPVC_2023:ASME_BPVC_2023_MATERIALS_2026-04:2026-04-01:ASME_BPVC_2023.materials.2026-04",
   "geometry_basis_ref": "geometry_module.GeometryInput.v1:REV-2026-04-18-A",
   "reproducibility": {
     "canonicalization": "json.sort_keys+compact",

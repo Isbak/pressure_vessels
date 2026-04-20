@@ -35,7 +35,7 @@ BL-003 fails closed when caller inputs are outside deterministic engineering-mod
 
 ## Materials + Corrosion Integration (BL-013)
 
-When `sizing_input=None`, the pipeline now resolves allowable stress, joint efficiency, and corrosion policy from the deterministic materials module and only applies MVP placeholders for geometry. Material allowables are versioned and include standards-package trace fields. Corrosion allowance policy is explicit and persisted in both `material_basis` and `applied_defaults`.
+When `sizing_input=None`, the pipeline now resolves allowable stress, joint efficiency, and corrosion policy from a standards-backed material allowables package selected by `design_basis.primary_standard_version`. Material records include deterministic provenance (`standards_package_id`, `effective_date`) and fail closed when a configured package path is missing or expired for the `design_basis.generated_at_utc` date. Corrosion allowance policy is explicit and persisted in both `material_basis` and `applied_defaults`.
 
 ## Geometry/CAD Interface + Strict Sizing Gate (BL-014)
 
@@ -80,7 +80,9 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
   "material_basis": {
     "schema_version": "MaterialBasis.v1",
     "standards_package_ref": "ASME Section VIII Division 1:ASME_BPVC_2023",
+    "standards_package_id": "ASME_BPVC_2023_MATERIALS_2026-04",
     "allowables_version": "ASME_BPVC_2023.materials.2026-04",
+    "effective_date": "2026-04-01",
     "material_spec": "SA-516 Gr.70",
     "allowable_stress_pa": 138000000.0,
     "joint_efficiency": 0.85,
