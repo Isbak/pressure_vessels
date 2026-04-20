@@ -1,7 +1,8 @@
-.PHONY: bootstrap validate ci test governance stack integration-up integration-down integration-logs t g s v up down logs
+.PHONY: bootstrap bootstrap-py bootstrap-js validate ci test governance stack integration-up integration-down integration-logs t g s v up down logs
 
 PYTHON ?= python
 PIP ?= pip
+NPM ?= npm
 VALIDATE_INFRA ?= 1
 
 INFRA_BOUNDARY_FILES ?= \
@@ -20,9 +21,17 @@ INFRA_BOUNDARY_FILES ?= \
 	infra/platform/vllm/module.boundaries.yaml \
 	infra/platform/model-catalog/module.boundaries.yaml
 
-bootstrap:
+bootstrap: bootstrap-py bootstrap-js
+
+bootstrap-py:
 	$(PYTHON) -m pip install --upgrade pip
 	$(PIP) install -e . pytest
+
+bootstrap-js:
+	@command -v node >/dev/null 2>&1 || { echo "Node.js is required for JS service bootstrap. Install Node.js (npm included), then rerun 'make bootstrap'."; exit 1; }
+	@command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS service bootstrap. Install npm, then rerun 'make bootstrap'."; exit 1; }
+	$(NPM) --prefix services/frontend install
+	$(NPM) --prefix services/backend install
 
 test:
 	pytest -q

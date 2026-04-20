@@ -9,6 +9,7 @@ Run from repository root:
 
 | Workflow | Standard command | Short alias |
 | --- | --- | --- |
+| Bootstrap local Python + JS dependencies | `make bootstrap` | _n/a_ |
 | Unit tests | `make test` | `make t` |
 | Governance docs/anchor checks | `make governance` | `make g` |
 | Runtime stack checks | `make stack` | `make s` |
@@ -23,6 +24,8 @@ Notes:
 - `make stack` includes infra boundary-file presence checks by default.
 - Set `VALIDATE_INFRA=0` when reusing this repository pattern where infra
   boundary files are intentionally out of scope.
+- `make bootstrap` fails fast when `node`/`npm` are missing and installs
+  dependencies for both `services/frontend` and `services/backend`.
 
 ## CI parity mapping for local runs
 

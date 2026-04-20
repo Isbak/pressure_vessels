@@ -42,3 +42,14 @@ def test_aliases_expand_to_expected_workflows() -> None:
     assert "python scripts/check_tech_stack.py" in _run_make("s", dry_run=True)
     assert "pytest -q" in _run_make("v", dry_run=True)
     assert "pytest -q" in _run_make("ci", dry_run=True)
+
+
+def test_bootstrap_remains_canonical_onboarding_entrypoint() -> None:
+    """Dry-run bootstrap should include both Python and JS bootstrap steps."""
+    output = _run_make("bootstrap", dry_run=True)
+
+    assert "pip install --upgrade pip" in output
+    assert "pip install -e . pytest" in output
+    assert "command -v node" in output
+    assert "npm --prefix services/frontend install" in output
+    assert "npm --prefix services/backend install" in output
