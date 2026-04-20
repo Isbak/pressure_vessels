@@ -38,8 +38,8 @@ def test_aliases_expand_to_expected_workflows() -> None:
     invoking pytest from inside pytest.
     """
     assert "pytest -q" in _run_make("t", dry_run=True)
-    assert "python scripts/check_readme_anchors.py" in _run_make("g", dry_run=True)
-    assert "python scripts/check_tech_stack.py" in _run_make("s", dry_run=True)
+    assert "PYTHONPATH=src python -m pressure_vessels.dev_cli check-readme-anchors" in _run_make("g", dry_run=True)
+    assert "PYTHONPATH=src python -m pressure_vessels.dev_cli check-tech-stack" in _run_make("s", dry_run=True)
     assert "pytest -q" in _run_make("v", dry_run=True)
     assert "npm --prefix services/frontend run smoke" in _run_make("v", dry_run=True)
     assert "npm --prefix services/backend run smoke" in _run_make("v", dry_run=True)

@@ -55,9 +55,9 @@ make validate
 What it checks:
 
 - Unit tests (`pytest -q`)
-- Tech stack documentation consistency (`scripts/check_tech_stack.py`)
+- Tech stack documentation consistency (`pv-check-tech-stack` via `make s`)
 - README anchor consistency for backlog references
-  (`scripts/check_readme_anchors.py`)
+  (`pv-check-readme-anchors` via `make g`)
 - Runtime foundation boundary files exist for core infra modules:
   - environment bootstrap + IaC primitives
   - secrets + observability

@@ -20,7 +20,10 @@ def check_tech_stack_main(argv: list[str] | None = None) -> int:
 
 
 def check_readme_anchors_main(argv: list[str] | None = None) -> int:
-    return _run_repo_script("check_readme_anchors.py", argv)
+    normalized_args = list(argv or [])
+    if normalized_args and not normalized_args[0].startswith("-"):
+        normalized_args = ["--backlog", normalized_args[0], *normalized_args[1:]]
+    return _run_repo_script("check_readme_anchors.py", normalized_args)
 
 
 def _run_repo_script(script_name: str, argv: list[str] | None) -> int:
@@ -45,3 +48,28 @@ def _run_repo_script(script_name: str, argv: list[str] | None) -> int:
         sys.argv = original_argv
 
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(argv or sys.argv[1:])
+    if not args:
+        print(
+            "usage: python -m pressure_vessels.dev_cli <check-readme-anchors|check-tech-stack|suggest-risk-label> [args...]",
+            file=sys.stderr,
+        )
+        return 2
+
+    command, command_args = args[0], args[1:]
+    if command == "check-readme-anchors":
+        return check_readme_anchors_main(command_args)
+    if command == "check-tech-stack":
+        return check_tech_stack_main(command_args)
+    if command == "suggest-risk-label":
+        return suggest_risk_label_main(command_args)
+
+    print(f"unknown command: {command}", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
