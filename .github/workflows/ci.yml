@@ -180,7 +180,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.node-version.outputs.node-version }}
-      - name: Assert pinned Node major is active
+      - name: Assert active Node major meets minimum pin
         run: |
           expected="${{ steps.node-version.outputs.node-version }}"
           actual="$(node -p "process.versions.node")"
