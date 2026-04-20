@@ -47,6 +47,13 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
   - `sizing_input` is provided, or
   - `geometry_input` is provided.
 - Fail-closed error string: `"BL-014 strict sizing-input gate failed: sizing_input or geometry_input is required."`
+- Geometry field validation behavior:
+  - `pressure_vessels.geometry_module.adapt_geometry_input` and
+    `build_cad_ready_parameter_export` validate all numeric geometry inputs
+    before conversion.
+  - Invalid numeric inputs raise typed
+    `GeometryInputValidationError` (not bare `ValueError`) with aggregated
+    per-field failures for null, non-numeric, and out-of-range values.
 
 ## Output Artifacts
 

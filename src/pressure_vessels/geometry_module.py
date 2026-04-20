@@ -11,6 +11,15 @@ GEOMETRY_INPUT_VERSION = "GeometryInput.v1"
 CAD_PARAMETER_EXPORT_VERSION = "CadReadyParameterExport.v1"
 
 
+class GeometryInputValidationError(ValueError):
+    """Raised when geometry inputs fail deterministic field-level validation."""
+
+    def __init__(self, failures: dict[str, str]):
+        self.failures = failures
+        details = "; ".join(f"{field}: {reason}" for field, reason in sorted(failures.items()))
+        super().__init__(f"BL-014 geometry validation failed: {details}")
+
+
 @dataclass(frozen=True)
 class GeometryInput:
     schema_version: str
@@ -43,6 +52,59 @@ class CadReadyParameterExport:
         return asdict(self)
 
 
+_REQUIRED_GEOMETRY_FIELDS = (
+    "shell_inside_diameter_m",
+    "shell_provided_thickness_m",
+    "head_inside_diameter_m",
+    "head_provided_thickness_m",
+    "nozzle_inside_diameter_m",
+    "nozzle_provided_thickness_m",
+)
+
+_OPTIONAL_NON_NEGATIVE_FIELDS = ("external_pressure_pa",)
+
+
+def _validate_and_normalize_geometry_numeric_fields(
+    geometry_input: GeometryInput,
+) -> dict[str, float | None]:
+    failures: dict[str, str] = {}
+    normalized: dict[str, float | None] = {}
+
+    for field in _REQUIRED_GEOMETRY_FIELDS:
+        value = getattr(geometry_input, field)
+        if value is None:
+            failures[field] = "null value is not allowed."
+            continue
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            failures[field] = f"non-numeric value {value!r}."
+            continue
+        if numeric <= 0.0:
+            failures[field] = f"out-of-range value {numeric}; expected > 0."
+            continue
+        normalized[field] = numeric
+
+    for field in _OPTIONAL_NON_NEGATIVE_FIELDS:
+        value = getattr(geometry_input, field)
+        if value is None:
+            normalized[field] = None
+            continue
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            failures[field] = f"non-numeric value {value!r}."
+            continue
+        if numeric < 0.0:
+            failures[field] = f"out-of-range value {numeric}; expected >= 0."
+            continue
+        normalized[field] = numeric
+
+    if failures:
+        raise GeometryInputValidationError(failures)
+    return normalized
+
+
 def adapt_geometry_input(geometry_input: GeometryInput) -> dict[str, float | None]:
     """Return canonical geometry sizing payload used by the calculation pipeline."""
     if geometry_input.schema_version != GEOMETRY_INPUT_VERSION:
@@ -52,20 +114,7 @@ def adapt_geometry_input(geometry_input: GeometryInput) -> dict[str, float | Non
     if not geometry_input.source_model_sha256:
         raise ValueError("BL-014 geometry adapter failed: source_model_sha256 is required.")
 
-    payload = {
-        "shell_inside_diameter_m": float(geometry_input.shell_inside_diameter_m),
-        "shell_provided_thickness_m": float(geometry_input.shell_provided_thickness_m),
-        "head_inside_diameter_m": float(geometry_input.head_inside_diameter_m),
-        "head_provided_thickness_m": float(geometry_input.head_provided_thickness_m),
-        "nozzle_inside_diameter_m": float(geometry_input.nozzle_inside_diameter_m),
-        "nozzle_provided_thickness_m": float(geometry_input.nozzle_provided_thickness_m),
-        "external_pressure_pa": (
-            None
-            if geometry_input.external_pressure_pa is None
-            else float(geometry_input.external_pressure_pa)
-        ),
-    }
-    return payload
+    return _validate_and_normalize_geometry_numeric_fields(geometry_input)
 
 
 def build_cad_ready_parameter_export(
@@ -74,16 +123,17 @@ def build_cad_ready_parameter_export(
     calculation_records_hash: str,
 ) -> CadReadyParameterExport:
     """Create deterministic CAD-ready parameter export linked to calculation evidence."""
+    validated_fields = _validate_and_normalize_geometry_numeric_fields(geometry_input)
     parameters = {
-        "head_inside_diameter_m": float(geometry_input.head_inside_diameter_m),
-        "head_provided_thickness_m": float(geometry_input.head_provided_thickness_m),
-        "nozzle_inside_diameter_m": float(geometry_input.nozzle_inside_diameter_m),
-        "nozzle_provided_thickness_m": float(geometry_input.nozzle_provided_thickness_m),
-        "shell_inside_diameter_m": float(geometry_input.shell_inside_diameter_m),
-        "shell_provided_thickness_m": float(geometry_input.shell_provided_thickness_m),
+        "head_inside_diameter_m": validated_fields["head_inside_diameter_m"],
+        "head_provided_thickness_m": validated_fields["head_provided_thickness_m"],
+        "nozzle_inside_diameter_m": validated_fields["nozzle_inside_diameter_m"],
+        "nozzle_provided_thickness_m": validated_fields["nozzle_provided_thickness_m"],
+        "shell_inside_diameter_m": validated_fields["shell_inside_diameter_m"],
+        "shell_provided_thickness_m": validated_fields["shell_provided_thickness_m"],
     }
-    if geometry_input.external_pressure_pa is not None:
-        parameters["external_pressure_pa"] = float(geometry_input.external_pressure_pa)
+    if validated_fields["external_pressure_pa"] is not None:
+        parameters["external_pressure_pa"] = validated_fields["external_pressure_pa"]
 
     payload = {
         "schema_version": CAD_PARAMETER_EXPORT_VERSION,
