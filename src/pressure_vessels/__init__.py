@@ -9,6 +9,7 @@ from .compliance_pipeline import (
     generate_compliance_dossier,
     write_compliance_artifacts,
 )
+from .clause_applicability import ClauseApplicabilityStatus
 
 from .design_basis_pipeline import (
     ApplicabilityMatrix,
@@ -159,6 +160,7 @@ __all__ = [
     "CalculationRecord",
     "CalculationRecordsArtifact",
     "ClauseApplicabilityRecord",
+    "ClauseApplicabilityStatus",
     "ClauseComplianceRecord",
     "ComplianceDossierHuman",
     "ComplianceDossierMachine",

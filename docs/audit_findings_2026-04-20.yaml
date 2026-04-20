@@ -366,7 +366,7 @@ findings:
   title: Replace clause applicability status strings with an enum
   severity: medium
   area: compliance
-  status: todo
+  status: done
   file_path: src/pressure_vessels/compliance_pipeline.py
   line_numbers: []
   depends_on: []
