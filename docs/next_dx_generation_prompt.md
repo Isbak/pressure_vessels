@@ -1,18 +1,19 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-007 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-008 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-007 in the `pressure_vessels` repo.
+You are implementing DXR-008 in the `pressure_vessels` repo.
 
 Problem:
-The repository has governance policy and review-role documentation, but there is
-no CODEOWNERS file routing changes to accountable reviewers by area. Without
-path-based ownership, Level 2 governance intent from AGENT_GOVERNANCE.md is not
-operationalized in GitHub review workflows.
+The platform runtime stack registry currently labels several modules as deployed
+even though the corresponding infra artifacts are contract-only scaffolds. This
+creates reuse risk because adopters cannot distinguish runnable modules from
+boundary documentation stubs, and CI's IaC validation gate can become a silent
+no-op for missing Terraform/OpenTofu content.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-007` branched from `main`.
+- Work on a new branch `claude/fix-DXR-008` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -20,26 +21,27 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-007 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-008 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Add a `.github/CODEOWNERS` baseline that maps core governance/documentation,
-   application code, and infrastructure paths to appropriate reviewer groups or
-   handles used in this repository.
-2. Ensure mappings reinforce AGENT_GOVERNANCE.md role boundaries and do not
-   create dead routes (owners that do not exist in-repo).
-3. Document the CODEOWNERS policy briefly where contributors already look for
-   PR workflow guidance.
-4. Last step before opening/merging the PR: update
-   `docs/next_dx_generation_prompt.md` to the next eligible DXR item and
-   set DXR-007 status to `done` in
-   `docs/dx_reusability_audit_2026-04-20.yaml`.
+1. Reconcile `docs/platform_runtime_stack_registry.yaml` status values so
+   contract-only platform modules are not reported as deployed unless runnable
+   artifacts actually exist.
+2. Ensure IaC readiness claims are consistent with `infra/platform/iac/*`
+   contents and CI behavior in `.github/workflows/ci.yml`.
+3. If status vocabulary changes, update any validation logic/tests that enforce
+   allowed values (for example `scripts/check_tech_stack.py`).
+4. Document the resulting status semantics where contributors look for platform
+   reuse/deployment guidance.
+5. Last step before opening/merging the PR: update
+   `docs/next_dx_generation_prompt.md` to the next eligible DXR item and set
+   DXR-008 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
-- Unrelated formatter/linter baseline expansions (already addressed by DXR-005).
+- Implementing full production IaC modules for every platform dependency.
 
-Deliverable: one PR touching only the files needed for DXR-007
-remediation plus the prompt/status files in the final step.
+Deliverable: one PR touching only the files needed for DXR-008 remediation
+plus the prompt/status files in the final step.
 ```
 
 ## Upcoming queue
@@ -52,7 +54,7 @@ Pick the first item with `status: todo` whose dependencies are all `done`.
 4. **DXR-004** — Provide .env.example scaffolding for local runtime profile (`done`, deps: none)
 5. **DXR-005** — Baseline formatting and linting configuration (editorconfig + formatters) (`done`, deps: none)
 6. **DXR-006** — Pin Node toolchain version alongside tools/versions.json (`done`, deps: none)
-7. **DXR-007** — Add CODEOWNERS routing to operationalize Level 2 governance (`todo`, deps: none)
+7. **DXR-007** — Add CODEOWNERS routing to operationalize Level 2 governance (`done`, deps: none)
 8. **DXR-008** — Reconcile platform IaC module deployment status with real artifacts (`todo`, deps: none)
 9. **DXR-009** — Extract reusable GitHub Actions for adopters of the governance baseline (`todo`, deps: DXR-010)
 10. **DXR-010** — Package governance scripts as a reusable Python module with an entry point (`todo`, deps: none)

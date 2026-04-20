@@ -66,6 +66,18 @@ scan, governance gate artifact checks, and governance checklist evidence generat
 
 Governance checklist evidence generated in CI is published in the `governance-gate-report` artifact bundle as `artifacts/ci/GovernanceChecklistEvidence.v1.json`.
 
+## CODEOWNERS review routing (DXR-007)
+
+Path-based reviewer routing is defined in `.github/CODEOWNERS` and is treated
+as the baseline ownership map for PR review assignment.
+
+- Governance/CI policy paths route to platform experience + security owners.
+- Application and test paths route to engineering + domain owners.
+- Infrastructure/runtime paths route to platform runtime/security owners.
+
+When a PR spans multiple ownership areas, ensure all routed owners are included
+in requested reviews before merge.
+
 ## PR risk label suggestion workflow (DX-008)
 
 CI includes an advisory `risk-label-suggestion` job on pull requests. It uses
