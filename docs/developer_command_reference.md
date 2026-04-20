@@ -93,6 +93,22 @@ Heuristic routing baseline:
   manifests change.
 - **Low** suggestion: docs/artifact metadata-only changes.
 
+Default heuristics are stored in
+`docs/governance/risk_label_heuristics.v1.json`. Downstream repositories can
+override classification without forking the script by passing a fourth CLI
+argument or setting `PV_RISK_LABEL_CONFIG`:
+
+```bash
+python scripts/suggest_risk_label.py \
+  artifacts/ci/changed-paths.txt \
+  artifacts/ci/RiskLabelSuggestion.v1.json \
+  artifacts/ci/RiskLabelSuggestion.summary.md \
+  /path/to/project-risk-label-heuristics.json
+```
+
+If no override is provided, `scripts/suggest_risk_label.py` loads the committed
+default config from `docs/governance/risk_label_heuristics.v1.json`.
+
 Outputs and visibility:
 
 - PR workflow job summary includes the suggested risk and matched paths.
