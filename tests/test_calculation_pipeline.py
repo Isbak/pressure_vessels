@@ -9,6 +9,8 @@ from pressure_vessels.calculation_pipeline import (
     Quantity,
     SizingCheckInput,
     _MVP_DEFAULTS,
+    _round_safety_critical,
+    _to_record,
     run_calculation_pipeline,
     write_calculation_artifacts,
 )
@@ -378,6 +380,29 @@ def test_margin_utilization_outputs_are_deterministic():
     assert shell.utilization_ratio == 0.9243934
     assert shell.is_near_limit is True
     assert shell.near_limit_threshold == 0.9
+
+
+def test_round_safety_critical_helper_pins_nine_decimal_policy():
+    assert _round_safety_critical(0.1234567894) == 0.123456789
+    assert _round_safety_critical(0.1234567896) == 0.12345679
+    assert _round_safety_critical(123.0000000004) == 123.0
+
+
+def test_rounding_policy_stabilizes_boundary_sensitive_pass_fail():
+    record = _to_record(
+        check_id="UG-27-shell",
+        component="shell",
+        formula="boundary-test",
+        inputs={"P_Pa": 1_800_000.0, "S_Pa": 138_000_000.0, "E": 0.85, "D_m": 2.0, "CA_m": 0.003},
+        required=1.0000000004,
+        provided=1.0000000003,
+    )
+
+    assert record.required_thickness_m == 1.0
+    assert record.provided_thickness_m == 1.0
+    assert record.margin_m == 0.0
+    assert record.utilization_ratio == 1.0
+    assert record.pass_status is True
 
 
 def test_near_limit_threshold_is_configurable_and_persisted_on_records():

@@ -179,6 +179,10 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
 ## Deterministic Controls
 
 - `generated_at_utc` supports injection via `now_utc` for reproducible testing.
+- Safety-critical numeric outputs are normalized through a single rounding
+  policy helper with precision fixed at 9 decimal places in SI units; rationale
+  and change-control requirements are documented in
+  `docs/decision-log/ADR-0006-safety-critical-rounding-policy.md`.
 - Every check record carries:
   - `check_id` (engine-internal key), `clause_id` (link to `ApplicabilityMatrix`)
   - `formula` string (human-readable)

@@ -18,6 +18,7 @@ from .requirements_pipeline import CANONICAL_UNITS, RequirementSet
 CALCULATION_RECORDS_VERSION = "CalculationRecords.v1"
 NON_CONFORMANCE_LIST_VERSION = "NonConformanceList.v1"
 DEFAULT_NEAR_LIMIT_THRESHOLD = 0.9
+_SAFETY_CRITICAL_ROUNDING_DECIMALS = 9
 
 # BL-003 MVP geometry defaults used when sizing_input is not supplied.
 # Stress/joint-efficiency/corrosion policy are now resolved by BL-013 material basis.
@@ -39,6 +40,20 @@ _MVP_DEFAULT_FIELDS = (
     "nozzle_inside_diameter_m",
     "nozzle_provided_thickness_m",
 )
+
+
+def _round_safety_critical(value: float) -> float:
+    """Round deterministic sizing values to 9 decimals per ADR-0006.
+
+    BL-003 checks use SI units (`m`, `Pa`) with pass/fail comparisons that are
+    sensitive to floating-point noise. Nine decimals sets a deterministic
+    quantization floor of 1e-9 in SI units (nanometer-scale for lengths), which
+    is far below fabrication and inspection tolerances while still stabilizing
+    reproducibility hashes and near-boundary outcomes across runtimes.
+    Changes to this precision require ADR review before implementation.
+    """
+
+    return round(value, _SAFETY_CRITICAL_ROUNDING_DECIMALS)
 
 
 class MissingGeometryInputError(ValueError):
@@ -930,16 +945,18 @@ def _to_record(
     computed_mawp_pa: float | None = None,
     near_limit_threshold: float = DEFAULT_NEAR_LIMIT_THRESHOLD,
 ) -> CalculationRecord:
-    required_rounded = round(required, 9)
-    provided_rounded = round(provided, 9)
-    margin = round(provided_rounded - required_rounded, 9)
-    utilization = round(required_rounded / provided_rounded, 9) if provided_rounded > 0.0 else float("inf")
+    required_rounded = _round_safety_critical(required)
+    provided_rounded = _round_safety_critical(provided)
+    margin = _round_safety_critical(provided_rounded - required_rounded)
+    utilization = (
+        _round_safety_critical(required_rounded / provided_rounded) if provided_rounded > 0.0 else float("inf")
+    )
     is_near_limit = pass_status = False
     pressure_margin_pa = None
     if design_pressure_pa is None or computed_mawp_pa is None:
         pass_status = provided_rounded >= required_rounded
     else:
-        pressure_margin_pa = round(computed_mawp_pa - design_pressure_pa, 9)
+        pressure_margin_pa = _round_safety_critical(computed_mawp_pa - design_pressure_pa)
         pass_status = pressure_margin_pa >= 0.0
     is_near_limit = pass_status and utilization >= near_limit_threshold
     clause_id = _CHECK_CLAUSE_MAP[check_id]
@@ -985,7 +1002,7 @@ def _to_record(
         parent_component=parent_component,
         parent_check_id=parent_check_id,
         design_pressure_pa=design_pressure_pa,
-        computed_mawp_pa=round(computed_mawp_pa, 9) if computed_mawp_pa is not None else None,
+        computed_mawp_pa=_round_safety_critical(computed_mawp_pa) if computed_mawp_pa is not None else None,
         pressure_margin_pa=pressure_margin_pa,
         validity_envelope=validity_envelope,
         pass_status=pass_status,
@@ -1034,7 +1051,7 @@ def _to_si_pressure(quantity: Quantity) -> Quantity:
     }
     if unit not in factors:
         raise ValueError(f"Unsupported pressure unit for BL-003: {quantity.unit}")
-    return Quantity(value=round(quantity.value * factors[unit], 9), unit="Pa")
+    return Quantity(value=_round_safety_critical(quantity.value * factors[unit]), unit="Pa")
 
 
 def _to_si_length(quantity: Quantity) -> Quantity:
@@ -1046,7 +1063,7 @@ def _to_si_length(quantity: Quantity) -> Quantity:
     }
     if unit not in factors:
         raise ValueError(f"Unsupported length unit for BL-003: {quantity.unit}")
-    return Quantity(value=round(quantity.value * factors[unit], 9), unit="m")
+    return Quantity(value=_round_safety_critical(quantity.value * factors[unit]), unit="m")
 
 
 def _sha256_payload(payload: dict[str, Any]) -> str:
