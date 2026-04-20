@@ -20,10 +20,11 @@ from pressure_vessels.workflow_orchestrator import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = REPO_ROOT / '.github/workflows/ci.yml'
+REUSABLE_WORKFLOW_PATH = REPO_ROOT / '.github/workflows/reusable-governance-core.yml'
 POLICY_PATH = REPO_ROOT / 'docs/governance/ci_governance_policy.v1.json'
 
 
-def _load_ci_workflow() -> dict[str, object]:
+def _load_workflow(path: Path) -> dict[str, object]:
     result = subprocess.run(
         [
             'ruby',
@@ -32,7 +33,7 @@ def _load_ci_workflow() -> dict[str, object]:
                 "require 'yaml'; require 'json'; "
                 "puts JSON.generate(YAML.safe_load(File.read(ARGV[0]), aliases: true))"
             ),
-            str(WORKFLOW_PATH),
+            str(path),
         ],
         check=True,
         capture_output=True,
@@ -128,10 +129,11 @@ def test_workflow_orchestrator_contract_versions_and_state_vocabulary() -> None:
 
 
 def test_contract_tests_are_wired_as_required_ci_gate() -> None:
-    workflow = _load_ci_workflow()
+    ci_workflow = _load_workflow(WORKFLOW_PATH)
+    reusable_workflow = _load_workflow(REUSABLE_WORKFLOW_PATH)
     policy = json.loads(POLICY_PATH.read_text(encoding='utf-8'))
 
-    contract_job = workflow['jobs']['contract-tests']
+    contract_job = ci_workflow['jobs']['contract-tests']
     run_steps = [
         step for step in contract_job['steps'] if step.get('name') == 'Run contract tests'
     ]
@@ -139,6 +141,8 @@ def test_contract_tests_are_wired_as_required_ci_gate() -> None:
     assert 'pytest -q tests/test_contract_interfaces_dx009.py' in run_steps[0]['run']
 
     required_gates = set(policy['required_gates'])
-    governance_needs = set(workflow['jobs']['governance-gate']['needs'])
+    governance_needs = set(ci_workflow['jobs']['governance-gate']['needs']) | set(
+        reusable_workflow['jobs']['governance-gate']['needs']
+    )
     assert 'contract-tests' in required_gates
     assert 'contract-tests' in governance_needs

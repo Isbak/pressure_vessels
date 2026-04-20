@@ -103,3 +103,25 @@ To apply this workflow in other repositories while preserving governance-by-defa
 4. Keep policy checks in `validate` aligned with CI-required checks.
 5. If infra does not apply, set `VALIDATE_INFRA=0` and document why in the
    project quickstart.
+
+For CI reuse, prefer calling the reusable governance workflow and pass your
+repository paths as inputs (instead of forking the full CI file). Example:
+
+```yaml
+jobs:
+  governance-gate:
+    needs:
+      - docs-check
+      - markdown-lint
+      - python-tests
+    uses: pressure-vessels/pressure_vessels/.github/workflows/reusable-governance-core.yml@main
+    with:
+      backlog_path: docs/development_backlog.yaml
+      tech_stack_registry_path: docs/platform_runtime_stack_registry.yaml
+      environment_bootstrap_path: infra/platform/environment.bootstrap.yaml
+      policy_backlog_path: docs/governance/policy_backlog.yaml
+      ci_policy_path: docs/governance/ci_governance_policy.v1.json
+      policy_exceptions_path: .github/governance/policy_exceptions.v1.json
+      exceptions_schema_path: docs/governance/policy_exceptions_schema.v1.json
+      upstream_needs_json: ${{ toJson(needs) }}
+```
