@@ -12,6 +12,27 @@ baseline.
   only; module behavior and architecture responsibilities remain defined in
   `README.md` under **System Architecture (Modular)**.
 
+## Optional fast path: Dev Container / GitHub Codespaces
+
+Use this path when you want one-click onboarding with pinned toolchains
+(Python 3.11 + Node 20) without installing them on your host machine.
+
+1. Open the repository in a Dev Container (VS Code: **Reopen in Container**) or
+   in GitHub Codespaces.
+2. Wait for the container build and `postCreateCommand` to complete. The
+   container automatically runs `make bootstrap` on first create.
+3. From the repository root inside the container, run:
+
+```bash
+make bootstrap && make validate
+```
+
+Notes:
+- The devcontainer configuration is committed at `.devcontainer/devcontainer.json`.
+- Docker CLI support is included in-container for optional integration-profile
+  workflows; replacing existing Docker Compose profile flows is out of scope
+  for this DX item.
+
 ## Prerequisites
 
 - `make` (GNU Make 3.81+ recommended)

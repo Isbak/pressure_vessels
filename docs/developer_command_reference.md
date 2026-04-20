@@ -24,6 +24,10 @@ Run from repository root:
 
 Notes:
 
+- Optional one-click onboarding: open the repository in the committed
+  devcontainer/Codespaces environment (`.devcontainer/devcontainer.json`) and
+  run `make bootstrap && make validate` inside the container.
+
 - `make stack` includes infra boundary-file presence checks by default.
 - Set `VALIDATE_INFRA=0` when reusing this repository pattern where infra
   boundary files are intentionally out of scope.
