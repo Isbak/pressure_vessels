@@ -6,9 +6,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 from typing import Any
+from uuid import uuid4
 
 STANDARDS_PACKAGE_VERSION = "StandardsPackage.v1"
 
@@ -110,6 +112,10 @@ class StandardsPackage:
         }
 
 
+class StandardsPackageCollisionError(FileExistsError):
+    """Raised when a standards package path already exists or is being published."""
+
+
 def run_standards_ingestion(
     *,
     source_documents: list[StandardSource],
@@ -177,10 +183,43 @@ def write_standards_package(package: StandardsPackage, directory: str | Path) ->
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{package.package_id}.json"
     payload = json.dumps(package.to_json_dict(), indent=2, sort_keys=True)
-    with output_path.open("x", encoding="utf-8") as handle:
-        handle.write(payload)
-        handle.write("\n")
+    _atomic_write_json(output_path=output_path, package_id=package.package_id, payload=payload)
     return output_path
+
+
+def _atomic_write_json(*, output_path: Path, package_id: str, payload: str) -> None:
+    lock_path = Path(f"{output_path}.lock")
+    temp_path = Path(f"{output_path}.tmp.{uuid4().hex}")
+    lock_fd: int | None = None
+    try:
+        try:
+            lock_fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError as exc:
+            raise StandardsPackageCollisionError(
+                f"Standards package collision for package_id={package_id} at {output_path}."
+            ) from exc
+
+        if output_path.exists():
+            raise StandardsPackageCollisionError(
+                f"Standards package collision for package_id={package_id} at {output_path}."
+            )
+
+        with temp_path.open("x", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+
+        os.replace(temp_path, output_path)
+    except Exception:
+        if temp_path.exists():
+            temp_path.unlink()
+        raise
+    finally:
+        if lock_fd is not None:
+            os.close(lock_fd)
+        if lock_path.exists():
+            lock_path.unlink()
 
 
 def _validate_source_intake(source_documents: list[StandardSource]) -> None:

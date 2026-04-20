@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
+import json
 
 import pytest
 
 from pressure_vessels.standards_ingestion_pipeline import (
     RegressionExample,
     StandardSource,
+    StandardsPackageCollisionError,
     run_standards_ingestion,
     write_standards_package,
 )
@@ -153,7 +155,7 @@ def test_ingestion_release_gate_requires_regression_examples_to_pass():
         )
 
 
-def test_write_standards_package_is_versioned_and_immutable(tmp_path):
+def test_write_standards_package_happy_path_is_byte_identical(tmp_path):
     package = run_standards_ingestion(
         source_documents=[_sample_source()],
         standard_key="ASME_VIII_1",
@@ -165,6 +167,50 @@ def test_write_standards_package_is_versioned_and_immutable(tmp_path):
 
     first_path = write_standards_package(package, tmp_path)
     assert first_path.name == "ASME_VIII_1_2025.2_r3.json"
+    expected_payload = package.to_json_dict()
+    assert first_path.read_text(encoding="utf-8") == (json.dumps(expected_payload, indent=2, sort_keys=True) + "\n")
 
-    with pytest.raises(FileExistsError):
+
+def test_write_standards_package_collision_raises_typed_error_and_preserves_artifact(tmp_path):
+    package = run_standards_ingestion(
+        source_documents=[_sample_source()],
+        standard_key="ASME_VIII_1",
+        standard_version="2025.2",
+        release_label="r3",
+        regression_examples=_regression_examples(),
+        now_utc=FIXED_NOW,
+    )
+
+    first_path = write_standards_package(package, tmp_path)
+    original_contents = first_path.read_text(encoding="utf-8")
+
+    with pytest.raises(
+        StandardsPackageCollisionError,
+        match="Standards package collision for package_id=ASME_VIII_1_2025.2_r3",
+    ):
         write_standards_package(package, tmp_path)
+
+    assert first_path.read_text(encoding="utf-8") == original_contents
+
+
+def test_write_standards_package_temp_file_removed_when_replace_fails(tmp_path, monkeypatch):
+    package = run_standards_ingestion(
+        source_documents=[_sample_source()],
+        standard_key="ASME_VIII_1",
+        standard_version="2025.2",
+        release_label="r4",
+        regression_examples=_regression_examples(),
+        now_utc=FIXED_NOW,
+    )
+    artifact_path = tmp_path / f"{package.package_id}.json"
+
+    def _boom(*_args, **_kwargs):
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr("pressure_vessels.standards_ingestion_pipeline.os.replace", _boom)
+
+    with pytest.raises(OSError, match="simulated replace failure"):
+        write_standards_package(package, tmp_path)
+
+    assert not artifact_path.exists()
+    assert list(tmp_path.glob(f"{artifact_path.name}.tmp.*")) == []
