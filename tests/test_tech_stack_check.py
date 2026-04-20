@@ -154,3 +154,135 @@ def test_tech_stack_check_fails_when_iac_module_exists_but_status_is_deployed_wi
 
     assert result.returncode == 1
     assert "'iac-opentofu-or-terraform' status must be 'scaffolded'" in result.stdout
+
+
+def test_tech_stack_check_handles_yaml_comments_and_quoted_values(tmp_path: Path) -> None:
+    (tmp_path / "scripts").mkdir(parents=True)
+    (tmp_path / "docs").mkdir(parents=True)
+    (tmp_path / "infra/platform/runtime").mkdir(parents=True)
+
+    script_text = SCRIPT_PATH.read_text(encoding="utf-8")
+    (tmp_path / "scripts/check_tech_stack.py").write_text(script_text, encoding="utf-8")
+
+    (tmp_path / "docs/tech-stack.md").write_text(
+        "\n".join(
+            [
+                "# Tech Stack",
+                "## Current",
+                "### Runtime stack components (deployed)",
+                "- Component: `runtime-apis`",
+                "### Runtime stack components (scaffolded)",
+                "## Planned",
+                "### Runtime stack components (planned)",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    (tmp_path / "docs/platform_runtime_stack_registry.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "components:",
+                "  - key: \"runtime-apis\"  # quoted with comment",
+                "    status: \"deployed\"",
+                "    module_path: 'infra/platform/runtime'",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    (tmp_path / "infra/platform/environment.bootstrap.yaml").write_text(
+        "\n".join(
+            [
+                "version: v1",
+                "kind: PlatformEnvironmentBootstrap",
+                "spec:",
+                "  environments:",
+                "    - name: dev",
+                "      modules: [\"runtime-apis\"]",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, str(tmp_path / "scripts/check_tech_stack.py")],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Tech stack consistency check passed" in result.stdout
+
+
+def test_tech_stack_check_reports_schema_errors_with_line_and_key(tmp_path: Path) -> None:
+    (tmp_path / "scripts").mkdir(parents=True)
+    (tmp_path / "docs").mkdir(parents=True)
+    (tmp_path / "infra/platform").mkdir(parents=True)
+
+    script_text = SCRIPT_PATH.read_text(encoding="utf-8")
+    (tmp_path / "scripts/check_tech_stack.py").write_text(script_text, encoding="utf-8")
+
+    (tmp_path / "docs/tech-stack.md").write_text(
+        "\n".join(
+            [
+                "# Tech Stack",
+                "## Current",
+                "### Runtime stack components (deployed)",
+                "- Component: `frontend-nextjs`",
+                "### Runtime stack components (scaffolded)",
+                "## Planned",
+                "### Runtime stack components (planned)",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    (tmp_path / "docs/platform_runtime_stack_registry.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "components:",
+                "  - status: deployed",
+                "    module_path: services/frontend",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    (tmp_path / "infra/platform/environment.bootstrap.yaml").write_text(
+        "\n".join(
+            [
+                "version: v1",
+                "kind: PlatformEnvironmentBootstrap",
+                "spec:",
+                "  environments:",
+                "    - name: dev",
+                "      modules:",
+                "        - frontend-nextjs",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, str(tmp_path / "scripts/check_tech_stack.py")],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Failed to parse YAML inputs" in result.stdout
+    assert "line" in result.stdout
+    assert "components[1].key" in result.stdout

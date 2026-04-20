@@ -7,7 +7,7 @@ name = "pressure_vessels"
 version = "0.1.0"
 description = "Pressure vessel deterministic requirement parsing pipeline"
 requires-python = ">=3.11,<3.13"
-dependencies = []
+dependencies = ["PyYAML>=6.0,<7"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

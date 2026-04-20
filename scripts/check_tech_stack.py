@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
+import json
 import re
+import subprocess
 from pathlib import Path
+from typing import Any
 
 COMPONENT_RE = re.compile(r"^- Component: `([^`]+)`", re.MULTILINE)
 
@@ -34,36 +39,121 @@ def _extract_section(text: str, header: str) -> str:
     return remainder[:next_header]
 
 
+def _load_yaml(path: Path) -> Any:
+    if importlib.util.find_spec("yaml"):
+        yaml_module = importlib.import_module("yaml")
+        return yaml_module.safe_load(path.read_text(encoding="utf-8"))
+
+    result = subprocess.run(
+        [
+            "ruby",
+            "-e",
+            (
+                "require 'yaml'; require 'json'; "
+                "puts JSON.generate(YAML.safe_load(File.read(ARGV[0]), aliases: true))"
+            ),
+            str(path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return json.loads(result.stdout)
+
+
+def _component_key_line_numbers(registry_path: Path) -> dict[str, int]:
+    if not importlib.util.find_spec("yaml"):
+        return {}
+
+    yaml_module = importlib.import_module("yaml")
+    nodes_module = importlib.import_module("yaml.nodes")
+    mapping_node = nodes_module.MappingNode
+    scalar_node = nodes_module.ScalarNode
+    sequence_node = nodes_module.SequenceNode
+
+    node = yaml_module.compose(registry_path.read_text(encoding="utf-8"))
+    if not isinstance(node, mapping_node):
+        return {}
+
+    for key_node, value_node in node.value:
+        if isinstance(key_node, scalar_node) and key_node.value == "components" and isinstance(
+            value_node, sequence_node
+        ):
+            key_lines: dict[str, int] = {}
+            for item in value_node.value:
+                if not isinstance(item, mapping_node):
+                    continue
+                for item_key_node, item_value_node in item.value:
+                    if (
+                        isinstance(item_key_node, scalar_node)
+                        and item_key_node.value == "key"
+                        and isinstance(item_value_node, scalar_node)
+                    ):
+                        key_lines[item_value_node.value] = item_value_node.start_mark.line + 1
+            return key_lines
+    return {}
+
+
 def _parse_registry(registry_path: Path) -> dict[str, dict[str, str]]:
-    lines = registry_path.read_text(encoding="utf-8").splitlines()
+    parsed = _load_yaml(registry_path)
+
+    if not isinstance(parsed, dict):
+        raise ValueError(f"{registry_path} must parse to a mapping at line 1 key '<root>'")
+
+    components_raw = parsed.get("components")
+    if not isinstance(components_raw, list):
+        raise ValueError(
+            f"{registry_path} is missing list key 'components' at line 1 key 'components'"
+        )
+
+    key_lines = _component_key_line_numbers(registry_path)
     components: dict[str, dict[str, str]] = {}
+    for index, entry in enumerate(components_raw, start=1):
+        if not isinstance(entry, dict):
+            raise ValueError(
+                f"{registry_path} has non-mapping components[{index}] at line 1 key 'components[{index}]'"
+            )
 
-    current: dict[str, str] | None = None
-    for line in lines:
-        if line.startswith("  - key: "):
-            if current is not None and "key" in current:
-                components[current["key"]] = current
-            current = {"key": line.split(": ", 1)[1].strip()}
-            continue
+        key = entry.get("key")
+        line = key_lines.get(str(key), 1)
+        if not isinstance(key, str) or not key.strip():
+            raise ValueError(
+                f"{registry_path} has invalid component key at line {line} key 'components[{index}].key'"
+            )
 
-        if current is None:
-            continue
-
-        if line.startswith("    ") and ": " in line:
-            field, raw_value = line.strip().split(": ", 1)
-            current[field] = raw_value.strip()
-
-    if current is not None and "key" in current:
-        components[current["key"]] = current
+        normalized_entry: dict[str, str] = {}
+        for field, value in entry.items():
+            if isinstance(field, str) and isinstance(value, str):
+                normalized_entry[field] = value
+        components[key] = normalized_entry
 
     return components
 
 
 def _parse_bootstrap_manifest(manifest_path: Path) -> set[str]:
+    parsed = _load_yaml(manifest_path)
+    if not isinstance(parsed, dict):
+        return set()
+
+    spec = parsed.get("spec")
+    if not isinstance(spec, dict):
+        return set()
+
+    environments = spec.get("environments")
+    if not isinstance(environments, list):
+        return set()
+
     modules: set[str] = set()
-    for line in manifest_path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("        - "):
-            modules.add(line.strip()[2:].strip())
+    for environment in environments:
+        if not isinstance(environment, dict):
+            continue
+        declared_modules = environment.get("modules")
+        if not isinstance(declared_modules, list):
+            continue
+        for module in declared_modules:
+            if isinstance(module, str):
+                modules.add(module)
+
     return modules
 
 
@@ -82,8 +172,13 @@ def main() -> int:
         print("No `- Component: ` entries found in docs/tech-stack.md; nothing to validate.")
         return 0
 
-    registry = _parse_registry(registry_path)
-    bootstrap_modules = _parse_bootstrap_manifest(bootstrap_manifest_path)
+    try:
+        registry = _parse_registry(registry_path)
+        bootstrap_modules = _parse_bootstrap_manifest(bootstrap_manifest_path)
+    except (ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+        print("Tech stack consistency check failed:")
+        print(f"- Failed to parse YAML inputs: {exc}")
+        return 1
 
     failures: list[str] = []
     all_declared = current_components | scaffolded_components | planned_components
@@ -121,10 +216,7 @@ def main() -> int:
         iac_entry = registry[iac_key]
         iac_status = iac_entry.get("status")
         iac_module_path = iac_entry.get("module_path")
-        iac_hcl_exists = bool(
-            iac_module_path
-            and list((repo_root / iac_module_path).glob("**/*.tf"))
-        )
+        iac_hcl_exists = bool(iac_module_path and list((repo_root / iac_module_path).glob("**/*.tf")))
         expected_iac_status = "deployed" if iac_hcl_exists else "scaffolded"
         if iac_status != expected_iac_status:
             failures.append(
@@ -135,8 +227,7 @@ def main() -> int:
     extra_registry_keys = sorted(set(registry) - all_declared)
     if extra_registry_keys:
         failures.append(
-            "Registry has components not declared in docs/tech-stack.md: "
-            + ", ".join(extra_registry_keys)
+            "Registry has components not declared in docs/tech-stack.md: " + ", ".join(extra_registry_keys)
         )
 
     for module in sorted(bootstrap_modules):
