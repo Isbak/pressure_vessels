@@ -39,7 +39,7 @@ findings:
   title: Harden concurrent standards-package writes
   severity: critical
   area: knowledge
-  status: todo
+  status: done
   file_path: src/pressure_vessels/standards_ingestion_pipeline.py
   line_numbers: [180]
   depends_on: []

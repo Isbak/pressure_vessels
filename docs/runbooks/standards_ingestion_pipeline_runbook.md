@@ -27,6 +27,8 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 - Clauses are sorted by `clause_id`.
 - Semantic links are sorted by `(from_clause_id, to_clause_id, link_type)`.
 - Hashes use sha256 over canonical JSON (`sort_keys=True`, compact separators).
+- Package publish is atomic: writes are staged in a sibling temp file
+  (`<target>.tmp.<uuid>`), fsynced, and then published via `os.replace`.
 
 ## Failure Modes (Fail Closed)
 
@@ -37,7 +39,8 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 - Parsed/normalized mismatch.
 - Semantic links to unknown clauses.
 - Missing/failed regression examples.
-- Duplicate package write path (immutable package overwrite attempt).
+- Duplicate package write path (immutable package overwrite attempt), raised as
+  `StandardsPackageCollisionError` naming the `package_id` and colliding path.
 
 ## Example Snippet
 
