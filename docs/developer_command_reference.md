@@ -27,7 +27,7 @@ Notes:
 - Set `VALIDATE_INFRA=0` when reusing this repository pattern where infra
   boundary files are intentionally out of scope.
 - `make bootstrap` fails fast when `node`/`npm` are missing, enforces the
-  pinned Node major in `tools/versions.json` (currently `20`), and installs
+  pinned Node major in `tools/versions.json` (currently `22`), and installs
   dependencies for both `services/frontend` and `services/backend` via
   deterministic `npm ci`.
 - `make validate` includes `make validate-js`, which runs
