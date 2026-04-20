@@ -28,6 +28,7 @@ make bootstrap && make validate
 ```
 
 Notes:
+
 - The devcontainer configuration is committed at `.devcontainer/devcontainer.json`.
 - Docker CLI support is included in-container for optional integration-profile
   workflows; replacing existing Docker Compose profile flows is out of scope

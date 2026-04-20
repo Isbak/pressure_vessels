@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
-import tomli
 
 
 def test_project_scripts_include_ci_governance_helper_commands() -> None:
-    payload = tomli.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+    payload = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
     scripts = payload["project"]["scripts"]
 
     assert scripts["pv-suggest-risk-label"] == "pressure_vessels.dev_cli:suggest_risk_label_main"
