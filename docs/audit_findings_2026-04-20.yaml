@@ -482,7 +482,7 @@ findings:
   title: Expand CI Python matrix to cover future versions
   severity: low
   area: ci
-  status: todo
+  status: done
   file_path: .github/workflows/ci.yml
   line_numbers: [81, 117]
   depends_on: []

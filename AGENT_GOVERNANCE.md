@@ -104,6 +104,12 @@ Classify every PR as one of:
 - Run formatting, linting, and tests on every PR.
 - Fail closed on broken checks.
 - Store build/test artifacts for auditability.
+- Declare supported Python runtimes in `pyproject.toml` using
+  `project.requires-python` and keep the upper bound aligned with tested
+  versions.
+- Whenever `project.requires-python` changes, update
+  `.github/workflows/ci.yml` Python test matrix in the same PR so every
+  supported minor version is exercised in CI.
 
 ### Secret and dependency controls
 
