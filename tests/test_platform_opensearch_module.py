@@ -52,7 +52,7 @@ def test_staging_references_opensearch_module() -> None:
     assert "search-opensearch" in modules
 
 
-def test_registry_marks_opensearch_component_deployed() -> None:
+def test_registry_marks_opensearch_component_scaffolded() -> None:
     lines = REGISTRY_PATH.read_text(encoding="utf-8").splitlines()
     in_opensearch_entry = False
     status: str | None = None
@@ -66,4 +66,4 @@ def test_registry_marks_opensearch_component_deployed() -> None:
             status = line.split(": ", 1)[1].strip()
             break
 
-    assert status == "deployed"
+    assert status == "scaffolded"

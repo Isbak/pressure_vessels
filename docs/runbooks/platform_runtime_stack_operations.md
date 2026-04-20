@@ -37,8 +37,8 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 13. `infra/platform/opensearch/module.boundaries.yaml` defines OpenSearch index ownership, retention lifecycle, and access ownership boundaries.
 14. `infra/platform/vllm/module.boundaries.yaml` defines vLLM endpoint ownership, capacity envelope, and access ownership boundaries.
 15. `infra/platform/model-catalog/module.boundaries.yaml` defines approved model families, version policy, and vLLM consumption contract boundaries.
-16. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed` or `planned`.
-17. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `deployed` when the IaC module path exists.
+16. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed`, `scaffolded`, or `planned`.
+17. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `scaffolded` until Terraform/OpenTofu HCL exists under `infra/platform/iac`, then `deployed`.
 18. `docs/runbooks/preview_environment_lifecycle_operations.md` defines deterministic ephemeral preview launch/teardown controls for pull requests.
 
 ## Deployment Readiness Checklist
@@ -85,7 +85,7 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `workflow_backlog_growth`
   - `secrets_resolution_failures`
   - `deployment_rollout_failures`
-- If component state changes from `planned` to `deployed`, update both:
+- If component state changes (for example `scaffolded` to `deployed`), update both:
   - `docs/platform_runtime_stack_registry.yaml`
   - `docs/tech-stack.md`
 - Re-run CI gate before merge to keep stack contract consistent.

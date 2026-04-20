@@ -14,79 +14,79 @@ components:
     notes: NestJS-style service skeleton committed in-repo.
   - key: datastore-postgresql
     capability: data
-    status: deployed
+    status: scaffolded
     owner: data-platform
     module_path: infra/platform/postgresql
     notes: PostgreSQL datastore module skeleton with schema ownership and lifecycle boundaries committed in-repo.
   - key: cache-redis
     capability: cache-and-queue
-    status: deployed
+    status: scaffolded
     owner: data-platform
     module_path: infra/platform/redis
     notes: Redis module skeleton with queue/cache ownership and lifecycle boundaries committed in-repo.
   - key: graph-neo4j
     capability: knowledge-graph
-    status: deployed
+    status: scaffolded
     owner: knowledge-platform
     module_path: infra/platform/neo4j
     notes: Traceability graph runtime.
   - key: retrieval-qdrant
     capability: vector-retrieval
-    status: deployed
+    status: scaffolded
     owner: retrieval-platform
     module_path: infra/platform/qdrant
     notes: Vector index and retrieval runtime.
   - key: llm-serving-vllm
     capability: llm-serving
-    status: deployed
+    status: scaffolded
     owner: ai-platform
     module_path: infra/platform/vllm
     notes: Self-hosted model serving endpoint.
   - key: models-llama-mistral-qwen
     capability: model-family
-    status: deployed
+    status: scaffolded
     owner: ai-platform
     module_path: infra/platform/model-catalog
     notes: Approved base model family set.
   - key: search-opensearch
     capability: search-analytics
-    status: deployed
+    status: scaffolded
     owner: retrieval-platform
     module_path: infra/platform/opensearch
     notes: Full-text search and analytics.
   - key: workflow-temporal
     capability: orchestration
-    status: deployed
+    status: scaffolded
     owner: orchestration-platform
     module_path: infra/platform/temporal
     notes: Workflow orchestration runtime.
   - key: auth-keycloak
     capability: authn-authz
-    status: deployed
+    status: scaffolded
     owner: security-platform
     module_path: infra/platform/keycloak
     notes: Keycloak identity module skeleton with realm/client/role ownership and lifecycle boundaries committed in-repo.
   - key: observability-prometheus-grafana-loki-tempo
     capability: observability
-    status: deployed
+    status: scaffolded
     owner: sre-platform
     module_path: infra/platform/observability
     notes: Metrics, logs, traces, and dashboard boundary module skeleton committed in-repo.
   - key: secrets-vault-or-sops-age
     capability: secrets
-    status: deployed
+    status: scaffolded
     owner: security-platform
     module_path: infra/platform/secrets
     notes: Secret issuance/encryption boundary module skeleton committed in-repo.
   - key: iac-opentofu-or-terraform
     capability: infrastructure-as-code
-    status: deployed
+    status: scaffolded
     owner: platform-runtime
     module_path: infra/platform/iac
     notes: IaC foundation module skeleton with reusable provisioning primitives.
   - key: runtime-docker-kubernetes
     capability: runtime-platform
-    status: deployed
+    status: scaffolded
     owner: platform-runtime
     module_path: infra/platform/runtime
     notes: Docker/Kubernetes runtime deployment module skeleton with ownership and lifecycle boundaries committed in-repo.

@@ -78,7 +78,7 @@ def test_every_deployed_infra_platform_component_has_boundary_contract_file() ->
         )
 
 
-def test_bootstrap_modules_all_registered_as_deployed() -> None:
+def test_bootstrap_modules_all_registered_as_runnable_or_scaffolded() -> None:
     registry = _parse_registry()
     declared_modules: set[str] = set()
 
@@ -91,7 +91,7 @@ def test_bootstrap_modules_all_registered_as_deployed() -> None:
         assert module_key in registry, (
             f"Bootstrap manifest references {module_key!r} but registry has no entry"
         )
-        assert registry[module_key].get("status") == "deployed", (
+        assert registry[module_key].get("status") in {"deployed", "scaffolded"}, (
             f"Bootstrap manifest references {module_key!r} but registry status is "
             f"{registry[module_key].get('status')!r}"
         )

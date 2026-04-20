@@ -21,7 +21,7 @@ def test_model_catalog_module_boundary_contract_declares_approval_and_versioning
     assert "infra/platform/vllm" in text
 
 
-def test_registry_marks_model_catalog_component_deployed() -> None:
+def test_registry_marks_model_catalog_component_scaffolded() -> None:
     lines = REGISTRY_PATH.read_text(encoding="utf-8").splitlines()
     in_model_catalog_entry = False
     status: str | None = None
@@ -39,5 +39,5 @@ def test_registry_marks_model_catalog_component_deployed() -> None:
         if in_model_catalog_entry and line.startswith("    module_path: "):
             module_path = line.split(": ", 1)[1].strip()
 
-    assert status == "deployed"
+    assert status == "scaffolded"
     assert module_path == "infra/platform/model-catalog"

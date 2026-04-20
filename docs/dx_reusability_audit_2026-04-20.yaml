@@ -285,7 +285,7 @@ items:
     area: platform
     phase: 'DX Audit 2026-04-20'
     priority: P1
-    status: todo
+    status: done
     effort: L
     depends_on: []
     references:

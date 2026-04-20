@@ -17,6 +17,13 @@ Technologies below are present in this repository today via imports and/or direc
 
 - Component: `frontend-nextjs`
 - Component: `backend-nestjs`
+
+### Runtime stack components (scaffolded)
+
+The components below have contract/boundary documentation committed in-repo
+but do not yet include runnable production artifacts (for example Terraform/
+OpenTofu root modules or deployable services).
+
 - Component: `datastore-postgresql`
 - Component: `cache-redis`
 - Component: `iac-opentofu-or-terraform`
@@ -41,7 +48,7 @@ The technologies below are documented target-state components and are **not** cu
 
 ### Runtime mapping source of truth
 
-- `docs/platform_runtime_stack_registry.yaml` maps each component to ownership, module path, and deployment status.
+- `docs/platform_runtime_stack_registry.yaml` maps each component to ownership, module path, and lifecycle status (`deployed`, `scaffolded`, `planned`).
 - `infra/platform/environment.bootstrap.yaml` maps component modules to deployable environments.
 
 ## Stack Change Policy

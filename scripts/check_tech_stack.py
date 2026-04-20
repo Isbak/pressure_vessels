@@ -9,12 +9,14 @@ from pathlib import Path
 COMPONENT_RE = re.compile(r"^- Component: `([^`]+)`", re.MULTILINE)
 
 
-def _parse_declared_components(tech_stack_text: str) -> tuple[set[str], set[str]]:
-    current = _extract_section(tech_stack_text, "## Current")
-    planned = _extract_section(tech_stack_text, "## Planned")
+def _parse_declared_components(tech_stack_text: str) -> tuple[set[str], set[str], set[str]]:
+    deployed = _extract_section(tech_stack_text, "### Runtime stack components (deployed)")
+    scaffolded = _extract_section(tech_stack_text, "### Runtime stack components (scaffolded)")
+    planned = _extract_section(tech_stack_text, "### Runtime stack components (planned)")
 
     return (
-        {value.strip() for value in COMPONENT_RE.findall(current)},
+        {value.strip() for value in COMPONENT_RE.findall(deployed)},
+        {value.strip() for value in COMPONENT_RE.findall(scaffolded)},
         {value.strip() for value in COMPONENT_RE.findall(planned)},
     )
 
@@ -25,7 +27,8 @@ def _extract_section(text: str, header: str) -> str:
         raise ValueError(f"docs/tech-stack.md is missing '{header}'")
 
     remainder = text[start + len(header) :]
-    next_header = remainder.find("\n## ")
+    next_header_token = "\n### " if header.startswith("### ") else "\n## "
+    next_header = remainder.find(next_header_token)
     if next_header == -1:
         return remainder
     return remainder[:next_header]
@@ -71,9 +74,11 @@ def main() -> int:
     bootstrap_manifest_path = repo_root / "infra/platform/environment.bootstrap.yaml"
 
     tech_stack_text = tech_stack_path.read_text(encoding="utf-8")
-    current_components, planned_components = _parse_declared_components(tech_stack_text)
+    current_components, scaffolded_components, planned_components = _parse_declared_components(
+        tech_stack_text
+    )
 
-    if not current_components and not planned_components:
+    if not current_components and not scaffolded_components and not planned_components:
         print("No `- Component: ` entries found in docs/tech-stack.md; nothing to validate.")
         return 0
 
@@ -81,7 +86,7 @@ def main() -> int:
     bootstrap_modules = _parse_bootstrap_manifest(bootstrap_manifest_path)
 
     failures: list[str] = []
-    all_declared = current_components | planned_components
+    all_declared = current_components | scaffolded_components | planned_components
     for component in sorted(all_declared):
         if component not in registry:
             failures.append(f"{component!r} is declared in docs/tech-stack.md but missing from registry")
@@ -90,12 +95,17 @@ def main() -> int:
         entry = registry[component]
         status = entry.get("status")
         module_path = entry.get("module_path")
-        if status not in {"deployed", "planned"}:
+        if status not in {"deployed", "scaffolded", "planned"}:
             failures.append(f"{component!r} has invalid registry status {status!r}")
             continue
 
         if component in current_components and status != "deployed":
             failures.append(f"{component!r} is under ## Current but status is {status!r}")
+        if component in scaffolded_components and status != "scaffolded":
+            failures.append(
+                f"{component!r} is under ### Runtime stack components (scaffolded) "
+                f"but status is {status!r}"
+            )
         if component in planned_components and status != "planned":
             failures.append(f"{component!r} is under ## Planned but status is {status!r}")
 
@@ -111,12 +121,15 @@ def main() -> int:
         iac_entry = registry[iac_key]
         iac_status = iac_entry.get("status")
         iac_module_path = iac_entry.get("module_path")
-        iac_module_exists = bool(iac_module_path) and (repo_root / iac_module_path).exists()
-        expected_iac_status = "deployed" if iac_module_exists else "planned"
+        iac_hcl_exists = bool(
+            iac_module_path
+            and list((repo_root / iac_module_path).glob("**/*.tf"))
+        )
+        expected_iac_status = "deployed" if iac_hcl_exists else "scaffolded"
         if iac_status != expected_iac_status:
             failures.append(
                 f"{iac_key!r} status must be {expected_iac_status!r} when module_path "
-                f"{'exists' if iac_module_exists else 'is absent'}: {iac_module_path}"
+                f"{'contains Terraform/OpenTofu HCL' if iac_hcl_exists else 'contains only contract artifacts'}: {iac_module_path}"
             )
 
     extra_registry_keys = sorted(set(registry) - all_declared)
@@ -138,7 +151,8 @@ def main() -> int:
 
     print(
         "Tech stack consistency check passed for "
-        f"{len(current_components)} deployed and {len(planned_components)} planned components."
+        f"{len(current_components)} deployed, {len(scaffolded_components)} scaffolded, "
+        f"and {len(planned_components)} planned components."
     )
     return 0
 
