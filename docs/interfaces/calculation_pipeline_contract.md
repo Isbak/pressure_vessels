@@ -47,6 +47,12 @@ When `sizing_input=None`, the pipeline now resolves allowable stress, joint effi
   - `sizing_input` is provided, or
   - `geometry_input` is provided.
 - Fail-closed error string: `"BL-014 strict sizing-input gate failed: sizing_input or geometry_input is required."`
+- When both `sizing_input` and `geometry_input` are missing:
+  - default behavior raises `MissingGeometryInputError` naming required geometry fields.
+  - opt-in behavior (`use_mvp_defaults=True`) emits a `UserWarning` and tags `applied_defaults` with:
+    - `non_production_flag: true`
+    - `audit_event.event_id: BL-003-MVP-GEOMETRY-DEFAULTS-NON-PRODUCTION`
+    - `audit_event.event_type: non_production_mvp_defaults_opt_in`
 - Geometry field validation behavior:
   - `pressure_vessels.geometry_module.adapt_geometry_input` and
     `build_cad_ready_parameter_export` validate all numeric geometry inputs

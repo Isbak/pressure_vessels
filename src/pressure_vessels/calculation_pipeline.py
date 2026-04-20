@@ -40,6 +40,10 @@ _MVP_DEFAULT_FIELDS = (
     "nozzle_inside_diameter_m",
     "nozzle_provided_thickness_m",
 )
+_MVP_DEFAULT_AUDIT_EVENT = {
+    "event_id": "BL-003-MVP-GEOMETRY-DEFAULTS-NON-PRODUCTION",
+    "event_type": "non_production_mvp_defaults_opt_in",
+}
 
 
 def _round_safety_critical(value: float) -> float:
@@ -522,7 +526,12 @@ def _normalize_and_resolve_inputs(
                 else None
             ),
         )
-        applied_defaults = {"applied_mvp_defaults": False, "values": {}, "source": "caller-provided"}
+        applied_defaults = {
+            "applied_mvp_defaults": False,
+            "non_production_flag": False,
+            "values": {},
+            "source": "caller-provided",
+        }
         geometry_basis = {"source": "sizing_input", "geometry_revision_id": None}
         return normalized, applied_defaults, geometry_basis
 
@@ -557,6 +566,7 @@ def _normalize_and_resolve_inputs(
         applied_defaults = {
             "applied_geometry_defaults": False,
             "applied_mvp_defaults": False,
+            "non_production_flag": False,
             "values": {},
             "source": "geometry-module+materials-module",
             "material_source": "materials_module.resolve_material_basis",
@@ -583,7 +593,7 @@ def _normalize_and_resolve_inputs(
         )
 
     warnings.warn(
-        "BL-003 using MVP geometry defaults for missing fields: "
+        "NON-PRODUCTION ONLY: BL-003 using MVP geometry defaults for missing fields: "
         + ", ".join(_MVP_DEFAULT_FIELDS),
         UserWarning,
         stacklevel=2,
@@ -614,6 +624,11 @@ def _normalize_and_resolve_inputs(
     applied_defaults = {
         "applied_geometry_defaults": True,
         "applied_mvp_defaults": True,
+        "non_production_flag": True,
+        "audit_event": {
+            **_MVP_DEFAULT_AUDIT_EVENT,
+            "message": "NON-PRODUCTION ONLY: Explicit opt-in via use_mvp_defaults=True.",
+        },
         "values": dict(_MVP_DEFAULTS),
         "source": _MVP_DEFAULTS["source"],
         "material_source": "materials_module.resolve_material_basis",

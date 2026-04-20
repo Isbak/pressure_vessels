@@ -56,3 +56,4 @@ Primary concerns:
 - `run_calculation_pipeline` no longer silently applies BL-003 `_MVP_DEFAULTS` when both `sizing_input` and `geometry_input` are missing.
 - The pipeline now raises `MissingGeometryInputError` by default and names the required geometry fields in the exception message.
 - Callers that intentionally want placeholder geometry must opt in with `use_mvp_defaults=True`; this emits a `UserWarning` listing each defaulted geometry field.
+- Opt-in runs are explicitly marked in `CalculationRecords.v1.applied_defaults` with `non_production_flag: true` and a deterministic `audit_event` payload to keep placeholder geometry out of production certification paths.
