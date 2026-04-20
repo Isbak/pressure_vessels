@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from pressure_vessels import calculation_pipeline as calculation_pipeline_module
 from pressure_vessels.calculation_pipeline import (
     MissingGeometryInputError,
     Quantity,
@@ -44,6 +45,24 @@ def _build_inputs_with_external_pressure(prompt: str, pressure_pa: float):
     )
     design_basis, matrix = build_design_basis(req_with_external, now_utc=FIXED_NOW)
     return req_with_external, design_basis, matrix
+
+
+def test_build_check_helpers_include_asme_clause_docstrings():
+    helper_names = [
+        "_build_shell_check",
+        "_build_head_check",
+        "_build_nozzle_check",
+        "_build_shell_mawp_check",
+        "_build_head_mawp_check",
+        "_build_nozzle_mawp_check",
+        "_build_ug37_reinforcement_check",
+        "_build_ug28_external_check",
+    ]
+
+    for helper_name in helper_names:
+        helper = getattr(calculation_pipeline_module, helper_name)
+        assert helper.__doc__ is not None
+        assert "UG-" in helper.__doc__
 
 
 def test_calculation_pipeline_is_deterministic_with_fixed_timestamp():
