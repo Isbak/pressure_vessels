@@ -8,7 +8,7 @@ description: >-
   priority_values, effort_values) so the same governance controls apply:
   every todo/in_progress item must gate on done dependencies and the audit
   is consumed by the next-generation prompt flow
-  (docs/next_dx_generation_prompt.yaml).
+  (docs/next_dx_generation_prompt.md).
 source_audit: DX and platform reusability audit (branch claude/audit-dx-reusability-ad9sW)
 audit_scope:
   - Repository developer onboarding ergonomics (bootstrap, validate, local feedback loop).
@@ -40,7 +40,7 @@ governance:
     An item may only move to in_progress when all depends_on entries are done,
     mirroring tests/test_backlog_consistency.py semantics.
   prompt_flow:
-    next_prompt_file: docs/next_dx_generation_prompt.yaml
+    next_prompt_file: docs/next_dx_generation_prompt.md
     selection_rule: >-
       Pick the first DXR item with status todo whose depends_on entries are
       all done; regenerate the next prompt whenever an item changes status.
