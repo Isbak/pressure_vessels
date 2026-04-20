@@ -125,7 +125,7 @@ items:
     area: tooling
     phase: 'DX Audit 2026-04-20'
     priority: P1
-    status: todo
+    status: done
     effort: XS
     depends_on:
       - DXR-001

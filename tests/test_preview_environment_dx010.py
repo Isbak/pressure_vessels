@@ -73,7 +73,5 @@ def test_dx010_closed_out_in_roadmap_and_prompt_advanced() -> None:
     assert "status: done" in dx010_section
     assert (
         "no remaining eligible dx roadmap item" in prompt.lower()
-        or "You are implementing DXR-001" in prompt
-        or "You are implementing DXR-002" in prompt
-        or "You are implementing DXR-003" in prompt
+        or "You are implementing DXR-" in prompt
     )

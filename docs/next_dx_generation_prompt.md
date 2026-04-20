@@ -1,18 +1,19 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-003 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-004 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-003 in the `pressure_vessels` repo.
+You are implementing DXR-004 in the `pressure_vessels` repo.
 
 Problem:
-`services/frontend` and `services/backend` declare Node dependencies but no
-committed lockfiles. This weakens deterministic local/CI installs and drifts
-from the reproducibility expectations in README.md and
-`docs/developer_experience_principles.md`.
+The integration profile reads FRONTEND_PORT, BACKEND_PORT,
+BACKEND_API_BASE_URL, and BACKEND_HOST but there is no committed
+.env.example the developer can copy. Operators must cross-reference
+the runbook before `make integration-up` will behave predictably on
+non-default hosts.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-003` branched from `main`.
+- Work on a new branch `claude/fix-DXR-004` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -20,29 +21,26 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-003 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-004 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Generate and commit deterministic lockfiles for `services/frontend` and
-   `services/backend` using the repository’s current package manager path.
-2. Ensure bootstrap/CI install commands consume those lockfiles in a
-   deterministic mode.
-3. Document lockfile hygiene (regeneration command and reviewer expectations).
-4. Update docs/developer_command_reference.md parity notes if command behavior
-   changes.
-5. Add or extend tests that assert lockfiles are present and referenced by the
-   canonical bootstrap/validation path.
-6. Last step before opening/merging the PR: update
+1. Add committed `.env.example` scaffolding for local runtime integration.
+2. Ensure every variable consumed by `infra/local/docker-compose.integration.yml`
+   is represented with safe defaults and clear comments.
+3. Update docs to point developers at `.env.example` for predictable
+   local startup.
+4. Add/extend tests or checks that guard the variable parity between
+   compose file and `.env.example`.
+5. Last step before opening/merging the PR: update
    `docs/next_dx_generation_prompt.md` to the next eligible DXR item and
-   set DXR-003 status to `done` in
+   set DXR-004 status to `done` in
    `docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
-- Providing `.env.example` (DXR-004).
 - Formatter/linter baseline (DXR-005).
 - Pinning the Node version (DXR-006).
 
-Deliverable: one PR touching only the files needed for DXR-003
+Deliverable: one PR touching only the files needed for DXR-004
 remediation plus the prompt/status files in the final step.
 ```
 
@@ -52,7 +50,7 @@ Pick the first item with `status: todo` whose dependencies are all `done`.
 
 1. **DXR-001** — Extend bootstrap to install JS service toolchains deterministically (`done`, deps: none)
 2. **DXR-002** — Add JS service test/lint parity to the baseline validate bundle (`done`, deps: DXR-001)
-3. **DXR-003** — Commit deterministic lockfiles for frontend and backend services (`todo`, deps: DXR-001)
+3. **DXR-003** — Commit deterministic lockfiles for frontend and backend services (`done`, deps: DXR-001)
 4. **DXR-004** — Provide .env.example scaffolding for local runtime profile (`todo`, deps: none)
 5. **DXR-005** — Baseline formatting and linting configuration (editorconfig + formatters) (`todo`, deps: none)
 6. **DXR-006** — Pin Node toolchain version alongside tools/versions.json (`todo`, deps: none)

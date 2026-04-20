@@ -26,12 +26,17 @@ Notes:
 - Set `VALIDATE_INFRA=0` when reusing this repository pattern where infra
   boundary files are intentionally out of scope.
 - `make bootstrap` fails fast when `node`/`npm` are missing and installs
-  dependencies for both `services/frontend` and `services/backend`.
+  dependencies for both `services/frontend` and `services/backend` via
+  deterministic `npm ci`.
 - `make validate` includes `make validate-js`, which runs
   `npm --prefix services/frontend run smoke` and
   `npm --prefix services/backend run smoke`.
 - JS checks fail fast when `node`/`npm` are missing; set `JS_VALIDATE=0` to
   explicitly skip JS checks in local environments without Node tooling.
+- Lockfile hygiene: regenerate lockfiles with
+  `npm --prefix services/frontend install --package-lock-only` and
+  `npm --prefix services/backend install --package-lock-only`, and require
+  engineering reviewer sign-off on lockfile diffs in PR review.
 
 ## CI parity mapping for local runs
 

@@ -31,8 +31,8 @@ bootstrap-py:
 bootstrap-js:
 	@command -v node >/dev/null 2>&1 || { echo "Node.js is required for JS service bootstrap. Install Node.js (npm included), then rerun 'make bootstrap'."; exit 1; }
 	@command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS service bootstrap. Install npm, then rerun 'make bootstrap'."; exit 1; }
-	$(NPM) --prefix services/frontend install
-	$(NPM) --prefix services/backend install
+	$(NPM) --prefix services/frontend ci
+	$(NPM) --prefix services/backend ci
 
 test:
 	pytest -q
