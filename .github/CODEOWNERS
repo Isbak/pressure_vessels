@@ -1,0 +1,33 @@
+# CODEOWNERS baseline for governance Level 2 routing.
+# Team handles mirror ownership identifiers already used in
+# docs/platform_runtime_stack_registry.yaml and AGENT_GOVERNANCE.md reviewer roles.
+
+# Default engineering review owner for unmatched paths.
+* @platform-experience
+
+# Governance policy, CI controls, and PR workflow controls.
+AGENT_GOVERNANCE.md @platform-experience @security-platform
+.github/pull_request_template.md @platform-experience @security-platform
+.github/workflows/** @platform-experience @security-platform
+.github/governance/** @platform-experience @security-platform
+scripts/check_ci_governance.py @platform-experience @security-platform
+
+docs/governance/** @platform-experience @security-platform
+docs/developer_command_reference.md @platform-experience
+docs/developer_quickstart.md @platform-experience
+
+# Application code and tests (engineering + pressure-vessel domain).
+src/** @platform-experience @knowledge-platform
+tests/** @platform-experience @knowledge-platform
+scripts/** @platform-experience
+
+# Compliance and safety-critical calculation paths (route domain + security).
+src/pressure_vessels/calculation_pipeline.py @knowledge-platform @security-platform
+src/pressure_vessels/compliance_pipeline.py @knowledge-platform @security-platform
+src/pressure_vessels/governance_pipeline.py @platform-experience @security-platform
+
+# Infrastructure and runtime platform ownership.
+infra/** @platform-runtime @sre-platform
+infra/platform/keycloak/** @security-platform @platform-runtime
+infra/platform/secrets/** @security-platform @platform-runtime
+infra/platform/iac/** @platform-runtime @security-platform
