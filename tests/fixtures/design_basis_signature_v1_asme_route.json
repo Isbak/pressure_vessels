@@ -1,0 +1,45 @@
+{
+  "id": "design_basis_signature_v1_asme_route",
+  "hash_algorithm": "sha256",
+  "canonicalization": "json.sort_keys+compact",
+  "input": {
+    "prompt": "Design a horizontal pressure vessel for propane storage, 18 bar design pressure, 65\u00b0C design temperature, 30 m3 capacity, ASME Section VIII Div 1, corrosion allowance 3 mm.",
+    "now_utc": "2026-04-18T00:00:00+00:00"
+  },
+  "canonical_unsigned_payload": {
+    "schema_version": "DesignBasis.v1",
+    "generated_at_utc": "2026-04-18T00:00:00+00:00",
+    "source_requirement_set_hash": "0c5e80aae1430f1ee835da7d30f16dd1c354207fea3a5de9be552a6e30909adc",
+    "primary_standard": "ASME Section VIII Division 1",
+    "primary_standard_version": "ASME_BPVC_2023",
+    "selected_route_id": "route_asme_viii_div1",
+    "secondary_standards": [
+      "PED (EN 13445):PED_2014_68_EU_EN13445_2021"
+    ],
+    "route_selection_audit": [
+      {
+        "route_id": "route_asme_viii_div1",
+        "standard_name": "ASME Section VIII Division 1",
+        "standard_version": "ASME_BPVC_2023",
+        "route_priority": 100,
+        "matched_input": true,
+        "selected": true,
+        "selection_reason": "Selected: matched input and won deterministic priority/order tie-break."
+      },
+      {
+        "route_id": "route_ped_en13445",
+        "standard_name": "PED (EN 13445)",
+        "standard_version": "PED_2014_68_EU_EN13445_2021",
+        "route_priority": 200,
+        "matched_input": false,
+        "selected": false,
+        "selection_reason": "Configured route did not match canonical code_standard input."
+      }
+    ],
+    "assumptions": [
+      "Deterministic route selection uses priority then route_id tie-break with canonical code_standard aliases.",
+      "Internal pressure basis is assumed unless external pressure input is provided."
+    ]
+  },
+  "expected_deterministic_signature": "4222550c628629c91a3c75fef9e41aa21efdcf8f148c02dd4f5eda6be976e62e"
+}

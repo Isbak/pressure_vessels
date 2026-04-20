@@ -143,7 +143,29 @@ def build_design_basis(
     now_utc: datetime | None = None,
     route_configs: tuple[StandardRouteConfig, ...] | None = None,
 ) -> tuple[DesignBasis, ApplicabilityMatrix]:
-    """Build deterministic BL-002/BL-009 artifacts from a valid RequirementSet.v1."""
+    """Build deterministic BL-002/BL-009 artifacts from a valid RequirementSet.v1.
+
+    ``DesignBasis.deterministic_signature`` is the SHA-256 digest of a canonical
+    unsigned payload with exactly these top-level keys:
+
+    - ``schema_version``
+    - ``generated_at_utc``
+    - ``source_requirement_set_hash``
+    - ``primary_standard``
+    - ``primary_standard_version``
+    - ``selected_route_id``
+    - ``secondary_standards``
+    - ``route_selection_audit``
+    - ``assumptions``
+
+    Canonicalization uses ``json.dumps(..., sort_keys=True,
+    separators=(",", ":"))``. Ordering-sensitive list fields are constructed
+    deterministically:
+
+    - ``secondary_standards`` follows ``configured_routes`` order after
+      deterministic sort by ``(route_priority, route_id)``.
+    - ``route_selection_audit`` follows the same ``configured_routes`` order.
+    """
     _validate_handoff_gate(requirement_set)
 
     generated_at = (now_utc or datetime.now(tz=timezone.utc)).replace(microsecond=0).isoformat()
@@ -185,17 +207,16 @@ def build_design_basis(
         "Internal pressure basis is assumed unless external pressure input is provided.",
     ]
 
-    design_basis_unsigned = {
-        "schema_version": DESIGN_BASIS_VERSION,
-        "generated_at_utc": generated_at,
-        "source_requirement_set_hash": requirement_set.deterministic_hash,
-        "primary_standard": selected_route.standard_name,
-        "primary_standard_version": selected_route.standard_version,
-        "selected_route_id": selected_route.route_id,
-        "secondary_standards": secondary_standards,
-        "route_selection_audit": [record.to_json_dict() for record in route_audit],
-        "assumptions": assumptions,
-    }
+    design_basis_unsigned = _build_design_basis_signature_payload(
+        generated_at=generated_at,
+        requirement_set_hash=requirement_set.deterministic_hash,
+        primary_standard=selected_route.standard_name,
+        primary_standard_version=selected_route.standard_version,
+        selected_route_id=selected_route.route_id,
+        secondary_standards=secondary_standards,
+        route_selection_audit=route_audit,
+        assumptions=assumptions,
+    )
     signature = _sha256_payload(design_basis_unsigned)
 
     design_basis = DesignBasis(
@@ -430,3 +451,32 @@ def _build_ped_clause_records(
 def _sha256_payload(payload: dict[str, Any]) -> str:
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _build_design_basis_signature_payload(
+    *,
+    generated_at: str,
+    requirement_set_hash: str,
+    primary_standard: str,
+    primary_standard_version: str,
+    selected_route_id: str,
+    secondary_standards: list[str],
+    route_selection_audit: list[RouteSelectionRecord],
+    assumptions: list[str],
+) -> dict[str, Any]:
+    """Return the unsigned canonical payload hashed into ``deterministic_signature``.
+
+    This helper isolates AF-007 signature semantics so regressions are captured
+    by a single frozen fixture in tests.
+    """
+    return {
+        "schema_version": DESIGN_BASIS_VERSION,
+        "generated_at_utc": generated_at,
+        "source_requirement_set_hash": requirement_set_hash,
+        "primary_standard": primary_standard,
+        "primary_standard_version": primary_standard_version,
+        "selected_route_id": selected_route_id,
+        "secondary_standards": secondary_standards,
+        "route_selection_audit": [record.to_json_dict() for record in route_selection_audit],
+        "assumptions": assumptions,
+    }

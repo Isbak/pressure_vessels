@@ -242,7 +242,7 @@ findings:
   title: Document and test design_basis deterministic_signature
   severity: high
   area: compliance
-  status: todo
+  status: done
   file_path: src/pressure_vessels/design_basis_pipeline.py
   line_numbers: []
   depends_on: []
