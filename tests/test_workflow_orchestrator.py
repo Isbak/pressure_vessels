@@ -1,3 +1,5 @@
+import pytest
+
 from pressure_vessels.workflow_orchestrator import (
     APPROVAL_GATE_EVENT_VERSION,
     WORKFLOW_EXECUTION_REPORT_VERSION,
@@ -81,7 +83,7 @@ def test_approval_events_are_immutable_and_include_role_and_timestamp_metadata()
         assert "immutable" in str(error)
 
 
-def test_retry_and_escalation_are_observable_in_execution_trace():
+def test_retry_trace_is_observable_before_terminal_success():
     report = orchestrate_workflow(
         workflow_id="wf-release-003",
         stage_specs=[
@@ -89,25 +91,71 @@ def test_retry_and_escalation_are_observable_in_execution_trace():
                 stage_id="sync_enterprise_systems",
                 requires_approval=False,
                 max_retries=2,
-                fail_first_attempts=3,
+                fail_first_attempts=2,
                 escalation_role="operations_manager",
             )
         ],
         approval_events=[],
     )
 
-    assert report.failed_stage == "sync_enterprise_systems"
-    assert report.escalation_target == "operations_manager"
-    assert report.stage_states["sync_enterprise_systems"] == "escalated"
+    assert report.failed_stage is None
+    assert report.escalation_target is None
+    assert report.stage_states["sync_enterprise_systems"] == "completed"
 
     statuses = [
         (event.event_type, event.status)
         for event in report.execution_trace
-        if event.event_type in {"execution_attempt", "escalation"}
+        if event.event_type == "execution_attempt"
     ]
     assert statuses == [
         ("execution_attempt", "retrying"),
         ("execution_attempt", "retrying"),
-        ("execution_attempt", "failed"),
-        ("escalation", "escalated"),
+        ("execution_attempt", "success"),
     ]
+
+
+def test_workflow_stage_spec_rejects_negative_max_retries():
+    with pytest.raises(
+        ValueError, match="BL-016 orchestration failed: max_retries cannot be negative."
+    ):
+        WorkflowStageSpec(stage_id="prepare", requires_approval=False, max_retries=-1)
+
+
+def test_workflow_stage_spec_rejects_negative_fail_first_attempts():
+    with pytest.raises(
+        ValueError,
+        match="BL-016 orchestration failed: fail_first_attempts cannot be negative.",
+    ):
+        WorkflowStageSpec(stage_id="prepare", requires_approval=False, fail_first_attempts=-1)
+
+
+def test_workflow_stage_spec_rejects_max_retries_above_upper_bound():
+    with pytest.raises(
+        ValueError, match="BL-016 orchestration failed: max_retries cannot exceed 10."
+    ):
+        WorkflowStageSpec(stage_id="prepare", requires_approval=False, max_retries=11)
+
+
+def test_workflow_stage_spec_rejects_fail_first_attempts_above_max_retries():
+    with pytest.raises(
+        ValueError,
+        match="BL-016 orchestration failed: fail_first_attempts cannot exceed max_retries.",
+    ):
+        WorkflowStageSpec(
+            stage_id="prepare",
+            requires_approval=False,
+            max_retries=2,
+            fail_first_attempts=3,
+        )
+
+
+def test_workflow_stage_spec_accepts_upper_bounds():
+    stage = WorkflowStageSpec(
+        stage_id="prepare",
+        requires_approval=False,
+        max_retries=10,
+        fail_first_attempts=10,
+    )
+
+    assert stage.max_retries == 10
+    assert stage.fail_first_attempts == 10

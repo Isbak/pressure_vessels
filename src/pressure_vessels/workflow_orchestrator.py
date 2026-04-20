@@ -18,6 +18,18 @@ class WorkflowStageSpec:
     fail_first_attempts: int = 0
     escalation_role: str | None = None
 
+    def __post_init__(self) -> None:
+        if self.max_retries < 0:
+            raise ValueError("BL-016 orchestration failed: max_retries cannot be negative.")
+        if self.max_retries > 10:
+            raise ValueError("BL-016 orchestration failed: max_retries cannot exceed 10.")
+        if self.fail_first_attempts < 0:
+            raise ValueError("BL-016 orchestration failed: fail_first_attempts cannot be negative.")
+        if self.fail_first_attempts > self.max_retries:
+            raise ValueError(
+                "BL-016 orchestration failed: fail_first_attempts cannot exceed max_retries."
+            )
+
     def to_json_dict(self) -> dict[str, Any]:
         return asdict(self)
 
@@ -292,10 +304,6 @@ def _validate_stage_specs(stage_specs: list[WorkflowStageSpec]) -> None:
             )
         seen_stage_ids.add(stage.stage_id)
 
-        if stage.max_retries < 0:
-            raise ValueError("BL-016 orchestration failed: max_retries cannot be negative.")
-        if stage.fail_first_attempts < 0:
-            raise ValueError("BL-016 orchestration failed: fail_first_attempts cannot be negative.")
         if stage.escalation_role is not None and not stage.escalation_role.strip():
             raise ValueError(
                 "BL-016 orchestration failed: escalation_role must be non-empty when supplied."

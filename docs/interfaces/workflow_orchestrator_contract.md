@@ -57,8 +57,9 @@ Immutability constraints enforced by orchestrator input validation:
 
 Stage execution is deterministic and controlled through stage spec fields:
 
-- `max_retries`: retry budget (`attempts = max_retries + 1`)
-- `fail_first_attempts`: deterministic injected adapter failures
+- `max_retries`: retry budget (`attempts = max_retries + 1`), integer in `[0, 10]`
+- `fail_first_attempts`: deterministic injected adapter failures, integer in
+  `[0, max_retries]`
 - `escalation_role`: escalation destination after retry budget exhaustion
 
 Every attempt is emitted into `execution_trace[]` with ordered `sequence` values and statuses:
