@@ -4,7 +4,7 @@ services:
     working_dir: /workspace
     command: sh -lc "node services/backend/local-integration-server.js"
     environment:
-      BACKEND_HOST: 0.0.0.0
+      BACKEND_HOST: ${BACKEND_HOST:-0.0.0.0}
       BACKEND_PORT: ${BACKEND_PORT:-8000}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
@@ -32,7 +32,7 @@ services:
       npm run dev -- --hostname 0.0.0.0 --port ${FRONTEND_PORT:-3000}
       "
     environment:
-      BACKEND_API_BASE_URL: http://backend:8000
+      BACKEND_API_BASE_URL: ${BACKEND_API_BASE_URL:-http://backend:8000}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:

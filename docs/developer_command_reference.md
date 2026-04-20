@@ -109,13 +109,14 @@ full baseline validation.
 
 ## Local runtime integration profile (DX-006)
 
-Use the Docker Compose profile at `infra/local/docker-compose.integration.yml` for a one-command frontend/backend startup:
+Use the Docker Compose profile at `infra/local/docker-compose.integration.yml` for a one-command frontend/backend startup. Copy `.env.example` to `.env` first so local host/port values are explicit and reproducible:
 
 ```bash
+cp .env.example .env
 make integration-up
 ```
 
-Environment variables used by the integration profile:
+Environment variables used by the integration profile (all scaffolded in `.env.example`):
 
 | Variable | Default | Used by | Purpose |
 | --- | --- | --- | --- |
