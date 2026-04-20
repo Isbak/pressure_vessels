@@ -1,0 +1,3 @@
+artifacts/
+services/**/node_modules/
+services/**/dist/

@@ -11,3 +11,13 @@ repos:
         entry: make s
         language: system
         pass_filenames: false
+      - id: python-style-baseline
+        name: Python style baseline check
+        entry: make lint-py
+        language: system
+        pass_filenames: false
+      - id: js-ts-style-baseline
+        name: JS/TS style baseline check
+        entry: make lint-js
+        language: system
+        pass_filenames: false

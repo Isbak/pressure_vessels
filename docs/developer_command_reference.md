@@ -14,6 +14,7 @@ Run from repository root:
 | Governance docs/anchor checks | `make governance` | `make g` |
 | Runtime stack checks | `make stack` | `make s` |
 | JS service validation checks | `make validate-js` | _n/a_ |
+| Python + JS/TS style baseline checks | `make validate-style` | _n/a_ |
 | Baseline validation bundle | `make validate` | `make v` |
 | Local runtime integration profile up | `make integration-up` | `make up` |
 | Local runtime integration profile down | `make integration-down` | `make down` |
@@ -31,6 +32,12 @@ Notes:
 - `make validate` includes `make validate-js`, which runs
   `npm --prefix services/frontend run smoke` and
   `npm --prefix services/backend run smoke`.
+- `make validate-style` runs:
+  - `python scripts/check_python_style.py` for repository-local Python style
+    baseline rules.
+  - `python scripts/check_js_ts_style.py` for repository-local JS/TS
+    baseline style rules under `services/frontend` and `services/backend`.
+- `make validate` includes both runtime checks and style baseline checks.
 - JS checks fail fast when `node`/`npm` are missing; set `JS_VALIDATE=0` to
   explicitly skip JS checks in local environments without Node tooling.
 - Lockfile hygiene: regenerate lockfiles with
@@ -48,8 +55,9 @@ Use this table to mirror CI behavior before opening a PR:
 | `readme-anchor-check` | `python scripts/check_readme_anchors.py` | `make g` |
 | `tech-stack-check` | `python scripts/check_tech_stack.py` | `make s` |
 | `js-validate` | `make validate-js` | `make validate-js` |
+| `style-baseline` | `make validate-style` | `make validate-style` |
 | _deployment-readiness subset_ | file existence checks in runbook checklist | `make s` |
-| _combined local baseline_ | `python-tests` + `readme-anchor-check` + `tech-stack-check` + `js-validate` | `make ci` (or `make v`) |
+| _combined local baseline_ | `python-tests` + `readme-anchor-check` + `tech-stack-check` + `js-validate` + `style-baseline` | `make ci` (or `make v`) |
 
 For full CI workflow coverage (including markdown lint, YAML validation, secret
 scan, governance gate artifact checks, and governance checklist evidence generation), refer to `.github/workflows/ci.yml`.
@@ -88,6 +96,8 @@ commits:
 
 - `make g` (README/governance anchor validation)
 - `make s` (runtime stack declaration + deployment-readiness file checks)
+- `make lint-py` (Python baseline style checks)
+- `make lint-js` (JS/TS baseline style checks)
 
 Install and use the hooks:
 

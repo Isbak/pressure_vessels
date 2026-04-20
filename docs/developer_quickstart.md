@@ -63,6 +63,8 @@ What it checks:
   - keycloak + temporal
   - neo4j + qdrant + opensearch
   - vLLM + model catalog
+- Python style baseline (`python scripts/check_python_style.py`)
+- JS/TS style baseline (`python scripts/check_js_ts_style.py`)
 
 Override variables when needed:
 
