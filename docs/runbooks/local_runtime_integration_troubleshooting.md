@@ -10,6 +10,12 @@ This runbook covers the DX-006 local frontend/backend integration profile.
 
 ## Environment variables and dependencies
 
+Copy `.env.example` to `.env` before startup to keep profile configuration predictable across hosts:
+
+```bash
+cp .env.example .env
+```
+
 | Variable | Default | Required | Notes |
 | --- | --- | --- | --- |
 | `FRONTEND_PORT` | `3000` | No | Host port mapped to Next.js dev server. |
