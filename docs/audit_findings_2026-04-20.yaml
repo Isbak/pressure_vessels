@@ -105,7 +105,7 @@ findings:
   title: Document and justify safety-critical rounding precision
   severity: critical
   area: calculation
-  status: todo
+  status: done
   file_path: src/pressure_vessels/calculation_pipeline.py
   line_numbers: [933, 988]
   depends_on: []

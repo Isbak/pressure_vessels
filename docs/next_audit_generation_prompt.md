@@ -1,6 +1,6 @@
 # Next Audit Generation Prompt (Findings-Aligned)
 
-The next eligible audit finding is **AF-003** from
+The next eligible audit finding is **AF-004** from
 `docs/audit_findings_2026-04-20.yaml` (severity: critical, status: todo,
 no open dependencies).
 
@@ -14,52 +14,45 @@ Selection rule used:
    docs/audit_findings_2026-04-20.yaml.
 ```
 
-## Prompt — AF-003 Document and justify safety-critical rounding precision (Critical)
+## Prompt — AF-004 Fail closed on MVP geometry defaults in production mode (Critical)
 
 ```text
-You are fixing audit finding AF-003 in the `pressure_vessels` repo.
+You are fixing audit finding AF-004 in the `pressure_vessels` repo.
 
 Problem:
-`src/pressure_vessels/calculation_pipeline.py` uses `round(..., 9)` in multiple
-safety-critical thickness/pressure/utilization calculations without a documented
-rationale in code or ADR. This makes the precision choice non-auditable and
-fragile to unreviewed changes.
+`src/pressure_vessels/calculation_pipeline.py` currently applies MVP geometry
+defaults when `sizing_input` is missing and only emits `warnings.warn(...)`.
+In production this can allow placeholder geometry to flow into certification
+artifacts.
 
 Conventions (apply to every audit-remediation PR):
-- Work on a new branch `claude/fix-AF-003` branched from `main`.
+- Work on a new branch `claude/fix-AF-004` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `pytest`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
 - Do not introduce new runtime dependencies without adding them to
   `pyproject.toml`.
-- Reference this finding in the commit body: `Fixes AF-003 per
+- Reference this finding in the commit body: `Fixes AF-004 per
   docs/audit_findings_2026-04-20.yaml`.
 
 Task:
-1. Read `src/pressure_vessels/calculation_pipeline.py` and identify every
-   direct `round(..., 9)` usage in sizing logic.
-2. Add a single named rounding helper in the calculation module that centralizes
-   this precision behavior and includes a docstring rationale suitable for audit
-   review.
-3. Replace direct `round(..., 9)` calls in safety-critical sizing calculations
-   with the helper (minimal diff, no behavior changes).
-4. Add/extend tests in `tests/test_calculation_pipeline.py` (or focused tests)
-   to pin the helper behavior and at least one boundary-sensitive sizing path.
-5. Add an ADR entry under `docs/decision-log/` documenting:
-   - why 9 decimal places are used,
-   - how this maps to engineering/manufacturing precision expectations,
-   - how future changes must be reviewed.
-6. If needed, minimally update `docs/interfaces/calculation_pipeline_contract.md`
-   to reference the documented rounding policy.
-7. Last step before opening/merging the PR: update
+1. Make missing-geometry behavior fail closed by default via
+   `MissingGeometryInputError`.
+2. Keep MVP default behavior behind an explicit opt-in (`use_mvp_defaults=True`)
+   and ensure this path is visibly tagged for non-production use.
+3. Preserve deterministic behavior for callers/tests that intentionally opt in.
+4. Add/adjust tests to cover default fail-closed and explicit opt-in behavior.
+5. Update docs (including `docs/architecture.md` if needed) to call out the
+   behavior change.
+6. Last step before opening/merging the PR: update
    `docs/next_audit_generation_prompt.md` to the next eligible finding and
-   update AF-003 status in `docs/audit_findings_2026-04-20.yaml`.
+   update AF-004 status in `docs/audit_findings_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
-- MVP default fail-closed behavior (AF-004).
 - Geometry typed input validation (AF-002).
+- Safety-critical rounding rationale (AF-003).
 
-Deliverable: one PR touching only the files needed for AF-003 remediation plus
+Deliverable: one PR touching only files needed for AF-004 remediation plus
 `docs/next_audit_generation_prompt.md` and
 `docs/audit_findings_2026-04-20.yaml` status updates in the final step.
 ```
@@ -68,12 +61,11 @@ Deliverable: one PR touching only the files needed for AF-003 remediation plus
 
 Pulled from `docs/audit_findings_2026-04-20.yaml` order and dependency gating:
 
-1. **AF-003** — Document and justify safety-critical rounding precision *(this prompt)*
-2. **AF-004** — Fail closed on MVP geometry defaults in production mode
-3. **AF-005** — Version and source material allowables from standards packages *(depends on AF-001)*
-4. **AF-006** — Validate governance exception date ordering
-5. **AF-007** — Document and test design_basis deterministic_signature
-6. **AF-008** — Replace inf utilization sentinel *(depends on AF-003)*
+1. **AF-004** — Fail closed on MVP geometry defaults in production mode *(this prompt)*
+2. **AF-005** — Version and source material allowables from standards packages *(depends on AF-001)*
+3. **AF-006** — Validate governance exception date ordering
+4. **AF-007** — Document and test design_basis deterministic_signature
+5. **AF-008** — Replace inf utilization sentinel *(depends on AF-003)*
 
 Regenerate this file after each finding merges by re-applying the selection
 rule above against the updated `status` fields.
