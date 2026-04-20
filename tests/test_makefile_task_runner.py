@@ -55,8 +55,14 @@ def test_bootstrap_remains_canonical_onboarding_entrypoint() -> None:
     assert "pip install --upgrade pip" in output
     assert "pip install -e . pytest" in output
     assert "command -v node" in output
-    assert "npm --prefix services/frontend install" in output
-    assert "npm --prefix services/backend install" in output
+    assert "npm --prefix services/frontend ci" in output
+    assert "npm --prefix services/backend ci" in output
+
+
+def test_js_services_commit_lockfiles_for_deterministic_bootstrap() -> None:
+    """Frontend/backend lockfiles must exist for npm ci deterministic installs."""
+    assert (REPO_ROOT / "services/frontend/package-lock.json").is_file()
+    assert (REPO_ROOT / "services/backend/package-lock.json").is_file()
 
 
 def test_validate_js_supports_explicit_local_skip_override() -> None:
