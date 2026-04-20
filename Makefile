@@ -32,11 +32,11 @@ bootstrap-py:
 	$(PIP) install -e . pytest
 
 bootstrap-js:
-	@command -v node >/dev/null 2>&1 || { echo "Node.js $(NODE_VERSION_PIN).x is required for JS service bootstrap. Install the pinned version from $(NODE_VERSION_PIN_FILE), then rerun 'make bootstrap'."; exit 1; }
+	@command -v node >/dev/null 2>&1 || { echo "Node.js $(NODE_VERSION_PIN).x or newer is required for JS service bootstrap. Install a supported version using $(NODE_VERSION_PIN_FILE) as the minimum baseline, then rerun 'make bootstrap'."; exit 1; }
 	@actual_node_version=$$(node -p "process.versions.node"); \
 	actual_node_major=$$(node -p "process.versions.node.split('.')[0]"); \
-	if [ "$$actual_node_major" != "$(NODE_VERSION_PIN)" ]; then \
-		echo "Unsupported Node.js version $$actual_node_version detected (expected $(NODE_VERSION_PIN).x per $(NODE_VERSION_PIN_FILE))."; \
+	if [ "$$actual_node_major" -lt "$(NODE_VERSION_PIN)" ]; then \
+		echo "Unsupported Node.js version $$actual_node_version detected (requires >= $(NODE_VERSION_PIN).x per $(NODE_VERSION_PIN_FILE))."; \
 		exit 1; \
 	fi
 	@command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS service bootstrap. Install npm, then rerun 'make bootstrap'."; exit 1; }
@@ -61,11 +61,11 @@ validate-js:
 	@if [ "$(JS_VALIDATE)" = "0" ]; then \
 		echo "Skipping JS validation because JS_VALIDATE=0."; \
 	else \
-		command -v node >/dev/null 2>&1 || { echo "Node.js $(NODE_VERSION_PIN).x is required for JS validation. Install the pinned version from $(NODE_VERSION_PIN_FILE), then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
+		command -v node >/dev/null 2>&1 || { echo "Node.js $(NODE_VERSION_PIN).x or newer is required for JS validation. Install a supported version using $(NODE_VERSION_PIN_FILE) as the minimum baseline, then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
 		actual_node_version=$$(node -p "process.versions.node"); \
 		actual_node_major=$$(node -p "process.versions.node.split('.')[0]"); \
-		if [ "$$actual_node_major" != "$(NODE_VERSION_PIN)" ]; then \
-			echo "Unsupported Node.js version $$actual_node_version detected (expected $(NODE_VERSION_PIN).x per $(NODE_VERSION_PIN_FILE))."; \
+		if [ "$$actual_node_major" -lt "$(NODE_VERSION_PIN)" ]; then \
+			echo "Unsupported Node.js version $$actual_node_version detected (requires >= $(NODE_VERSION_PIN).x per $(NODE_VERSION_PIN_FILE))."; \
 			exit 1; \
 		fi; \
 		command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS validation. Install npm, then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
