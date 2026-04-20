@@ -17,7 +17,7 @@ baseline.
 - `make` (GNU Make 3.81+ recommended)
 - Python 3.11+
 - `pip`
-- Node.js 22.x (with `npm`) pinned in `tools/versions.json`
+- Node.js 20.x or newer (with `npm`), with minimum major pinned in `tools/versions.json`
 
 ## 1) Bootstrap (single command)
 

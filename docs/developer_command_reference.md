@@ -27,7 +27,7 @@ Notes:
 - Set `VALIDATE_INFRA=0` when reusing this repository pattern where infra
   boundary files are intentionally out of scope.
 - `make bootstrap` fails fast when `node`/`npm` are missing, enforces the
-  pinned Node major in `tools/versions.json` (currently `22`), and installs
+  minimum Node major in `tools/versions.json` (currently `20`), and installs
   dependencies for both `services/frontend` and `services/backend` via
   deterministic `npm ci`.
 - `make validate` includes `make validate-js`, which runs
@@ -40,7 +40,7 @@ Notes:
     baseline style rules under `services/frontend` and `services/backend`.
 - `make validate` includes both runtime checks and style baseline checks.
 - JS checks fail fast when `node`/`npm` are missing and when the active Node
-  major drifts from `tools/versions.json`; set `JS_VALIDATE=0` to explicitly
+  major is older than the minimum in `tools/versions.json`; set `JS_VALIDATE=0` to explicitly
   skip JS checks in local environments without Node tooling.
 - Lockfile hygiene: regenerate lockfiles with
   `npm --prefix services/frontend install --package-lock-only` and

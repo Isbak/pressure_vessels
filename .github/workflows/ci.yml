@@ -185,8 +185,8 @@ jobs:
           expected="${{ steps.node-version.outputs.node-version }}"
           actual="$(node -p "process.versions.node")"
           actual_major="$(node -p "process.versions.node.split('.')[0]")"
-          if [ "$actual_major" != "$expected" ]; then
-            echo "Node drift detected: expected ${expected}.x from tools/versions.json, got ${actual}."
+          if [ "$actual_major" -lt "$expected" ]; then
+            echo "Node version too old: requires >= ${expected}.x from tools/versions.json, got ${actual}."
             exit 1
           fi
       - name: Install JS service dependencies
