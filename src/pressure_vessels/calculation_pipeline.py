@@ -646,6 +646,7 @@ def _normalize_and_resolve_inputs(
 
 
 def _build_shell_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
+    """Build the UG-27(c)(1) cylindrical-shell internal-pressure thickness check."""
     p = inputs.internal_pressure.value
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
@@ -667,6 +668,7 @@ def _build_shell_check(inputs: SizingCheckInput, near_limit_threshold: float) ->
 
 
 def _build_head_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
+    """Build the UG-32(c) ellipsoidal-head internal-pressure thickness check."""
     p = inputs.internal_pressure.value
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
@@ -688,6 +690,7 @@ def _build_head_check(inputs: SizingCheckInput, near_limit_threshold: float) -> 
 
 
 def _build_nozzle_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
+    """Build the UG-45 nozzle-neck internal-pressure minimum-thickness check."""
     p = inputs.internal_pressure.value
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
@@ -709,6 +712,7 @@ def _build_nozzle_check(inputs: SizingCheckInput, near_limit_threshold: float) -
 
 
 def _build_shell_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
+    """Build the UG-27(c)(1) cylindrical-shell MAWP back-calculation check."""
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
     d = inputs.shell_inside_diameter.value
@@ -732,6 +736,7 @@ def _build_shell_mawp_check(inputs: SizingCheckInput, near_limit_threshold: floa
 
 
 def _build_head_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
+    """Build the UG-32(c) ellipsoidal-head MAWP back-calculation check."""
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
     d = inputs.head_inside_diameter.value
@@ -755,6 +760,7 @@ def _build_head_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float
 
 
 def _build_nozzle_mawp_check(inputs: SizingCheckInput, near_limit_threshold: float) -> CalculationRecord:
+    """Build the UG-45 nozzle-neck MAWP back-calculation check."""
     s = inputs.allowable_stress.value
     e = inputs.joint_efficiency
     d = inputs.nozzle_inside_diameter.value
@@ -780,6 +786,7 @@ def _build_nozzle_mawp_check(inputs: SizingCheckInput, near_limit_threshold: flo
 def _build_external_pressure_checks(
     inputs: SizingCheckInput, near_limit_threshold: float
 ) -> list[CalculationRecord]:
+    """Build paired UG-28 external-pressure checks for shell and head components."""
     if inputs.external_pressure is None:
         return []
 
@@ -814,6 +821,7 @@ def _build_reinforcement_checks(
     parent_thickness_checks: list[CalculationRecord],
     near_limit_threshold: float,
 ) -> list[CalculationRecord]:
+    """Build UG-37 opening-reinforcement area checks for shell and head nozzle attachments."""
     parent_index = {record.component: record for record in parent_thickness_checks}
     return [
         _build_ug37_reinforcement_check(
@@ -859,6 +867,7 @@ def _build_ug37_reinforcement_check(
     corrosion_allowance_m: float,
     near_limit_threshold: float,
 ) -> CalculationRecord:
+    """Build one UG-37 area-replacement check for a nozzle opening in a parent component."""
     parent_excess_m = max(parent_provided_thickness_m - parent_required_thickness_m, 0.0)
     nozzle_excess_m = max(nozzle_provided_thickness_m - nozzle_required_thickness_m, 0.0)
 
@@ -907,6 +916,7 @@ def _build_ug28_external_check(
     p_external_pa: float,
     near_limit_threshold: float,
 ) -> CalculationRecord:
+    """Build one UG-28 external-pressure capacity check using the deterministic A/B-factor route."""
     # Deterministic UG-28 chart/equation route placeholder:
     # A-factor is computed from geometry; B-factor is selected via a bounded
     # monotonic interpolation to represent a chart lookup deterministically.
