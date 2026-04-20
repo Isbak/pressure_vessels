@@ -29,8 +29,14 @@ Notes:
   run `make bootstrap && make validate` inside the container.
 
 - `make stack` includes infra boundary-file presence checks by default.
+- By default, `make stack` reads infra boundary file requirements from
+  `infra/platform/infra_boundary_files.manifest`.
 - Set `VALIDATE_INFRA=0` when reusing this repository pattern where infra
   boundary files are intentionally out of scope.
+- Set `INFRA_BOUNDARY_MANIFEST=/path/to/infra_boundary_files.manifest` to
+  repoint boundary checks in downstream repositories.
+- `INFRA_BOUNDARY_FILES` remains available as an explicit list override for
+  compatibility with existing local workflows.
 - `make bootstrap` fails fast when `node`/`npm` are missing, enforces the
   minimum Node major in `tools/versions.json` (currently `20`), and installs
   dependencies for both `services/frontend` and `services/backend` via

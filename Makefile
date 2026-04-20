@@ -7,23 +7,8 @@ VALIDATE_INFRA ?= 1
 JS_VALIDATE ?= 1
 NODE_VERSION_PIN_FILE ?= tools/versions.json
 NODE_VERSION_PIN ?= $(shell $(PYTHON) -c "import json, pathlib; print(json.loads(pathlib.Path('$(NODE_VERSION_PIN_FILE)').read_text(encoding='utf-8'))['node'])")
-
-
-INFRA_BOUNDARY_FILES ?= \
-	infra/platform/environment.bootstrap.yaml \
-	infra/platform/iac/module.primitives.yaml \
-	infra/platform/secrets/module.boundaries.yaml \
-	infra/platform/observability/module.boundaries.yaml \
-	infra/platform/postgresql/module.boundaries.yaml \
-	infra/platform/redis/module.boundaries.yaml \
-	infra/platform/runtime/module.boundaries.yaml \
-	infra/platform/keycloak/module.boundaries.yaml \
-	infra/platform/temporal/module.boundaries.yaml \
-	infra/platform/neo4j/module.boundaries.yaml \
-	infra/platform/qdrant/module.boundaries.yaml \
-	infra/platform/opensearch/module.boundaries.yaml \
-	infra/platform/vllm/module.boundaries.yaml \
-	infra/platform/model-catalog/module.boundaries.yaml
+INFRA_BOUNDARY_MANIFEST ?= infra/platform/infra_boundary_files.manifest
+INFRA_BOUNDARY_FILES ?=
 
 bootstrap: bootstrap-py bootstrap-js
 
@@ -52,9 +37,19 @@ governance:
 stack:
 	PYTHONPATH=src $(PYTHON) -m pressure_vessels.dev_cli check-tech-stack
 	@if [ "$(VALIDATE_INFRA)" = "1" ]; then \
-		for file in $(INFRA_BOUNDARY_FILES); do \
-			test -f "$$file" || { echo "Missing required infra file: $$file"; exit 1; }; \
-		done; \
+		if [ -n "$(INFRA_BOUNDARY_FILES)" ]; then \
+			for file in $(INFRA_BOUNDARY_FILES); do \
+				test -f "$$file" || { echo "Missing required infra file: $$file"; exit 1; }; \
+			done; \
+		else \
+			test -f "$(INFRA_BOUNDARY_MANIFEST)" || { echo "Missing required infra boundary manifest: $(INFRA_BOUNDARY_MANIFEST)"; exit 1; }; \
+			while IFS= read -r file || [ -n "$$file" ]; do \
+				case "$$file" in \
+					''|\#*) continue ;; \
+				esac; \
+				test -f "$$file" || { echo "Missing required infra file: $$file"; exit 1; }; \
+			done < "$(INFRA_BOUNDARY_MANIFEST)"; \
+		fi; \
 	fi
 
 validate-js:

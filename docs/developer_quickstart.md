@@ -92,7 +92,10 @@ What it checks:
 Override variables when needed:
 
 - `VALIDATE_INFRA=0` to skip infra boundary checks for non-platform projects
-- `INFRA_BOUNDARY_FILES="..."` to provide a project-specific infra file list
+- `INFRA_BOUNDARY_MANIFEST=/path/to/project-boundary-files.manifest` to point
+  at a project-specific boundary file manifest (one path per line)
+- `INFRA_BOUNDARY_FILES="..."` to pass an explicit space-delimited file list
+  (legacy override compatibility)
 
 ## Governance checks to keep in view
 
@@ -141,7 +144,7 @@ downstream repositories can track drift from this baseline.
 After scaffolding, wire your project-specific paths and commands:
 
 1. Keep `validate` as the single local baseline command.
-2. Point `INFRA_BOUNDARY_FILES` at that project's boundary manifests.
+2. Point `INFRA_BOUNDARY_MANIFEST` at that project's boundary-file manifest.
 3. Keep policy checks in `validate` aligned with CI-required checks.
 4. If infra does not apply, set `VALIDATE_INFRA=0` and document why in the
    project quickstart.
