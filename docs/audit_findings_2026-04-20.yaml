@@ -310,7 +310,7 @@ findings:
   title: Add concurrent-write stress test for standards ingestion
   severity: medium
   area: quality
-  status: todo
+  status: done
   file_path: tests/
   line_numbers: []
   depends_on:
