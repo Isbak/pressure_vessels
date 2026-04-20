@@ -179,12 +179,21 @@ def _validate_exception_item(*, index: int, item: dict[str, Any]) -> None:
         )
 
     try:
-        _parse_iso8601(item["approved_at"])
-        _parse_iso8601(item["expires_at"])
+        approved_at = _parse_iso8601(item["approved_at"])
+        expires_at = _parse_iso8601(item["expires_at"])
     except ValueError as error:
         raise ValueError(
             f"Policy exceptions document validation failed: exceptions[{index}] timestamps must be ISO-8601."
         ) from error
+
+    if approved_at == expires_at:
+        raise ValueError(
+            f"Policy exceptions document validation failed: exceptions[{index}] approved_at must not equal expires_at."
+        )
+    if approved_at > expires_at:
+        raise ValueError(
+            f"Policy exceptions document validation failed: exceptions[{index}] approved_at must be earlier than expires_at."
+        )
 
 
 def _eligible_exceptions(

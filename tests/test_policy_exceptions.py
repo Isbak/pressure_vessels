@@ -44,6 +44,69 @@ def test_policy_exceptions_schema_validation_rejects_missing_required_fields() -
         governance_check._validate_exceptions_document(document, _read_schema())
 
 
+def test_policy_exceptions_schema_validation_rejects_equal_window_dates() -> None:
+    document = {
+        "version": 1,
+        "exceptions": [
+            {
+                "id": "EX-2026-005",
+                "gate": "secret-scan",
+                "scope": ["docs/**"],
+                "justification": "Window should not be zero-length.",
+                "approver": "@security-reviewer",
+                "approved_at": "2026-04-18T00:00:00Z",
+                "expires_at": "2026-04-18T00:00:00Z",
+                "linked_backlog_id": "BL-122",
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match=r"approved_at must not equal expires_at"):
+        governance_check._validate_exceptions_document(document, _read_schema())
+
+
+def test_policy_exceptions_schema_validation_rejects_reversed_window_dates() -> None:
+    document = {
+        "version": 1,
+        "exceptions": [
+            {
+                "id": "EX-2026-006",
+                "gate": "secret-scan",
+                "scope": ["docs/**"],
+                "justification": "Window should not run backward.",
+                "approver": "@security-reviewer",
+                "approved_at": "2026-04-19T00:00:00Z",
+                "expires_at": "2026-04-18T00:00:00Z",
+                "linked_backlog_id": "BL-123",
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match=r"approved_at must be earlier than expires_at"):
+        governance_check._validate_exceptions_document(document, _read_schema())
+
+
+def test_policy_exceptions_schema_validation_rejects_malformed_dates() -> None:
+    document = {
+        "version": 1,
+        "exceptions": [
+            {
+                "id": "EX-2026-007",
+                "gate": "secret-scan",
+                "scope": ["docs/**"],
+                "justification": "Malformed timestamp should fail strict parsing.",
+                "approver": "@security-reviewer",
+                "approved_at": "2026/04/18",
+                "expires_at": "2026-05-18T00:00:00Z",
+                "linked_backlog_id": "BL-124",
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match=r"timestamps must be ISO-8601"):
+        governance_check._validate_exceptions_document(document, _read_schema())
+
+
 def test_policy_exception_expiry_and_scope_matching() -> None:
     exception = governance_check.PolicyException(
         id="EX-2026-002",

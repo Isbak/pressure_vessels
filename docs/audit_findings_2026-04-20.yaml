@@ -211,7 +211,7 @@ findings:
   title: Validate governance exception date ordering
   severity: high
   area: governance
-  status: todo
+  status: done
   file_path: scripts/check_ci_governance.py
   line_numbers: [181, 187, 249, 264]
   depends_on: []
