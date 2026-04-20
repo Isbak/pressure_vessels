@@ -37,9 +37,10 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 13. `infra/platform/opensearch/module.boundaries.yaml` defines OpenSearch index ownership, retention lifecycle, and access ownership boundaries.
 14. `infra/platform/vllm/module.boundaries.yaml` defines vLLM endpoint ownership, capacity envelope, and access ownership boundaries.
 15. `infra/platform/model-catalog/module.boundaries.yaml` defines approved model families, version policy, and vLLM consumption contract boundaries.
-16. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed`, `scaffolded`, or `planned`.
-17. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `scaffolded` until Terraform/OpenTofu HCL exists under `infra/platform/iac`, then `deployed`.
-18. `docs/runbooks/preview_environment_lifecycle_operations.md` defines deterministic ephemeral preview launch/teardown controls for pull requests.
+16. `infra/platform/infra_boundary_files.manifest` is the make-based stack check source of truth for required infra boundary files (one path per line).
+17. `scripts/check_tech_stack.py` enforces that every declared stack component is mapped and marked `deployed`, `scaffolded`, or `planned`.
+18. `scripts/check_tech_stack.py` deterministically requires `iac-opentofu-or-terraform` to be `scaffolded` until Terraform/OpenTofu HCL exists under `infra/platform/iac`, then `deployed`.
+19. `docs/runbooks/preview_environment_lifecycle_operations.md` defines deterministic ephemeral preview launch/teardown controls for pull requests.
 
 ## Deployment Readiness Checklist
 

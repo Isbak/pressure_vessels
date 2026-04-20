@@ -40,6 +40,7 @@ def test_aliases_expand_to_expected_workflows() -> None:
     assert "pytest -q" in _run_make("t", dry_run=True)
     assert "PYTHONPATH=src python -m pressure_vessels.dev_cli check-readme-anchors" in _run_make("g", dry_run=True)
     assert "PYTHONPATH=src python -m pressure_vessels.dev_cli check-tech-stack" in _run_make("s", dry_run=True)
+    assert "infra/platform/infra_boundary_files.manifest" in _run_make("s", dry_run=True)
     assert "pytest -q" in _run_make("v", dry_run=True)
     assert "npm --prefix services/frontend run smoke" in _run_make("v", dry_run=True)
     assert "npm --prefix services/backend run smoke" in _run_make("v", dry_run=True)
@@ -79,3 +80,16 @@ def test_validate_js_supports_explicit_local_skip_override() -> None:
         text=True,
     )
     assert "Skipping JS validation because JS_VALIDATE=0." in skipped.stdout
+
+
+def test_stack_supports_manifest_pointer_override() -> None:
+    """Downstream repositories can repoint infra checks via a single pointer."""
+    output = subprocess.run(
+        ["make", "-n", "INFRA_BOUNDARY_MANIFEST=custom/infra.manifest", "s"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+    assert "custom/infra.manifest" in output

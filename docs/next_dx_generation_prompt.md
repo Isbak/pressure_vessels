@@ -1,18 +1,17 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-014 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-015 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-014 in the `pressure_vessels` repo.
+You are implementing DXR-015 in the `pressure_vessels` repo.
 
 Problem:
-`INFRA_BOUNDARY_FILES` is currently hard-coded in the Makefile as a long inline
-list. Every module change requires editing Makefile logic, and downstream
-repositories reusing this baseline cannot swap in their own infra boundary set
-with a single pointer.
+`scripts/check_tech_stack.py` currently parses YAML via ad-hoc prefix/string
+logic instead of a robust YAML parser. The current behavior is fragile for
+schema evolution and hard to reuse across repositories.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-014` branched from `main`.
+- Work on a new branch `claude/fix-DXR-015` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -20,25 +19,25 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-014 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-015 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Replace inline `INFRA_BOUNDARY_FILES` in Make-based validation with a
-   data-driven source (registry or dedicated manifest).
-2. Preserve an override mechanism for downstream reuse via one pointer
-   (env var/config/flag).
-3. Keep `make s` / `make validate` behavior and existing test expectations
-   intact.
-4. Update docs that describe stack checks and boundary file ownership.
+1. Replace ad-hoc YAML parsing in `scripts/check_tech_stack.py` with a robust
+   parser implementation.
+2. Add the parser dependency to `pyproject.toml` and keep install paths
+   consistent with existing tooling.
+3. Add/adjust tests to cover prior edge cases and at least one schema variation
+   (comments, quoted values, or alternate indentation).
+4. Keep the current CLI behavior and error semantics intact where possible.
 5. Last step before opening/merging the PR: update
    `docs/next_dx_generation_prompt.md` to the next eligible DXR item and set
-   DXR-014 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
+   DXR-015 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
 - Rewriting unrelated governance or CI policies.
-- Expanding infra module scope beyond boundary file derivation.
+- Broad refactors outside `check_tech_stack.py` + directly related tests/docs.
 
-Deliverable: one PR touching only the files needed for DXR-014 remediation
+Deliverable: one PR touching only the files needed for DXR-015 remediation
 plus the prompt/status files in the final step.
 ```
 
@@ -59,5 +58,5 @@ Pick the first item with `status: todo` whose dependencies are all `done`.
 11. **DXR-011** — Make risk-label heuristics declarative and project-overridable (`done`, deps: DXR-010)
 12. **DXR-012** — Provide a baseline scaffold for AGENT_GOVERNANCE cross-project adoption (`done`, deps: DXR-009, DXR-010)
 13. **DXR-013** — Ship devcontainer and Codespaces configuration for one-click onboarding (`done`, deps: DXR-001, DXR-006)
-14. **DXR-014** — Replace hard-coded INFRA_BOUNDARY_FILES with a data-driven manifest (`todo`, deps: none)
+14. **DXR-014** — Replace hard-coded INFRA_BOUNDARY_FILES with a data-driven manifest (`done`, deps: none)
 15. **DXR-015** — Replace ad-hoc YAML parsing in check_tech_stack.py with a robust parser (`todo`, deps: none)

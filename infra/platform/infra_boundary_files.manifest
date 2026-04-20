@@ -1,0 +1,14 @@
+infra/platform/environment.bootstrap.yaml
+infra/platform/iac/module.primitives.yaml
+infra/platform/secrets/module.boundaries.yaml
+infra/platform/observability/module.boundaries.yaml
+infra/platform/postgresql/module.boundaries.yaml
+infra/platform/redis/module.boundaries.yaml
+infra/platform/runtime/module.boundaries.yaml
+infra/platform/keycloak/module.boundaries.yaml
+infra/platform/temporal/module.boundaries.yaml
+infra/platform/neo4j/module.boundaries.yaml
+infra/platform/qdrant/module.boundaries.yaml
+infra/platform/opensearch/module.boundaries.yaml
+infra/platform/vllm/module.boundaries.yaml
+infra/platform/model-catalog/module.boundaries.yaml
