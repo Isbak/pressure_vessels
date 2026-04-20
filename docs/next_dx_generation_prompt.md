@@ -1,19 +1,19 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-009 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-011 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-009 in the `pressure_vessels` repo.
+You are implementing DXR-011 in the `pressure_vessels` repo.
 
 Problem:
-AGENT_GOVERNANCE §13 requires other projects to preserve governance controls,
-but `.github/workflows/ci.yml` is a monolithic workflow coupled to this
-repository's script paths. Adopters must copy-paste the entire workflow and
-edit script invocations, which contradicts the "Portable by default" principle
-and makes drift between adopting projects inevitable.
+The risk-label heuristic is currently encoded directly in
+`scripts/suggest_risk_label.py`. Downstream projects have different
+high-risk path patterns but cannot override behavior without forking the
+script, which conflicts with the "Portable by default" and
+"Single source of truth" principles.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-009` branched from `main`.
+- Work on a new branch `claude/fix-DXR-011` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -21,26 +21,24 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-009 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-011 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Extract core governance jobs (readme-anchor-check, tech-stack-check,
-   secret-scan, governance-gate, risk-label-suggestion) into a composite
-   action or reusable workflow (`workflow_call`).
-2. Expose repository-specific paths (backlog, registry, exceptions, etc.)
-   as workflow inputs instead of hard-coded values.
-3. Migrate `.github/workflows/ci.yml` to call the reusable unit while
-   preserving current CI behavior.
-4. Document a usage example for another repository adopting the reusable
-   governance workflow/action.
+1. Move risk-label thresholds and path patterns into a committed
+   declarative config file under `docs/governance/`.
+2. Update `scripts/suggest_risk_label.py` to load that config (with a
+   documented default fallback when no override is provided).
+3. Add tests covering at least one override scenario proving downstream
+   projects can customize classification.
+4. Update developer docs with how to provide override config.
 5. Last step before opening/merging the PR: update
    `docs/next_dx_generation_prompt.md` to the next eligible DXR item and set
-   DXR-009 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
+   DXR-011 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
 - Implementing full production IaC modules for every platform dependency.
 
-Deliverable: one PR touching only the files needed for DXR-009 remediation
+Deliverable: one PR touching only the files needed for DXR-011 remediation
 plus the prompt/status files in the final step.
 ```
 
@@ -56,7 +54,7 @@ Pick the first item with `status: todo` whose dependencies are all `done`.
 6. **DXR-006** — Pin Node toolchain version alongside tools/versions.json (`done`, deps: none)
 7. **DXR-007** — Add CODEOWNERS routing to operationalize Level 2 governance (`done`, deps: none)
 8. **DXR-008** — Reconcile platform IaC module deployment status with real artifacts (`done`, deps: none)
-9. **DXR-009** — Extract reusable GitHub Actions for adopters of the governance baseline (`todo`, deps: DXR-010)
+9. **DXR-009** — Extract reusable GitHub Actions for adopters of the governance baseline (`done`, deps: DXR-010)
 10. **DXR-010** — Package governance scripts as a reusable Python module with an entry point (`done`, deps: none)
 11. **DXR-011** — Make risk-label heuristics declarative and project-overridable (`todo`, deps: DXR-010)
 12. **DXR-012** — Provide a baseline scaffold for AGENT_GOVERNANCE cross-project adoption (`todo`, deps: DXR-009, DXR-010)

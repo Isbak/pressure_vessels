@@ -322,7 +322,7 @@ items:
     area: platform-operations
     phase: 'DX Audit 2026-04-20'
     priority: P1
-    status: todo
+    status: done
     effort: M
     depends_on:
       - DXR-010

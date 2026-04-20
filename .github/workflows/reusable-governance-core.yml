@@ -1,0 +1,271 @@
+name: Reusable Governance Core
+
+on:
+  workflow_call:
+    inputs:
+      ci_policy_path:
+        description: Path to CI governance policy JSON.
+        required: false
+        type: string
+        default: docs/governance/ci_governance_policy.v1.json
+      policy_exceptions_path:
+        description: Path to policy exceptions JSON.
+        required: false
+        type: string
+        default: .github/governance/policy_exceptions.v1.json
+      exceptions_schema_path:
+        description: Path to policy exceptions schema JSON.
+        required: false
+        type: string
+        default: docs/governance/policy_exceptions_schema.v1.json
+      backlog_path:
+        description: Path to development backlog YAML.
+        required: false
+        type: string
+        default: docs/development_backlog.yaml
+      tech_stack_registry_path:
+        description: Path to platform runtime stack registry YAML.
+        required: false
+        type: string
+        default: docs/platform_runtime_stack_registry.yaml
+      environment_bootstrap_path:
+        description: Path to environment bootstrap manifest YAML.
+        required: false
+        type: string
+        default: infra/platform/environment.bootstrap.yaml
+      policy_backlog_path:
+        description: Path to policy backlog YAML.
+        required: false
+        type: string
+        default: docs/governance/policy_backlog.yaml
+      changed_paths_artifact_path:
+        description: Artifact path for changed files list.
+        required: false
+        type: string
+        default: artifacts/ci/changed-paths.txt
+      risk_suggestion_json_path:
+        description: Artifact path for risk label suggestion payload.
+        required: false
+        type: string
+        default: artifacts/ci/RiskLabelSuggestion.v1.json
+      risk_suggestion_summary_path:
+        description: Artifact path for risk label suggestion summary.
+        required: false
+        type: string
+        default: artifacts/ci/RiskLabelSuggestion.summary.md
+      raw_needs_json_path:
+        description: Artifact path for merged needs payload.
+        required: false
+        type: string
+        default: artifacts/ci/raw-needs.json
+      job_results_path:
+        description: Artifact path for deterministic gate payload.
+        required: false
+        type: string
+        default: artifacts/ci/job-results.json
+      gate_report_path:
+        description: Artifact path for governance gate report.
+        required: false
+        type: string
+        default: artifacts/ci/GovernanceGateReport.v1.json
+      checklist_evidence_path:
+        description: Artifact path for governance checklist evidence.
+        required: false
+        type: string
+        default: artifacts/ci/GovernanceChecklistEvidence.v1.json
+      upstream_needs_json:
+        description: JSON object from caller job needs (toJson(needs)).
+        required: false
+        type: string
+        default: '{}'
+
+jobs:
+  readme-anchor-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate backlog README anchor consistency
+        run: |
+          pv-check-readme-anchors "${{ inputs.backlog_path }}"
+
+  tech-stack-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate tech stack and infra boundary manifests
+        run: |
+          pv-check-tech-stack \
+            "${{ inputs.tech_stack_registry_path }}" \
+            "${{ inputs.environment_bootstrap_path }}" \
+            "${{ inputs.policy_backlog_path }}"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for hardcoded secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          base: ${{ github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event.pull_request.head.sha || github.sha }}
+          extra_args: --results=verified,unknown
+
+  risk-label-suggestion:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read CI governance policy
+        id: policy
+        run: |
+          retention="$(jq -r '.artifact_retention_days' "${{ inputs.ci_policy_path }}")"
+          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
+      - name: Determine changed paths
+        run: |
+          mkdir -p "$(dirname "${{ inputs.changed_paths_artifact_path }}")"
+          git diff --name-only \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}" \
+            > "${{ inputs.changed_paths_artifact_path }}"
+      - name: Build advisory risk label suggestion
+        run: |
+          pv-suggest-risk-label \
+            "${{ inputs.changed_paths_artifact_path }}" \
+            "${{ inputs.risk_suggestion_json_path }}" \
+            "${{ inputs.risk_suggestion_summary_path }}"
+      - name: Publish risk suggestion summary
+        run: |
+          cat "${{ inputs.risk_suggestion_summary_path }}" >> "${GITHUB_STEP_SUMMARY}"
+      - name: Upload risk suggestion artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: risk-label-suggestion
+          path: |
+            ${{ inputs.changed_paths_artifact_path }}
+            ${{ inputs.risk_suggestion_json_path }}
+            ${{ inputs.risk_suggestion_summary_path }}
+          retention-days: ${{ steps.policy.outputs.retention }}
+
+  governance-gate:
+    if: always()
+    needs:
+      - readme-anchor-check
+      - risk-label-suggestion
+      - secret-scan
+      - tech-stack-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read CI governance policy
+        id: policy
+        run: |
+          retention="$(jq -r '.artifact_retention_days' "${{ inputs.ci_policy_path }}")"
+          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Determine changed paths
+        id: changes
+        run: |
+          mkdir -p "$(dirname "${{ inputs.changed_paths_artifact_path }}")"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+          if [ -n "$base_sha" ] && git cat-file -e "$base_sha" 2>/dev/null; then
+            git diff --name-only "$base_sha" "$head_sha" > "${{ inputs.changed_paths_artifact_path }}"
+          else
+            : > "${{ inputs.changed_paths_artifact_path }}"
+          fi
+      - name: Build deterministic CI gate result payload
+        run: |
+          mkdir -p "$(dirname "${{ inputs.raw_needs_json_path }}")"
+          cat > "${{ inputs.raw_needs_json_path }}" <<'JSON'
+          {
+            "internal": ${{ toJson(needs) }},
+            "upstream": ${{ inputs.upstream_needs_json }}
+          }
+          JSON
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          raw = json.loads(Path("${{ inputs.raw_needs_json_path }}").read_text(encoding="utf-8"))
+
+          merged: dict[str, str] = {}
+          for scope in ("upstream", "internal"):
+              jobs = raw.get(scope, {})
+              if isinstance(jobs, dict):
+                  for job_name, details in jobs.items():
+                      if isinstance(details, dict) and "result" in details:
+                          merged[job_name] = str(details["result"])
+
+          changed_paths_file = Path("${{ inputs.changed_paths_artifact_path }}")
+          changed_paths: list[str] = []
+          if changed_paths_file.exists():
+              changed_paths = [
+                  line.strip()
+                  for line in changed_paths_file.read_text(encoding="utf-8").splitlines()
+                  if line.strip()
+              ]
+
+          payload: dict[str, object] = dict(sorted(merged.items()))
+          payload["_changed_paths"] = changed_paths
+          Path("${{ inputs.job_results_path }}").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+      - name: Enforce governance policy gates
+        run: |
+          pv-check-ci-governance \
+            "${{ inputs.ci_policy_path }}" \
+            "${{ inputs.policy_exceptions_path }}" \
+            "${{ inputs.job_results_path }}" \
+            "${{ inputs.gate_report_path }}" \
+            --exceptions-schema "${{ inputs.exceptions_schema_path }}"
+      - name: Build governance checklist evidence payload
+        if: always()
+        run: |
+          pv-generate-governance-checklist-evidence \
+            "${{ inputs.job_results_path }}" \
+            "${{ inputs.gate_report_path }}" \
+            "${{ inputs.checklist_evidence_path }}"
+      - name: Upload governance audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-gate-report
+          path: |
+            ${{ inputs.job_results_path }}
+            ${{ inputs.gate_report_path }}
+            ${{ inputs.checklist_evidence_path }}
+            ${{ inputs.changed_paths_artifact_path }}
+          retention-days: ${{ steps.policy.outputs.retention }}

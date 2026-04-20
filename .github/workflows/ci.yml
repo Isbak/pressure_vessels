@@ -124,51 +124,6 @@ jobs:
         run: |
           pytest -q tests/test_contract_interfaces_dx009.py
 
-  tech-stack-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Validate tech stack and infra boundary manifests
-        run: |
-          make s
-
-  js-validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Read pinned Node version
-        id: node-version
-        run: |
-          node_version="$(jq -r '.node' tools/versions.json)"
-          if [ "$node_version" = "null" ] || [ -z "$node_version" ]; then
-            echo "tools/versions.json is missing required .node pin"
-            exit 1
-          fi
-          echo "node-version=$node_version" >> "${GITHUB_OUTPUT}"
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ steps.node-version.outputs.node-version }}
-      - name: Assert pinned Node major is active
-        run: |
-          expected="${{ steps.node-version.outputs.node-version }}"
-          actual="$(node -p "process.versions.node")"
-          actual_major="$(node -p "process.versions.node.split('.')[0]")"
-          if [ "$actual_major" != "$expected" ]; then
-            echo "Node drift detected: expected ${expected}.x from tools/versions.json, got ${actual}."
-            exit 1
-          fi
-      - name: Install JS service dependencies
-        run: |
-          make bootstrap-js
-      - name: Run JS validation checks
-        run: |
-          make validate-js
-
   style-baseline:
     runs-on: ubuntu-latest
     steps:
@@ -208,17 +163,38 @@ jobs:
             echo "No HCL under infra/platform/iac yet; iac-validate is advisory for scaffold-only modules."
           fi
 
-  readme-anchor-check:
+  js-validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Validate backlog README anchor consistency
+      - name: Read pinned Node version
+        id: node-version
         run: |
-          python scripts/check_readme_anchors.py
+          node_version="$(jq -r '.node' tools/versions.json)"
+          if [ "$node_version" = "null" ] || [ -z "$node_version" ]; then
+            echo "tools/versions.json is missing required .node pin"
+            exit 1
+          fi
+          echo "node-version=$node_version" >> "${GITHUB_OUTPUT}"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node-version.outputs.node-version }}
+      - name: Assert pinned Node major is active
+        run: |
+          expected="${{ steps.node-version.outputs.node-version }}"
+          actual="$(node -p "process.versions.node")"
+          actual_major="$(node -p "process.versions.node.split('.')[0]")"
+          if [ "$actual_major" != "$expected" ]; then
+            echo "Node drift detected: expected ${expected}.x from tools/versions.json, got ${actual}."
+            exit 1
+          fi
+      - name: Install JS service dependencies
+        run: |
+          make bootstrap-js
+      - name: Run JS validation checks
+        run: |
+          make validate-js
 
   markdown-links:
     runs-on: ubuntu-latest
@@ -235,61 +211,6 @@ jobs:
             --no-progress --verbose --max-retries 3 --retry-wait-time 2
             README.md AGENT_GOVERNANCE.md docs/**/*.md .github/pull_request_template.md
 
-  secret-scan:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Scan for hardcoded secrets
-        uses: trufflesecurity/trufflehog@main
-        with:
-          base: ${{ github.event.pull_request.base.sha || '' }}
-          head: ${{ github.event.pull_request.head.sha || github.sha }}
-          extra_args: --results=verified,unknown
-
-  risk-label-suggestion:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Read CI governance policy
-        id: policy
-        run: |
-          retention="$(jq -r '.artifact_retention_days' docs/governance/ci_governance_policy.v1.json)"
-          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
-      - name: Determine changed paths
-        run: |
-          mkdir -p artifacts/ci
-          git diff --name-only \
-            "${{ github.event.pull_request.base.sha }}" \
-            "${{ github.event.pull_request.head.sha }}" \
-            > artifacts/ci/changed-paths.txt
-      - name: Build advisory risk label suggestion
-        run: |
-          python scripts/suggest_risk_label.py \
-            artifacts/ci/changed-paths.txt \
-            artifacts/ci/RiskLabelSuggestion.v1.json \
-            artifacts/ci/RiskLabelSuggestion.summary.md
-      - name: Publish risk suggestion summary
-        run: |
-          cat artifacts/ci/RiskLabelSuggestion.summary.md >> "${GITHUB_STEP_SUMMARY}"
-      - name: Upload risk suggestion artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: risk-label-suggestion
-          path: |
-            artifacts/ci/changed-paths.txt
-            artifacts/ci/RiskLabelSuggestion.v1.json
-            artifacts/ci/RiskLabelSuggestion.summary.md
-          retention-days: ${{ steps.policy.outputs.retention }}
-
   governance-gate:
     if: always()
     needs:
@@ -302,97 +223,14 @@ jobs:
       - js-validate
       - style-baseline
       - python-tests
-      - readme-anchor-check
-      - secret-scan
-      - tech-stack-check
       - yaml-validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Read CI governance policy
-        id: policy
-        run: |
-          retention="$(jq -r '.artifact_retention_days' docs/governance/ci_governance_policy.v1.json)"
-          echo "retention=${retention}" >> "${GITHUB_OUTPUT}"
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: pip
-      - name: Install package
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-      - name: Determine changed paths
-        id: changes
-        run: |
-          mkdir -p artifacts/ci
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base_sha="${{ github.event.pull_request.base.sha }}"
-            head_sha="${{ github.event.pull_request.head.sha }}"
-          else
-            base_sha="${{ github.event.before }}"
-            head_sha="${{ github.sha }}"
-          fi
-          if [ -n "$base_sha" ] && git cat-file -e "$base_sha" 2>/dev/null; then
-            git diff --name-only "$base_sha" "$head_sha" > artifacts/ci/changed-paths.txt
-          else
-            : > artifacts/ci/changed-paths.txt
-          fi
-      - name: Build deterministic CI gate result payload
-        run: |
-          mkdir -p artifacts/ci
-          cat > artifacts/ci/raw-needs.json <<'JSON'
-          ${{ toJson(needs) }}
-          JSON
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          raw = json.loads(Path("artifacts/ci/raw-needs.json").read_text(encoding="utf-8"))
-          gate_results = {job_name: details["result"] for job_name, details in sorted(raw.items())}
-
-          changed_paths_file = Path("artifacts/ci/changed-paths.txt")
-          changed_paths: list[str] = []
-          if changed_paths_file.exists():
-              changed_paths = [
-                  line.strip()
-                  for line in changed_paths_file.read_text(encoding="utf-8").splitlines()
-                  if line.strip()
-              ]
-
-          payload: dict[str, object] = dict(gate_results)
-          payload["_changed_paths"] = changed_paths
-          Path("artifacts/ci/job-results.json").write_text(
-              json.dumps(payload, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          PY
-      - name: Enforce governance policy gates
-        run: |
-          pv-check-ci-governance \
-            docs/governance/ci_governance_policy.v1.json \
-            .github/governance/policy_exceptions.v1.json \
-            artifacts/ci/job-results.json \
-            artifacts/ci/GovernanceGateReport.v1.json \
-            --exceptions-schema docs/governance/policy_exceptions_schema.v1.json
-      - name: Build governance checklist evidence payload
-        if: always()
-        run: |
-          pv-generate-governance-checklist-evidence \
-            artifacts/ci/job-results.json \
-            artifacts/ci/GovernanceGateReport.v1.json \
-            artifacts/ci/GovernanceChecklistEvidence.v1.json
-      - name: Upload governance audit artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: governance-gate-report
-          path: |
-            artifacts/ci/job-results.json
-            artifacts/ci/GovernanceGateReport.v1.json
-            artifacts/ci/GovernanceChecklistEvidence.v1.json
-            artifacts/ci/changed-paths.txt
-          retention-days: ${{ steps.policy.outputs.retention }}
+    uses: ./.github/workflows/reusable-governance-core.yml
+    with:
+      ci_policy_path: docs/governance/ci_governance_policy.v1.json
+      policy_exceptions_path: .github/governance/policy_exceptions.v1.json
+      exceptions_schema_path: docs/governance/policy_exceptions_schema.v1.json
+      backlog_path: docs/development_backlog.yaml
+      tech_stack_registry_path: docs/platform_runtime_stack_registry.yaml
+      environment_bootstrap_path: infra/platform/environment.bootstrap.yaml
+      policy_backlog_path: docs/governance/policy_backlog.yaml
+      upstream_needs_json: ${{ toJson(needs) }}
