@@ -140,10 +140,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Read pinned Node version
+        id: node-version
+        run: |
+          node_version="$(jq -r '.node' tools/versions.json)"
+          if [ "$node_version" = "null" ] || [ -z "$node_version" ]; then
+            echo "tools/versions.json is missing required .node pin"
+            exit 1
+          fi
+          echo "node-version=$node_version" >> "${GITHUB_OUTPUT}"
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ steps.node-version.outputs.node-version }}
+      - name: Assert pinned Node major is active
+        run: |
+          expected="${{ steps.node-version.outputs.node-version }}"
+          actual="$(node -p "process.versions.node")"
+          actual_major="$(node -p "process.versions.node.split('.')[0]")"
+          if [ "$actual_major" != "$expected" ]; then
+            echo "Node drift detected: expected ${expected}.x from tools/versions.json, got ${actual}."
+            exit 1
+          fi
       - name: Install JS service dependencies
         run: |
           make bootstrap-js

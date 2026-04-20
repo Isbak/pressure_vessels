@@ -1,19 +1,18 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-006 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-007 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-006 in the `pressure_vessels` repo.
+You are implementing DXR-007 in the `pressure_vessels` repo.
 
 Problem:
-The repository does not yet pin a single Node.js toolchain version for
-contributors and CI. `tools/versions.json` currently tracks markdownlint-cli2
-only, while local runtime scripts and CI reference Node 20 implicitly. Without
-a committed pin, contributors can run unsupported Node versions and observe
-drift from CI behavior.
+The repository has governance policy and review-role documentation, but there is
+no CODEOWNERS file routing changes to accountable reviewers by area. Without
+path-based ownership, Level 2 governance intent from AGENT_GOVERNANCE.md is not
+operationalized in GitHub review workflows.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-006` branched from `main`.
+- Work on a new branch `claude/fix-DXR-007` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -21,24 +20,25 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-006 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-007 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Add a single source-of-truth Node version pin (for example `.nvmrc` or
-   `tools/versions.json`) aligned with current CI/runtime expectations.
-2. Wire the pin into local bootstrap/docs so contributors can discover the
-   required Node version quickly.
-3. Ensure CI/tooling references are consistent with the chosen pin and report
-   drift clearly without weakening governance gates.
+1. Add a `.github/CODEOWNERS` baseline that maps core governance/documentation,
+   application code, and infrastructure paths to appropriate reviewer groups or
+   handles used in this repository.
+2. Ensure mappings reinforce AGENT_GOVERNANCE.md role boundaries and do not
+   create dead routes (owners that do not exist in-repo).
+3. Document the CODEOWNERS policy briefly where contributors already look for
+   PR workflow guidance.
 4. Last step before opening/merging the PR: update
    `docs/next_dx_generation_prompt.md` to the next eligible DXR item and
-   set DXR-006 status to `done` in
+   set DXR-007 status to `done` in
    `docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
 - Unrelated formatter/linter baseline expansions (already addressed by DXR-005).
 
-Deliverable: one PR touching only the files needed for DXR-006
+Deliverable: one PR touching only the files needed for DXR-007
 remediation plus the prompt/status files in the final step.
 ```
 
@@ -51,7 +51,7 @@ Pick the first item with `status: todo` whose dependencies are all `done`.
 3. **DXR-003** — Commit deterministic lockfiles for frontend and backend services (`done`, deps: DXR-001)
 4. **DXR-004** — Provide .env.example scaffolding for local runtime profile (`done`, deps: none)
 5. **DXR-005** — Baseline formatting and linting configuration (editorconfig + formatters) (`done`, deps: none)
-6. **DXR-006** — Pin Node toolchain version alongside tools/versions.json (`todo`, deps: none)
+6. **DXR-006** — Pin Node toolchain version alongside tools/versions.json (`done`, deps: none)
 7. **DXR-007** — Add CODEOWNERS routing to operationalize Level 2 governance (`todo`, deps: none)
 8. **DXR-008** — Reconcile platform IaC module deployment status with real artifacts (`todo`, deps: none)
 9. **DXR-009** — Extract reusable GitHub Actions for adopters of the governance baseline (`todo`, deps: DXR-010)

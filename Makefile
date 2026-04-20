@@ -5,6 +5,9 @@ PIP ?= pip
 NPM ?= npm
 VALIDATE_INFRA ?= 1
 JS_VALIDATE ?= 1
+NODE_VERSION_PIN_FILE ?= tools/versions.json
+NODE_VERSION_PIN ?= $(shell $(PYTHON) -c "import json, pathlib; print(json.loads(pathlib.Path('$(NODE_VERSION_PIN_FILE)').read_text(encoding='utf-8'))['node'])")
+
 
 INFRA_BOUNDARY_FILES ?= \
 	infra/platform/environment.bootstrap.yaml \
@@ -29,7 +32,13 @@ bootstrap-py:
 	$(PIP) install -e . pytest
 
 bootstrap-js:
-	@command -v node >/dev/null 2>&1 || { echo "Node.js is required for JS service bootstrap. Install Node.js (npm included), then rerun 'make bootstrap'."; exit 1; }
+	@command -v node >/dev/null 2>&1 || { echo "Node.js $(NODE_VERSION_PIN).x is required for JS service bootstrap. Install the pinned version from $(NODE_VERSION_PIN_FILE), then rerun 'make bootstrap'."; exit 1; }
+	@actual_node_version=$$(node -p "process.versions.node"); \
+	actual_node_major=$$(node -p "process.versions.node.split('.')[0]"); \
+	if [ "$$actual_node_major" != "$(NODE_VERSION_PIN)" ]; then \
+		echo "Unsupported Node.js version $$actual_node_version detected (expected $(NODE_VERSION_PIN).x per $(NODE_VERSION_PIN_FILE))."; \
+		exit 1; \
+	fi
 	@command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS service bootstrap. Install npm, then rerun 'make bootstrap'."; exit 1; }
 	$(NPM) --prefix services/frontend ci
 	$(NPM) --prefix services/backend ci
@@ -52,7 +61,13 @@ validate-js:
 	@if [ "$(JS_VALIDATE)" = "0" ]; then \
 		echo "Skipping JS validation because JS_VALIDATE=0."; \
 	else \
-		command -v node >/dev/null 2>&1 || { echo "Node.js is required for JS validation. Install Node.js (npm included), then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
+		command -v node >/dev/null 2>&1 || { echo "Node.js $(NODE_VERSION_PIN).x is required for JS validation. Install the pinned version from $(NODE_VERSION_PIN_FILE), then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
+		actual_node_version=$$(node -p "process.versions.node"); \
+		actual_node_major=$$(node -p "process.versions.node.split('.')[0]"); \
+		if [ "$$actual_node_major" != "$(NODE_VERSION_PIN)" ]; then \
+			echo "Unsupported Node.js version $$actual_node_version detected (expected $(NODE_VERSION_PIN).x per $(NODE_VERSION_PIN_FILE))."; \
+			exit 1; \
+		fi; \
 		command -v $(NPM) >/dev/null 2>&1 || { echo "npm is required for JS validation. Install npm, then rerun 'make validate' or set JS_VALIDATE=0 to skip locally."; exit 1; }; \
 		$(NPM) --prefix services/frontend run smoke; \
 		$(NPM) --prefix services/backend run smoke; \
