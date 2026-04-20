@@ -1,0 +1,48 @@
+{
+  "high_risk_rules": [
+    {
+      "risk": "high",
+      "reason": "Compliance calculation logic changed.",
+      "patterns": [
+        "src/pressure_vessels/calculation_pipeline.py",
+        "src/pressure_vessels/compliance_pipeline.py"
+      ]
+    },
+    {
+      "risk": "high",
+      "reason": "CI workflow or governance policy controls changed.",
+      "patterns": [
+        ".github/workflows/",
+        ".github/governance/",
+        "docs/governance/"
+      ]
+    },
+    {
+      "risk": "high",
+      "reason": "Infrastructure-as-code primitives changed (potential permission/runtime impact).",
+      "patterns": [
+        "infra/platform/iac/"
+      ]
+    }
+  ],
+  "medium_risk_prefixes": [
+    "src/",
+    "services/",
+    "scripts/",
+    "tests/"
+  ],
+  "medium_risk_files": [
+    "pyproject.toml",
+    "Makefile",
+    ".pre-commit-config.yaml"
+  ],
+  "low_risk_prefixes": [
+    "docs/",
+    "artifacts/"
+  ],
+  "low_risk_files": [
+    "README.md",
+    "LICENSE",
+    "AGENT_GOVERNANCE.md"
+  ]
+}

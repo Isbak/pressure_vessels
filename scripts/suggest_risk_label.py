@@ -8,8 +8,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 import sys
+
+
+DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[1] / "docs/governance/risk_label_heuristics.v1.json"
+CONFIG_OVERRIDE_ENV = "PV_RISK_LABEL_CONFIG"
 
 
 @dataclass(frozen=True)
@@ -19,68 +24,27 @@ class Rule:
     patterns: tuple[str, ...]
 
 
-HIGH_RISK_RULES: tuple[Rule, ...] = (
-    Rule(
-        risk="high",
-        reason="Compliance calculation logic changed.",
-        patterns=(
-            "src/pressure_vessels/calculation_pipeline.py",
-            "src/pressure_vessels/compliance_pipeline.py",
-        ),
-    ),
-    Rule(
-        risk="high",
-        reason="CI workflow or governance policy controls changed.",
-        patterns=(
-            ".github/workflows/",
-            ".github/governance/",
-            "docs/governance/",
-        ),
-    ),
-    Rule(
-        risk="high",
-        reason="Infrastructure-as-code primitives changed (potential permission/runtime impact).",
-        patterns=(
-            "infra/platform/iac/",
-        ),
-    ),
-)
-
-MEDIUM_RISK_PREFIXES: tuple[str, ...] = (
-    "src/",
-    "services/",
-    "scripts/",
-    "tests/",
-)
-
-MEDIUM_RISK_FILES: tuple[str, ...] = (
-    "pyproject.toml",
-    "Makefile",
-    ".pre-commit-config.yaml",
-)
-
-LOW_RISK_PREFIXES: tuple[str, ...] = (
-    "docs/",
-    "artifacts/",
-)
-
-LOW_RISK_FILES: tuple[str, ...] = (
-    "README.md",
-    "LICENSE",
-    "AGENT_GOVERNANCE.md",
-)
+@dataclass(frozen=True)
+class Heuristics:
+    high_risk_rules: tuple[Rule, ...]
+    medium_risk_prefixes: tuple[str, ...]
+    medium_risk_files: tuple[str, ...]
+    low_risk_prefixes: tuple[str, ...]
+    low_risk_files: tuple[str, ...]
 
 
 def main() -> int:
-    if len(sys.argv) != 4:
+    if len(sys.argv) not in {4, 5}:
         print(
-            "usage: suggest_risk_label.py <changed_paths.txt> <risk_suggestion.json> <risk_summary.md>",
+            "usage: suggest_risk_label.py <changed_paths.txt> <risk_suggestion.json> <risk_summary.md> [heuristics_config.json]",
             file=sys.stderr,
         )
         return 2
 
     changed_paths = _read_paths(Path(sys.argv[1]))
-    suggestion = _suggest(changed_paths)
+    override_config_arg = Path(sys.argv[4]) if len(sys.argv) == 5 else None
+    heuristics = _load_heuristics(override_config_arg)
+    suggestion = _suggest(changed_paths, heuristics)
 
     output_json = Path(sys.argv[2])
     output_md = Path(sys.argv[3])
@@ -95,13 +59,33 @@ def main() -> int:
     return 0
 
 
+def _load_heuristics(cli_override: Path | None) -> Heuristics:
+    config_path = cli_override
+    if config_path is None:
+        env_override = Path(value) if (value := os.environ.get(CONFIG_OVERRIDE_ENV)) else None
+        config_path = env_override if env_override is not None else DEFAULT_CONFIG_PATH
+
+    payload = json.loads(config_path.read_text(encoding="utf-8"))
+    rules = tuple(
+        Rule(risk=rule["risk"], reason=rule["reason"], patterns=tuple(rule["patterns"]))
+        for rule in payload["high_risk_rules"]
+    )
+    return Heuristics(
+        high_risk_rules=rules,
+        medium_risk_prefixes=tuple(payload["medium_risk_prefixes"]),
+        medium_risk_files=tuple(payload["medium_risk_files"]),
+        low_risk_prefixes=tuple(payload["low_risk_prefixes"]),
+        low_risk_files=tuple(payload["low_risk_files"]),
+    )
+
+
 def _read_paths(path: Path) -> list[str]:
     if not path.exists():
         return []
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def _suggest(changed_paths: list[str]) -> dict[str, object]:
+def _suggest(changed_paths: list[str], heuristics: Heuristics) -> dict[str, object]:
     if not changed_paths:
         return {
             "schema_version": "RiskLabelSuggestion.v1",
@@ -114,7 +98,7 @@ def _suggest(changed_paths: list[str]) -> dict[str, object]:
         }
 
     high_matches: list[dict[str, object]] = []
-    for rule in HIGH_RISK_RULES:
+    for rule in heuristics.high_risk_rules:
         matched = [path for path in changed_paths if any(path.startswith(pattern) for pattern in rule.patterns)]
         if matched:
             high_matches.append({"reason": rule.reason, "paths": sorted(matched)})
@@ -133,7 +117,7 @@ def _suggest(changed_paths: list[str]) -> dict[str, object]:
     medium_paths = [
         path
         for path in changed_paths
-        if path.startswith(MEDIUM_RISK_PREFIXES) or path in MEDIUM_RISK_FILES
+        if path.startswith(heuristics.medium_risk_prefixes) or path in heuristics.medium_risk_files
     ]
     if medium_paths:
         return {
@@ -148,7 +132,7 @@ def _suggest(changed_paths: list[str]) -> dict[str, object]:
             "changed_paths": changed_paths,
         }
 
-    low_only = all(path.startswith(LOW_RISK_PREFIXES) or path in LOW_RISK_FILES for path in changed_paths)
+    low_only = all(path.startswith(heuristics.low_risk_prefixes) or path in heuristics.low_risk_files for path in changed_paths)
     if low_only:
         return {
             "schema_version": "RiskLabelSuggestion.v1",
