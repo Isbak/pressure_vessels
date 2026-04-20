@@ -12,6 +12,17 @@ BACKLOG_README_REF_RE = re.compile(r"README\.md#([a-zA-Z0-9._-]+)")
 
 
 def _github_anchor_slug(heading: str) -> str:
+    """Return a GitHub-style heading anchor slug for a single heading text.
+
+    Behavior tracks GitHub's rendered heading IDs for punctuation stripping,
+    lowercasing, and hyphen normalization, as implemented by the cmark-gfm
+    pipeline used for GitHub Flavored Markdown rendering:
+    https://github.github.com/gfm/ and
+    https://github.com/gjtorikian/html-pipeline/blob/main/lib/html/pipeline/toc_filter.rb
+
+    Duplicate-heading de-duplication is applied in _extract_readme_anchors
+    (first instance uses ``slug``, then ``slug-1``, ``slug-2``, ...).
+    """
     value = heading.strip().lower()
     value = re.sub(r"[^\w\- ]", "", value)
     value = value.replace(" ", "-")

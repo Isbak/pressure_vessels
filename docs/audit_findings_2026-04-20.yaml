@@ -430,7 +430,7 @@ findings:
   title: Cite source spec for README anchor-slug algorithm
   severity: low
   area: tooling
-  status: todo
+  status: done
   file_path: scripts/check_readme_anchors.py
   line_numbers: [23, 40]
   depends_on: []
