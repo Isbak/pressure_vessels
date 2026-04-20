@@ -337,7 +337,7 @@ findings:
   title: Bound temperature conversions with physical reasonability check
   severity: medium
   area: requirements
-  status: todo
+  status: done
   file_path: src/pressure_vessels/requirements_pipeline.py
   line_numbers: [35, 41]
   depends_on: []

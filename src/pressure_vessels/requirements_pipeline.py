@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 import re
 from typing import Any
 
@@ -39,6 +40,9 @@ TEMPERATURE_CONVERTERS = {
     "°f": lambda v: (v - 32.0) * (5.0 / 9.0),
     "k": lambda v: v - 273.15,
 }
+DEFAULT_DESIGN_TEMPERATURE_BOUNDS_C = (-196.0, 650.0)
+DESIGN_TEMPERATURE_MIN_C_ENV = "PRESSURE_VESSELS_DESIGN_TEMPERATURE_MIN_C"
+DESIGN_TEMPERATURE_MAX_C_ENV = "PRESSURE_VESSELS_DESIGN_TEMPERATURE_MAX_C"
 
 VOLUME_FACTORS = {
     "m3": 1.0,
@@ -230,7 +234,14 @@ def _normalize_unit_value(field_name: str, raw_value: float, raw_unit: str) -> t
         conv = TEMPERATURE_CONVERTERS.get(u)
         if conv is None:
             return None
-        return (round(conv(raw_value), 6), CANONICAL_UNITS[field_name])
+        normalized_temperature_c = round(conv(raw_value), 6)
+        min_c, max_c = _design_temperature_bounds_c()
+        if not (min_c <= normalized_temperature_c <= max_c):
+            raise ValueError(
+                "design_temperature is outside configured physical reasonability bounds: "
+                f"{normalized_temperature_c} C not in [{min_c}, {max_c}] C."
+            )
+        return (normalized_temperature_c, CANONICAL_UNITS[field_name])
 
     if field_name == "capacity":
         factor = VOLUME_FACTORS.get(u)
@@ -253,3 +264,16 @@ def _detect_gaps(extracted: dict[str, RequirementValue]) -> list[Gap]:
         if field not in extracted:
             gaps.append(Gap(field=field, reason="Mandatory field missing or not parseable from prompt."))
     return gaps
+
+
+def _design_temperature_bounds_c() -> tuple[float, float]:
+    min_c_raw = os.getenv(DESIGN_TEMPERATURE_MIN_C_ENV)
+    max_c_raw = os.getenv(DESIGN_TEMPERATURE_MAX_C_ENV)
+
+    min_c = DEFAULT_DESIGN_TEMPERATURE_BOUNDS_C[0] if min_c_raw is None else float(min_c_raw)
+    max_c = DEFAULT_DESIGN_TEMPERATURE_BOUNDS_C[1] if max_c_raw is None else float(max_c_raw)
+    if min_c > max_c:
+        raise ValueError(
+            "Invalid design temperature bounds configuration: minimum must be less than or equal to maximum."
+        )
+    return min_c, max_c
