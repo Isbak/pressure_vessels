@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pressure_vessels"
 version = "0.1.0"
 description = "Pressure vessel deterministic requirement parsing pipeline"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = []
 
 [tool.pytest.ini_options]
