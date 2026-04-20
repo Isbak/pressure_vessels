@@ -41,7 +41,11 @@ def test_aliases_expand_to_expected_workflows() -> None:
     assert "python scripts/check_readme_anchors.py" in _run_make("g", dry_run=True)
     assert "python scripts/check_tech_stack.py" in _run_make("s", dry_run=True)
     assert "pytest -q" in _run_make("v", dry_run=True)
+    assert "npm --prefix services/frontend run smoke" in _run_make("v", dry_run=True)
+    assert "npm --prefix services/backend run smoke" in _run_make("v", dry_run=True)
     assert "pytest -q" in _run_make("ci", dry_run=True)
+    assert "npm --prefix services/frontend run smoke" in _run_make("ci", dry_run=True)
+    assert "npm --prefix services/backend run smoke" in _run_make("ci", dry_run=True)
 
 
 def test_bootstrap_remains_canonical_onboarding_entrypoint() -> None:
@@ -53,3 +57,19 @@ def test_bootstrap_remains_canonical_onboarding_entrypoint() -> None:
     assert "command -v node" in output
     assert "npm --prefix services/frontend install" in output
     assert "npm --prefix services/backend install" in output
+
+
+def test_validate_js_supports_explicit_local_skip_override() -> None:
+    """A no-Node local environment can explicitly skip JS validation."""
+    output = _run_make("validate-js", dry_run=True)
+    assert "npm --prefix services/frontend run smoke" in output
+    assert "npm --prefix services/backend run smoke" in output
+
+    skipped = subprocess.run(
+        ["make", "JS_VALIDATE=0", "validate-js"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert "Skipping JS validation because JS_VALIDATE=0." in skipped.stdout

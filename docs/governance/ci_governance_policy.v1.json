@@ -12,6 +12,7 @@
     "readme-anchor-check",
     "secret-scan",
     "tech-stack-check",
+    "js-validate",
     "yaml-validate"
   ]
 }

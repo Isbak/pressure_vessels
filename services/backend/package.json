@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "build": "nest build"
+    "build": "nest build",
+    "smoke": "node --check local-integration-server.js"
   }
 }

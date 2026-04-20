@@ -37,6 +37,7 @@ def test_dx006_is_done_and_next_prompt_advances() -> None:
         or 'no remaining eligible dx roadmap item' in next_prompt.lower()
         or 'You are implementing DXR-001' in next_prompt
         or 'You are implementing DXR-002' in next_prompt
+        or 'You are implementing DXR-003' in next_prompt
     )
 
 
