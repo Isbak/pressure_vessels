@@ -17,3 +17,6 @@ testpaths = ["tests"]
 [project.scripts]
 pv-check-ci-governance = "pressure_vessels.governance_checks:check_ci_governance_main"
 pv-generate-governance-checklist-evidence = "pressure_vessels.governance_checks:generate_governance_checklist_evidence_main"
+pv-check-readme-anchors = "pressure_vessels.dev_cli:check_readme_anchors_main"
+pv-check-tech-stack = "pressure_vessels.dev_cli:check_tech_stack_main"
+pv-suggest-risk-label = "pressure_vessels.dev_cli:suggest_risk_label_main"
