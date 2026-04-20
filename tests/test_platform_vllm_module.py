@@ -54,7 +54,7 @@ def test_only_staging_references_vllm_module() -> None:
     assert "llm-serving-vllm" not in _modules_for_environment("dev")
 
 
-def test_registry_marks_vllm_component_deployed() -> None:
+def test_registry_marks_vllm_component_scaffolded() -> None:
     lines = REGISTRY_PATH.read_text(encoding="utf-8").splitlines()
     in_vllm_entry = False
     status: str | None = None
@@ -68,4 +68,4 @@ def test_registry_marks_vllm_component_deployed() -> None:
             status = line.split(": ", 1)[1].strip()
             break
 
-    assert status == "deployed"
+    assert status == "scaffolded"

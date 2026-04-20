@@ -35,8 +35,11 @@ def test_tech_stack_check_fails_when_deployed_module_path_missing(tmp_path: Path
             [
                 "# Tech Stack",
                 "## Current",
+                "### Runtime stack components (deployed)",
                 "- Component: `frontend-nextjs`",
+                "### Runtime stack components (scaffolded)",
                 "## Planned",
+                "### Runtime stack components (planned)",
             ]
         )
         + "\n",
@@ -85,7 +88,9 @@ def test_tech_stack_check_fails_when_deployed_module_path_missing(tmp_path: Path
     assert "module_path does not exist" in result.stdout
 
 
-def test_tech_stack_check_fails_when_iac_module_exists_but_status_is_planned(tmp_path: Path) -> None:
+def test_tech_stack_check_fails_when_iac_module_exists_but_status_is_deployed_without_hcl(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "scripts").mkdir(parents=True)
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "infra/platform/iac").mkdir(parents=True)
@@ -98,8 +103,11 @@ def test_tech_stack_check_fails_when_iac_module_exists_but_status_is_planned(tmp
             [
                 "# Tech Stack",
                 "## Current",
-                "## Planned",
+                "### Runtime stack components (deployed)",
+                "### Runtime stack components (scaffolded)",
                 "- Component: `iac-opentofu-or-terraform`",
+                "## Planned",
+                "### Runtime stack components (planned)",
             ]
         )
         + "\n",
@@ -112,7 +120,7 @@ def test_tech_stack_check_fails_when_iac_module_exists_but_status_is_planned(tmp
                 "version: 1",
                 "components:",
                 "  - key: iac-opentofu-or-terraform",
-                "    status: planned",
+                "    status: deployed",
                 "    module_path: infra/platform/iac",
             ]
         )
@@ -145,4 +153,4 @@ def test_tech_stack_check_fails_when_iac_module_exists_but_status_is_planned(tmp
     )
 
     assert result.returncode == 1
-    assert "'iac-opentofu-or-terraform' status must be 'deployed'" in result.stdout
+    assert "'iac-opentofu-or-terraform' status must be 'scaffolded'" in result.stdout

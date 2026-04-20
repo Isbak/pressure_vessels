@@ -200,12 +200,12 @@ jobs:
           tofu fmt -check -recursive infra/platform/iac
       - name: Lint HCL under infra/platform/iac
         run: |
-          # The gate is wired now so it activates the moment real HCL lands,
-          # but tflint behavior on empty trees is noisy, so skip explicitly.
+          # DXR-008: Until infra/platform/iac contains Terraform/OpenTofu HCL,
+          # this lint step is advisory for scaffold-only contracts.
           if [ -n "$(find infra/platform/iac -type f -name '*.tf' -print -quit 2>/dev/null)" ]; then
             tflint --chdir infra/platform/iac --recursive
           else
-            echo "No HCL under infra/platform/iac yet; tflint gate is a no-op."
+            echo "No HCL under infra/platform/iac yet; iac-validate is advisory for scaffold-only modules."
           fi
 
   readme-anchor-check:

@@ -1,19 +1,17 @@
 # Next DX Generation Prompt (DXR Audit-Aligned)
 
-DXR-008 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
+DXR-010 is the **next eligible DX remediation item** in `docs/dx_reusability_audit_2026-04-20.yaml` as of 2026-04-20.
 
 ```text
-You are implementing DXR-008 in the `pressure_vessels` repo.
+You are implementing DXR-010 in the `pressure_vessels` repo.
 
 Problem:
-The platform runtime stack registry currently labels several modules as deployed
-even though the corresponding infra artifacts are contract-only scaffolds. This
-creates reuse risk because adopters cannot distinguish runnable modules from
-boundary documentation stubs, and CI's IaC validation gate can become a silent
-no-op for missing Terraform/OpenTofu content.
+Governance scripts currently live as repository-local files with hard-coded
+paths and no reusable package entry points. This blocks cross-project adoption
+of the governance baseline and increases drift risk between adopters.
 
 Conventions (apply to every DX-remediation PR):
-- Work on a new branch `claude/fix-DXR-008` branched from `main`.
+- Work on a new branch `claude/fix-DXR-010` branched from `main`.
 - Keep the diff minimal and scoped to this finding.
 - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
   `python scripts/check_ci_governance.py` before committing.
@@ -21,26 +19,23 @@ Conventions (apply to every DX-remediation PR):
   appropriate manifest (`pyproject.toml` for Python, the relevant
   `services/*/package.json` for Node).
 - Reference this finding in the commit body:
-  `Fixes DXR-008 per docs/dx_reusability_audit_2026-04-20.yaml`.
+  `Fixes DXR-010 per docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Task:
-1. Reconcile `docs/platform_runtime_stack_registry.yaml` status values so
-   contract-only platform modules are not reported as deployed unless runnable
-   artifacts actually exist.
-2. Ensure IaC readiness claims are consistent with `infra/platform/iac/*`
-   contents and CI behavior in `.github/workflows/ci.yml`.
-3. If status vocabulary changes, update any validation logic/tests that enforce
-   allowed values (for example `scripts/check_tech_stack.py`).
-4. Document the resulting status semantics where contributors look for platform
-   reuse/deployment guidance.
+1. Package governance checks under a reusable Python module with console entry
+   points instead of script-local execution only.
+2. Remove hard-coded repository paths from governance script internals by
+   introducing explicit config/input plumbing.
+3. Keep CI behavior parity while switching callers to the packaged entry points.
+4. Document reuse instructions for adopters.
 5. Last step before opening/merging the PR: update
    `docs/next_dx_generation_prompt.md` to the next eligible DXR item and set
-   DXR-008 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
+   DXR-010 status to `done` in `docs/dx_reusability_audit_2026-04-20.yaml`.
 
 Out of scope (tracked separately):
 - Implementing full production IaC modules for every platform dependency.
 
-Deliverable: one PR touching only the files needed for DXR-008 remediation
+Deliverable: one PR touching only the files needed for DXR-010 remediation
 plus the prompt/status files in the final step.
 ```
 
@@ -55,7 +50,7 @@ Pick the first item with `status: todo` whose dependencies are all `done`.
 5. **DXR-005** — Baseline formatting and linting configuration (editorconfig + formatters) (`done`, deps: none)
 6. **DXR-006** — Pin Node toolchain version alongside tools/versions.json (`done`, deps: none)
 7. **DXR-007** — Add CODEOWNERS routing to operationalize Level 2 governance (`done`, deps: none)
-8. **DXR-008** — Reconcile platform IaC module deployment status with real artifacts (`todo`, deps: none)
+8. **DXR-008** — Reconcile platform IaC module deployment status with real artifacts (`done`, deps: none)
 9. **DXR-009** — Extract reusable GitHub Actions for adopters of the governance baseline (`todo`, deps: DXR-010)
 10. **DXR-010** — Package governance scripts as a reusable Python module with an entry point (`todo`, deps: none)
 11. **DXR-011** — Make risk-label heuristics declarative and project-overridable (`todo`, deps: DXR-010)

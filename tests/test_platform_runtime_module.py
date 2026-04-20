@@ -54,7 +54,7 @@ def test_dev_and_staging_reference_runtime_module() -> None:
         assert "runtime-docker-kubernetes" in modules
 
 
-def test_registry_marks_runtime_component_deployed() -> None:
+def test_registry_marks_runtime_component_scaffolded() -> None:
     lines = REGISTRY_PATH.read_text(encoding="utf-8").splitlines()
     in_runtime_entry = False
     status: str | None = None
@@ -68,4 +68,4 @@ def test_registry_marks_runtime_component_deployed() -> None:
             status = line.split(": ", 1)[1].strip()
             break
 
-    assert status == "deployed"
+    assert status == "scaffolded"
