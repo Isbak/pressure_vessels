@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+import pytest
+
 from pressure_vessels.requirements_pipeline import parse_prompt_to_requirement_set
 
 
@@ -56,3 +58,51 @@ def test_unit_normalization_across_supported_dimensions():
     assert result.requirements["capacity"].unit == "m3"
     assert result.requirements["corrosion_allowance"].value == 6.35
     assert result.requirements["corrosion_allowance"].unit == "mm"
+
+
+@pytest.mark.parametrize(
+    ("temperature_fragment", "expected_c"),
+    [
+        ("-196 C", -196.0),
+        ("65 C", 65.0),
+        ("650 C", 650.0),
+    ],
+)
+def test_design_temperature_reasonability_bounds_accept_interior_and_boundary_values(
+    temperature_fragment: str,
+    expected_c: float,
+) -> None:
+    prompt = (
+        "Design vessel for ammonia storage, design pressure 12 bar, "
+        f"design temperature {temperature_fragment}, volume 10 m3, ASME VIII-1"
+    )
+
+    result = parse_prompt_to_requirement_set(prompt)
+
+    assert result.requirements["design_temperature"].value == expected_c
+
+
+@pytest.mark.parametrize("temperature_fragment", ["-197 C", "651 C"])
+def test_design_temperature_reasonability_bounds_reject_out_of_range_values(
+    temperature_fragment: str,
+) -> None:
+    prompt = (
+        "Design vessel for ammonia storage, design pressure 12 bar, "
+        f"design temperature {temperature_fragment}, volume 10 m3, ASME VIII-1"
+    )
+
+    with pytest.raises(ValueError, match="design_temperature is outside configured physical reasonability bounds"):
+        parse_prompt_to_requirement_set(prompt)
+
+
+def test_design_temperature_bounds_allow_environment_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PRESSURE_VESSELS_DESIGN_TEMPERATURE_MIN_C", "-250")
+    monkeypatch.setenv("PRESSURE_VESSELS_DESIGN_TEMPERATURE_MAX_C", "700")
+    prompt = (
+        "Design vessel for ammonia storage, design pressure 12 bar, "
+        "design temperature 680 C, volume 10 m3, ASME VIII-1"
+    )
+
+    result = parse_prompt_to_requirement_set(prompt)
+
+    assert result.requirements["design_temperature"].value == 680.0

@@ -59,6 +59,20 @@ Normalized canonical units in `RequirementSet.v1`:
 - `capacity` → `m3`
 - `corrosion_allowance` → `mm`
 
+## Design Temperature Physical Reasonability Bounds
+
+After temperature-unit normalization to canonical `C`, the parser enforces an
+inclusive physical reasonability envelope.
+
+- Default envelope: `-196 C` to `650 C`
+- Out-of-range behavior: parser raises `ValueError` and fails closed
+- Runtime overrides (inclusive bounds):
+  - `PRESSURE_VESSELS_DESIGN_TEMPERATURE_MIN_C`
+  - `PRESSURE_VESSELS_DESIGN_TEMPERATURE_MAX_C`
+
+If override values are invalid (for example, min > max), parsing raises
+`ValueError`.
+
 ## Determinism/Traceability Controls
 
 - Deterministic regex-based extraction only (no non-deterministic model calls).
