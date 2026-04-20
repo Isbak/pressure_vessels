@@ -26,7 +26,7 @@ def scaffold_governance_baseline_main(argv: list[str] | None = None) -> int:
 
 
 def check_readme_anchors_main(argv: list[str] | None = None) -> int:
-    normalized_args = list(argv or [])
+    normalized_args = list(argv) if argv is not None else list(sys.argv[1:])
     if normalized_args and not normalized_args[0].startswith("-"):
         normalized_args = ["--backlog", normalized_args[0], *normalized_args[1:]]
     return _run_repo_script("check_readme_anchors.py", normalized_args)
@@ -39,8 +39,14 @@ def _run_repo_script(script_name: str, argv: list[str] | None) -> int:
     if not script_path.exists():
         raise FileNotFoundError(f"Expected script entry point not found: {script_path}")
 
+    # Console-script entry points call the main function with argv=None; the
+    # real CLI args live in sys.argv[1:]. Fall back to those when argv is not
+    # explicitly supplied so `pv-*` commands forward their arguments to the
+    # underlying repo script.
+    effective_argv = list(argv) if argv is not None else list(sys.argv[1:])
+
     original_argv = sys.argv
-    sys.argv = [str(script_path), *(argv or [])]
+    sys.argv = [str(script_path), *effective_argv]
     try:
         runpy.run_path(str(script_path), run_name="__main__")
     except SystemExit as exc:
