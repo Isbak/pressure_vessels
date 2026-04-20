@@ -275,7 +275,7 @@ findings:
   title: Replace inf utilization sentinel with explicit invalid record
   severity: high
   area: calculation
-  status: todo
+  status: done
   file_path: src/pressure_vessels/calculation_pipeline.py
   line_numbers: [936]
   depends_on:

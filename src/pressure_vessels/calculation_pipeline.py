@@ -220,7 +220,8 @@ class CalculationRecord:
     required_thickness_m: float
     provided_thickness_m: float
     margin_m: float
-    utilization_ratio: float
+    utilization_ratio: float | None
+    utilization_invalid_reason: str | None
     near_limit_threshold: float
     is_near_limit: bool
     pass_status: bool
@@ -243,6 +244,7 @@ class CalculationRecord:
             "provided_thickness_m": self.provided_thickness_m,
             "margin_m": self.margin_m,
             "utilization_ratio": self.utilization_ratio,
+            "utilization_invalid_reason": self.utilization_invalid_reason,
             "near_limit_threshold": self.near_limit_threshold,
             "is_near_limit": self.is_near_limit,
             "parent_component": self.parent_component,
@@ -963,9 +965,12 @@ def _to_record(
     required_rounded = _round_safety_critical(required)
     provided_rounded = _round_safety_critical(provided)
     margin = _round_safety_critical(provided_rounded - required_rounded)
-    utilization = (
-        _round_safety_critical(required_rounded / provided_rounded) if provided_rounded > 0.0 else float("inf")
-    )
+    utilization: float | None = None
+    utilization_invalid_reason: str | None = None
+    if provided_rounded > 0.0:
+        utilization = _round_safety_critical(required_rounded / provided_rounded)
+    else:
+        utilization_invalid_reason = "provided_thickness_non_positive"
     is_near_limit = pass_status = False
     pressure_margin_pa = None
     if design_pressure_pa is None or computed_mawp_pa is None:
@@ -973,7 +978,7 @@ def _to_record(
     else:
         pressure_margin_pa = _round_safety_critical(computed_mawp_pa - design_pressure_pa)
         pass_status = pressure_margin_pa >= 0.0
-    is_near_limit = pass_status and utilization >= near_limit_threshold
+    is_near_limit = pass_status and utilization is not None and utilization >= near_limit_threshold
     clause_id = _CHECK_CLAUSE_MAP[check_id]
     validity_envelope = _build_validity_envelope_metadata(
         check_id=check_id,
@@ -990,6 +995,7 @@ def _to_record(
         "provided_thickness_m": provided_rounded,
         "margin_m": margin,
         "utilization_ratio": utilization,
+        "utilization_invalid_reason": utilization_invalid_reason,
         "near_limit_threshold": near_limit_threshold,
         "is_near_limit": is_near_limit,
         "parent_component": parent_component,
@@ -1012,6 +1018,7 @@ def _to_record(
         provided_thickness_m=provided_rounded,
         margin_m=margin,
         utilization_ratio=utilization,
+        utilization_invalid_reason=utilization_invalid_reason,
         near_limit_threshold=near_limit_threshold,
         is_near_limit=is_near_limit,
         parent_component=parent_component,
