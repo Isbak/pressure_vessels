@@ -1,0 +1,165 @@
+---
+version: 1.0.0
+generated_on: '2026-04-20'
+project: pressure_vessels
+source_audit: docs/dx_reusability_audit_2026-04-20.yaml
+governance:
+  controlling_policy: AGENT_GOVERNANCE.md
+  dependency_rule: >-
+    Only DXR items with status todo (or in_progress already claimed) and
+    all depends_on entries done are eligible.
+  selection_rule: |
+    1) Read docs/dx_reusability_audit_2026-04-20.yaml.
+    2) Walk items top-to-bottom and pick the first with status: todo
+       (or in_progress if already claimed) whose depends_on entries are
+       all status: done.
+    3) Implement only that single DXR item with minimal, focused changes.
+    4) Last step of the PR: update this file and the DXR status in
+       docs/dx_reusability_audit_2026-04-20.yaml.
+  prompt_conventions:
+    branch_pattern: claude/fix-<DXR-id>
+    required_checks:
+      - make v
+      - ./markdownlint-cli2 "**/*.md"
+      - python scripts/check_ci_governance.py
+    commit_reference: >-
+      Include "Fixes <DXR-id> per docs/dx_reusability_audit_2026-04-20.yaml"
+      in the commit body.
+    dependency_rule: >-
+      Do not add runtime dependencies without updating pyproject.toml or the
+      relevant services/*/package.json.
+next_item:
+  id: DXR-001
+  title: Extend bootstrap to install JS service toolchains deterministically
+  priority: P0
+  effort: S
+  status: todo
+  depends_on: []
+prompt: |
+  You are implementing DXR-001 in the `pressure_vessels` repo.
+
+  Problem:
+  `make bootstrap` currently only runs `pip install --upgrade pip` and
+  `pip install -e . pytest`. The runtime services under `services/frontend`
+  and `services/backend` have Node dependencies (Next.js 14.2.5, React,
+  TypeScript) that a new contributor must install by hand. This violates
+  the "Fast local feedback first" principle in
+  docs/developer_experience_principles.md and the single-command
+  onboarding promise in docs/developer_quickstart.md.
+
+  Conventions (apply to every DX-remediation PR):
+  - Work on a new branch `claude/fix-DXR-001` branched from `main`.
+  - Keep the diff minimal and scoped to this finding.
+  - Run `make v`, `./markdownlint-cli2 "**/*.md"`, and
+    `python scripts/check_ci_governance.py` before committing.
+  - Do not introduce new runtime dependencies without updating the
+    appropriate manifest (`pyproject.toml` for Python, the relevant
+    `services/*/package.json` for Node).
+  - Reference this finding in the commit body:
+    `Fixes DXR-001 per docs/dx_reusability_audit_2026-04-20.yaml`.
+
+  Task:
+  1. Audit the current `make bootstrap` target in `Makefile` and the JS
+     service manifests (`services/frontend/package.json`,
+     `services/backend/package.json`).
+  2. Extend `make bootstrap` (or add a clearly named sibling target such
+     as `make bootstrap-js`) so that a clean clone can reach a working
+     local state for both Python tests and the JS services with a single
+     documented command.
+  3. Ensure the target fails fast with an actionable message when the Node
+     toolchain is missing, rather than partially installing.
+  4. Update `docs/developer_quickstart.md` to list Node as a prerequisite
+     and document the new command path. Do not weaken any governance
+     control in the quickstart.
+  5. Update `docs/developer_command_reference.md` so the local/CI parity
+     table still reflects reality.
+  6. Add or extend tests that prove the quickstart commands are still the
+     canonical onboarding entry point (for example, extend
+     `tests/test_makefile_task_runner.py`).
+  7. Last step before opening/merging the PR: update
+     `docs/next_dx_generation_prompt.yaml` to the next eligible DXR item
+     and set DXR-001 status to `done` in
+     `docs/dx_reusability_audit_2026-04-20.yaml`.
+
+  Out of scope (tracked separately as DXR-002 … DXR-015):
+  - Adding JS test/lint parity to `make validate` (DXR-002).
+  - Committing lockfiles (DXR-003).
+  - Providing `.env.example` (DXR-004).
+  - Formatter/linter baseline (DXR-005).
+  - Pinning the Node version (DXR-006).
+
+  Deliverable: one PR touching only the files needed for DXR-001
+  remediation plus the two update-the-prompt status files in the final
+  step.
+upcoming_queue:
+  - id: DXR-001
+    title: Extend bootstrap to install JS service toolchains deterministically
+    status: todo
+    depends_on: []
+  - id: DXR-002
+    title: Add JS service test/lint parity to the baseline validate bundle
+    status: todo
+    depends_on: [DXR-001]
+  - id: DXR-003
+    title: Commit deterministic lockfiles for frontend and backend services
+    status: todo
+    depends_on: [DXR-001]
+  - id: DXR-004
+    title: Provide .env.example scaffolding for local runtime profile
+    status: todo
+    depends_on: []
+  - id: DXR-005
+    title: Baseline formatting and linting configuration (editorconfig + formatters)
+    status: todo
+    depends_on: []
+  - id: DXR-006
+    title: Pin Node toolchain version alongside tools/versions.json
+    status: todo
+    depends_on: []
+  - id: DXR-007
+    title: Add CODEOWNERS routing to operationalize Level 2 governance
+    status: todo
+    depends_on: []
+  - id: DXR-008
+    title: Reconcile platform IaC module deployment status with real artifacts
+    status: todo
+    depends_on: []
+  - id: DXR-009
+    title: Extract reusable GitHub Actions for adopters of the governance baseline
+    status: todo
+    depends_on: [DXR-010]
+  - id: DXR-010
+    title: Package governance scripts as a reusable Python module with an entry point
+    status: todo
+    depends_on: []
+  - id: DXR-011
+    title: Make risk-label heuristics declarative and project-overridable
+    status: todo
+    depends_on: [DXR-010]
+  - id: DXR-012
+    title: Provide a baseline scaffold for AGENT_GOVERNANCE cross-project adoption
+    status: todo
+    depends_on: [DXR-009, DXR-010]
+  - id: DXR-013
+    title: Ship devcontainer and Codespaces configuration for one-click onboarding
+    status: todo
+    depends_on: [DXR-001, DXR-006]
+  - id: DXR-014
+    title: Replace hard-coded INFRA_BOUNDARY_FILES with a data-driven manifest
+    status: todo
+    depends_on: []
+  - id: DXR-015
+    title: Replace ad-hoc YAML parsing in check_tech_stack.py with a robust parser
+    status: todo
+    depends_on: []
+regeneration_policy:
+  trigger: >-
+    Regenerate this file whenever any DXR item in
+    docs/dx_reusability_audit_2026-04-20.yaml changes status, or when a
+    new DXR item is added.
+  output_contract:
+    - next_item points at the first eligible DXR item per selection_rule.
+    - upcoming_queue mirrors the ordered DXR list with current statuses.
+    - prompt block remains self-contained (branch, conventions, task,
+      out-of-scope, final status updates) so it can be handed verbatim
+      to the implementing agent.

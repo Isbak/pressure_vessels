@@ -1,0 +1,589 @@
+---
+version: 1.0.0
+generated_on: '2026-04-20'
+project: pressure_vessels
+description: >-
+  Machine-readable developer-experience and platform-reusability audit
+  findings. Schema mirrors docs/development_backlog.yaml (status_values,
+  priority_values, effort_values) so the same governance controls apply:
+  every todo/in_progress item must gate on done dependencies and the audit
+  is consumed by the next-generation prompt flow
+  (docs/next_dx_generation_prompt.yaml).
+source_audit: DX and platform reusability audit (branch claude/audit-dx-reusability-ad9sW)
+audit_scope:
+  - Repository developer onboarding ergonomics (bootstrap, validate, local feedback loop).
+  - Frontend/backend/JS toolchain parity with Python-centric DX surface.
+  - Reusability of the governance baseline and platform modules in other projects
+    per AGENT_GOVERNANCE.md#13 and docs/developer_experience_principles.md.
+status_values:
+  - todo
+  - in_progress
+  - blocked
+  - done
+priority_values:
+  - P0
+  - P1
+  - P2
+  - P3
+effort_values:
+  - XS
+  - S
+  - M
+  - L
+  - XL
+governance:
+  authoring_controls:
+    - Findings are governed by AGENT_GOVERNANCE.md (risk-based merge gates, dual-agent review).
+    - Each item lists acceptance_criteria and deliverables consistent with development_backlog.yaml item shape.
+    - Promotion of a finding into development_backlog.yaml requires an explicit BL-* entry referencing the DXR id.
+  dependency_rule: >-
+    An item may only move to in_progress when all depends_on entries are done,
+    mirroring tests/test_backlog_consistency.py semantics.
+  prompt_flow:
+    next_prompt_file: docs/next_dx_generation_prompt.yaml
+    selection_rule: >-
+      Pick the first DXR item with status todo whose depends_on entries are
+      all done; regenerate the next prompt whenever an item changes status.
+items:
+  - id: DXR-001
+    title: Extend bootstrap to install JS service toolchains deterministically
+    area: developer-onboarding
+    phase: 'DX Audit 2026-04-20'
+    priority: P0
+    status: todo
+    effort: S
+    depends_on: []
+    references:
+      - Makefile
+      - docs/developer_quickstart.md
+      - services/backend/package.json
+      - services/frontend/package.json
+      - docs/developer_experience_principles.md#principles
+    rationale: >-
+      `make bootstrap` only upgrades pip and installs the Python package and
+      pytest. The runtime services under services/frontend and services/backend
+      have Node dependencies (Next.js, react, typescript) but there is no
+      documented `make bootstrap` step that runs `npm install` for them, so a
+      clean clone cannot reach "Fast local feedback first" without reading
+      the runbook.
+    acceptance_criteria:
+      - >-
+        `make bootstrap` (or a documented sibling target such as
+        `make bootstrap-js`) installs npm dependencies for
+        services/frontend and services/backend without manual intervention.
+      - >-
+        The quickstart explicitly names the JS bootstrap path and keeps the
+        single-command onboarding promise from
+        docs/developer_quickstart.md.
+      - >-
+        A missing Node toolchain produces an actionable error rather than a
+        partial install.
+    deliverables:
+      - Makefile target updates for JS bootstrap
+      - docs/developer_quickstart.md update listing JS prerequisites
+      - CI parity note in docs/developer_command_reference.md
+
+  - id: DXR-002
+    title: Add JS service test/lint parity to the baseline validate bundle
+    area: tooling
+    phase: 'DX Audit 2026-04-20'
+    priority: P0
+    status: todo
+    effort: M
+    depends_on:
+      - DXR-001
+    references:
+      - Makefile
+      - services/backend/package.json
+      - services/frontend/package.json
+      - docs/developer_command_reference.md#ci-parity-mapping-for-local-runs
+    rationale: >-
+      `make validate` runs pytest + governance + stack checks but never
+      touches the JS services. DX-005/DX-006 shipped an integration server
+      and Next.js frontend, yet there is no local or CI parity check that
+      services/backend/local-integration-server.js still starts or that
+      services/frontend builds. Contract drift in the TypeScript surface
+      (services/frontend/lib/prompt-contract.ts) is invisible to
+      `make validate`.
+    acceptance_criteria:
+      - >-
+        `make validate` (or a documented companion target) invokes at least
+        one JS-side check for both services (typecheck, smoke boot, or unit
+        test) without requiring network access by default.
+      - >-
+        CI runs the same JS-side check so the local/CI parity table in
+        docs/developer_command_reference.md remains accurate.
+      - >-
+        Skip/override variables are documented for environments without Node.
+    deliverables:
+      - Makefile target(s) for JS validation
+      - CI job update in .github/workflows/ci.yml
+      - Documentation update in docs/developer_command_reference.md
+
+  - id: DXR-003
+    title: Commit deterministic lockfiles for frontend and backend services
+    area: tooling
+    phase: 'DX Audit 2026-04-20'
+    priority: P1
+    status: todo
+    effort: XS
+    depends_on:
+      - DXR-001
+    references:
+      - services/frontend/package.json
+      - services/backend/package.json
+      - README.md#9-non-functional-requirements
+      - docs/developer_experience_principles.md#principles
+    rationale: >-
+      services/frontend and services/backend declare dependencies but no
+      package-lock.json or equivalent is committed. This contradicts the
+      Determinism non-functional requirement and the DX principle of
+      reproducible local builds; every contributor currently pulls a
+      different resolved dependency tree.
+    acceptance_criteria:
+      - >-
+        A lockfile (package-lock.json, pnpm-lock.yaml, or yarn.lock) exists
+        for each service package and is enforced by CI install step.
+      - >-
+        Lockfile hygiene is documented (how to regenerate, which reviewer
+        role is required when it changes).
+    deliverables:
+      - Lockfile(s) committed per service
+      - Contributor note describing lockfile policy
+
+  - id: DXR-004
+    title: Provide .env.example scaffolding for local runtime profile
+    area: developer-onboarding
+    phase: 'DX Audit 2026-04-20'
+    priority: P1
+    status: todo
+    effort: XS
+    depends_on: []
+    references:
+      - infra/local/docker-compose.integration.yml
+      - docs/runbooks/local_runtime_integration_troubleshooting.md
+      - docs/developer_command_reference.md#local-runtime-integration-profile-dx-006
+    rationale: >-
+      The integration profile reads FRONTEND_PORT, BACKEND_PORT,
+      BACKEND_API_BASE_URL, and BACKEND_HOST but there is no committed
+      .env.example the developer can copy. Operators must cross-reference
+      the runbook before `make integration-up` will behave predictably on
+      non-default hosts.
+    acceptance_criteria:
+      - >-
+        A .env.example (or equivalently named file) documents every variable
+        consumed by infra/local/docker-compose.integration.yml.
+      - >-
+        The example values do not contain secrets and are safe to commit
+        under AGENT_GOVERNANCE.md controls.
+      - >-
+        docs/developer_command_reference.md references the file.
+    deliverables:
+      - Committed .env.example (or named equivalent)
+      - Quickstart/runbook update
+
+  - id: DXR-005
+    title: Baseline formatting and linting configuration (editorconfig + formatters)
+    area: quality
+    phase: 'DX Audit 2026-04-20'
+    priority: P1
+    status: todo
+    effort: M
+    depends_on: []
+    references:
+      - .pre-commit-config.yaml
+      - pyproject.toml
+      - services/frontend/package.json
+      - docs/developer_experience_principles.md#principles
+    rationale: >-
+      The repository has no .editorconfig and no formatter or linter
+      configured for Python (ruff/black) or TypeScript/JS (prettier/eslint).
+      Pre-commit only runs governance and stack checks. Style drift across
+      agent-authored PRs is inevitable without a committed baseline, which
+      contradicts the "Governance by default, automation where possible"
+      principle.
+    acceptance_criteria:
+      - >-
+        .editorconfig is committed at repo root and covers Python, TS, JS,
+        YAML, and Markdown files.
+      - >-
+        At least one formatter/linter per language is configured, runnable
+        locally, and wired into pre-commit with a documented opt-in path.
+      - >-
+        CI enforces or reports on the new checks without regressing existing
+        governance jobs.
+    deliverables:
+      - .editorconfig
+      - Formatter/linter configs and pre-commit hooks
+      - CI integration (advisory or enforcing) with docs update
+
+  - id: DXR-006
+    title: Pin Node toolchain version alongside tools/versions.json
+    area: tooling
+    phase: 'DX Audit 2026-04-20'
+    priority: P2
+    status: todo
+    effort: XS
+    depends_on: []
+    references:
+      - tools/versions.json
+      - infra/local/docker-compose.integration.yml
+      - services/frontend/package.json
+    rationale: >-
+      tools/versions.json pins markdownlint-cli2 only. The integration
+      profile hardcodes node:20-alpine while services/frontend requires
+      Next.js 14.2.5, but there is no .nvmrc, no engines field, and no
+      entry in tools/versions.json pinning Node. Developers on Node 18 or
+      Node 22 can silently drift from CI behavior.
+    acceptance_criteria:
+      - >-
+        A Node version pin exists (tools/versions.json, .nvmrc, or
+        package.json engines) and is referenced by local bootstrap and CI.
+      - >-
+        The pin matches the integration profile and is documented in the
+        quickstart.
+    deliverables:
+      - Node pin artifact (choose single source of truth)
+      - Documentation update
+
+  - id: DXR-007
+    title: Add CODEOWNERS routing to operationalize Level 2 governance
+    area: governance
+    phase: 'DX Audit 2026-04-20'
+    priority: P1
+    status: todo
+    effort: S
+    depends_on: []
+    references:
+      - AGENT_GOVERNANCE.md#14-is-this-best-practice-yet
+      - AGENT_GOVERNANCE.md#3-roles-and-responsibilities
+      - .github/pull_request_template.md
+    rationale: >-
+      AGENT_GOVERNANCE §14 names "mandatory CODEOWNERS routing" as a
+      Level 2 (Controlled) control, but no CODEOWNERS file exists. Dual-
+      agent cross-check requirements (§5) therefore rely on human memory
+      to route compliance, security, and domain reviewers. Other projects
+      adopting this baseline must recreate this control by hand.
+    acceptance_criteria:
+      - >-
+        .github/CODEOWNERS routes at least compliance calculation,
+        governance, CI, and infra paths to the reviewer roles named in
+        AGENT_GOVERNANCE.md §3.
+      - >-
+        The file is referenced from AGENT_GOVERNANCE.md or the PR template
+        as authoritative routing.
+      - >-
+        A test or CI check asserts CODEOWNERS coverage for high-risk
+        directories.
+    deliverables:
+      - .github/CODEOWNERS
+      - Reference update in AGENT_GOVERNANCE.md or PR template
+      - Optional CI guard or unit test
+
+  - id: DXR-008
+    title: Reconcile platform IaC module deployment status with real artifacts
+    area: platform
+    phase: 'DX Audit 2026-04-20'
+    priority: P1
+    status: todo
+    effort: L
+    depends_on: []
+    references:
+      - docs/platform_runtime_stack_registry.yaml
+      - infra/platform/iac/module.primitives.yaml
+      - .github/workflows/ci.yml
+      - docs/development_backlog.yaml
+    rationale: >-
+      docs/platform_runtime_stack_registry.yaml lists iac-opentofu-or-terraform
+      as status "deployed" and BL-021 is marked done, but infra/platform/iac
+      contains only README.md and module.primitives.yaml. The iac-validate
+      CI job explicitly short-circuits when no HCL is present ("tflint gate
+      is a no-op"). The same pattern applies to the other platform/* module
+      skeletons: they are contracts-only, yet labelled deployed, which
+      confuses downstream projects evaluating reuse.
+    acceptance_criteria:
+      - >-
+        Registry statuses distinguish contract-only ("scaffolded") from
+        runnable ("deployed") modules, or the registry is updated to reflect
+        reality with matching backlog entries.
+      - >-
+        At least one concrete IaC module artifact exists (terraform/OpenTofu
+        root or stub) so the iac-validate gate is no longer a guaranteed
+        no-op, or the gate is documented as advisory until a module lands.
+      - >-
+        scripts/check_tech_stack.py validates the new status vocabulary.
+    deliverables:
+      - Registry schema/status update
+      - Concrete IaC scaffold or explicit advisory-gate documentation
+      - check_tech_stack.py update and tests
+
+  - id: DXR-009
+    title: Extract reusable GitHub Actions for adopters of the governance baseline
+    area: platform-operations
+    phase: 'DX Audit 2026-04-20'
+    priority: P1
+    status: todo
+    effort: M
+    depends_on:
+      - DXR-010
+    references:
+      - .github/workflows/ci.yml
+      - .github/workflows/preview-environment.yml
+      - AGENT_GOVERNANCE.md#13-cross-project-adoption-policy
+      - docs/developer_experience_principles.md#principles
+    rationale: >-
+      AGENT_GOVERNANCE §13 requires other projects to preserve governance
+      controls, but `.github/workflows/ci.yml` is a monolithic workflow
+      coupled to this repository's script paths. Adopters must copy-paste
+      the entire workflow and edit script invocations, which contradicts
+      the "Portable by default" principle and makes drift between adopting
+      projects inevitable.
+    acceptance_criteria:
+      - >-
+        Core governance jobs (readme-anchor-check, tech-stack-check,
+        secret-scan, governance-gate, risk-label-suggestion) are available
+        as a composite action or reusable workflow (workflow_call) and
+        consumed by ci.yml as the first caller.
+      - >-
+        Inputs for repository-specific paths (backlog, registry, exceptions)
+        are exposed as workflow inputs, not hard-coded.
+      - >-
+        A usage example for another repository is documented.
+    deliverables:
+      - .github/actions/* composite(s) or workflow_call file(s)
+      - ci.yml migration to consume the reusable unit
+      - Cross-project adoption example in docs/
+
+  - id: DXR-010
+    title: Package governance scripts as a reusable Python module with an entry point
+    area: platform
+    phase: 'DX Audit 2026-04-20'
+    priority: P2
+    status: todo
+    effort: L
+    depends_on: []
+    references:
+      - scripts/check_ci_governance.py
+      - scripts/check_readme_anchors.py
+      - scripts/check_tech_stack.py
+      - scripts/suggest_risk_label.py
+      - scripts/generate_governance_checklist_evidence.py
+      - pyproject.toml
+    rationale: >-
+      Governance scripts embed hard-coded paths (docs/development_backlog.yaml,
+      .github/governance/policy_exceptions.v1.json, infra/platform/*) and
+      live under scripts/ with no console entry points. Reuse in a new
+      project requires copying files and manually editing path constants,
+      which directly violates docs/developer_experience_principles.md
+      principles 2 and 7 (single source of truth, portable by default).
+    acceptance_criteria:
+      - >-
+        Scripts move (or are mirrored) under src/pressure_vessels/ (or a
+        dedicated subpackage) with console_scripts entry points registered
+        in pyproject.toml.
+      - >-
+        All hard-coded repository paths become CLI flags or environment
+        variables with documented defaults.
+      - >-
+        Existing CI jobs and `make` targets invoke the entry points instead
+        of script paths, preserving current behavior.
+    deliverables:
+      - Refactored package with entry points
+      - pyproject.toml update
+      - Migration notes for downstream adopters
+
+  - id: DXR-011
+    title: Make risk-label heuristics declarative and project-overridable
+    area: governance
+    phase: 'DX Audit 2026-04-20'
+    priority: P2
+    status: todo
+    effort: S
+    depends_on:
+      - DXR-010
+    references:
+      - scripts/suggest_risk_label.py
+      - docs/developer_command_reference.md#pr-risk-label-suggestion-workflow-dx-008
+      - AGENT_GOVERNANCE.md#4-change-classification-and-merge-gates
+    rationale: >-
+      The risk-label heuristic is implemented as inline code in
+      scripts/suggest_risk_label.py. Another project needs different
+      high-risk path patterns (for example, their own compliance surface)
+      yet cannot express that without forking the script.
+    acceptance_criteria:
+      - >-
+        Heuristic thresholds and path patterns are loaded from a YAML/JSON
+        config file committed under docs/governance/ (or equivalent).
+      - >-
+        The script falls back to a documented default config when no
+        override is supplied.
+      - >-
+        Tests cover at least one override scenario.
+    deliverables:
+      - Heuristic config schema + default file
+      - Refactored suggest_risk_label.py
+      - Unit tests
+
+  - id: DXR-012
+    title: Provide a baseline scaffold for AGENT_GOVERNANCE cross-project adoption
+    area: platform
+    phase: 'DX Audit 2026-04-20'
+    priority: P2
+    status: todo
+    effort: L
+    depends_on:
+      - DXR-009
+      - DXR-010
+    references:
+      - AGENT_GOVERNANCE.md#13-cross-project-adoption-policy
+      - docs/developer_quickstart.md#reusing-this-dx-baseline-in-other-projects
+      - docs/developer_experience_principles.md#principles
+    rationale: >-
+      The quickstart and §13 document adoption but there is no concrete
+      tool (cookiecutter, copier template, or shell installer) to apply
+      the governance baseline to a new repository. Adopters must manually
+      copy files and reconcile versions, which erodes the "governance
+      outcomes equivalent or stronger than this baseline" commitment.
+    acceptance_criteria:
+      - >-
+        A single documented command (or template render) installs the
+        governance baseline (AGENT_GOVERNANCE.md, PR template, CI gates
+        wiring, CODEOWNERS stub, developer_command_reference subset) into
+        a new repository.
+      - >-
+        The scaffold records the source version so adopters can track
+        drift against this baseline over time.
+      - >-
+        The scaffold is exercised by a CI smoke test in this repository.
+    deliverables:
+      - Template (cookiecutter/copier) or installer script
+      - Versioned baseline manifest
+      - Smoke test in tests/
+
+  - id: DXR-013
+    title: Ship devcontainer and Codespaces configuration for one-click onboarding
+    area: developer-onboarding
+    phase: 'DX Audit 2026-04-20'
+    priority: P3
+    status: todo
+    effort: M
+    depends_on:
+      - DXR-001
+      - DXR-006
+    references:
+      - docs/developer_quickstart.md
+      - infra/local/docker-compose.integration.yml
+      - tools/versions.json
+    rationale: >-
+      First-run onboarding today depends on the host having a correct
+      Python 3.11+, Node 20, GNU Make, and Docker. A devcontainer or
+      Codespaces configuration would let contributors reach `make validate`
+      without host-level setup and would make DX-006 integration profile
+      reproducible across machines.
+    acceptance_criteria:
+      - >-
+        .devcontainer/devcontainer.json exists and pins the same Python and
+        Node versions as the rest of the toolchain.
+      - >-
+        `make bootstrap && make validate` succeeds inside the devcontainer
+        on a cold build.
+      - >-
+        The quickstart links to the devcontainer as an optional fast path.
+    deliverables:
+      - .devcontainer/ config
+      - Quickstart update
+      - CI job (optional) that builds the devcontainer image
+
+  - id: DXR-014
+    title: Replace hard-coded INFRA_BOUNDARY_FILES with a data-driven manifest
+    area: platform
+    phase: 'DX Audit 2026-04-20'
+    priority: P2
+    status: todo
+    effort: S
+    depends_on: []
+    references:
+      - Makefile
+      - infra/platform/environment.bootstrap.yaml
+      - docs/platform_runtime_stack_registry.yaml
+      - scripts/check_tech_stack.py
+    rationale: >-
+      The Makefile enumerates INFRA_BOUNDARY_FILES as a long shell list,
+      and every change requires editing Make. A downstream project reusing
+      this DX baseline (DXR-012) cannot simply point at their own registry;
+      they must rewrite the list. The authoritative data already lives in
+      docs/platform_runtime_stack_registry.yaml.
+    acceptance_criteria:
+      - >-
+        `make s` (or its successor) derives the boundary-file list from the
+        registry or a dedicated manifest, not from an inline Makefile list.
+      - >-
+        Downstream projects can override via a single pointer (env var,
+        config file, or flag).
+      - >-
+        Existing tests (tests/test_makefile_task_runner.py,
+        tests/test_platform_*_module.py) still pass.
+    deliverables:
+      - Registry-driven derivation logic
+      - Makefile simplification
+      - Documentation update
+
+  - id: DXR-015
+    title: Replace ad-hoc YAML parsing in check_tech_stack.py with a robust parser
+    area: tooling
+    phase: 'DX Audit 2026-04-20'
+    priority: P3
+    status: todo
+    effort: S
+    depends_on: []
+    references:
+      - scripts/check_tech_stack.py
+      - docs/platform_runtime_stack_registry.yaml
+      - pyproject.toml
+    rationale: >-
+      scripts/check_tech_stack.py parses the registry and bootstrap manifest
+      via prefix-based string slicing. Any schema evolution (nested keys,
+      aliases, comments in unusual positions) can silently break the check,
+      and reuse in another project requires preserving the exact indentation
+      conventions.
+    acceptance_criteria:
+      - >-
+        The script uses a real YAML parser (PyYAML or ruamel.yaml) that is
+        declared as a dependency in pyproject.toml.
+      - >-
+        Tests exercise the previously ad-hoc cases plus at least one new
+        schema variation (comments, quoted values, alternate indentation).
+      - >-
+        Failure messages reference the line and key that violated the
+        schema.
+    deliverables:
+      - Refactored parser
+      - pyproject.toml dependency addition
+      - Expanded tests in tests/test_tech_stack_check.py
+
+execution_order:
+  - step: 1
+    group: [DXR-001, DXR-004, DXR-007]
+    rationale: >-
+      Unblock new-contributor onboarding (JS bootstrap, env scaffolding)
+      while adding the CODEOWNERS routing every downstream reuse needs.
+  - step: 2
+    group: [DXR-002, DXR-003, DXR-005, DXR-006]
+    rationale: >-
+      Once JS bootstrap exists, tighten reproducibility (lockfiles, Node
+      pin, formatters/linters) and land JS validate parity.
+  - step: 3
+    group: [DXR-014, DXR-015, DXR-011]
+    rationale: >-
+      Data-driven governance controls unlock clean reuse and unblock the
+      packaging work.
+  - step: 4
+    group: [DXR-010, DXR-009, DXR-008]
+    rationale: >-
+      Extract the governance scripts into a reusable package, then ship
+      reusable workflows and reconcile platform module status honesty.
+  - step: 5
+    group: [DXR-012, DXR-013]
+    rationale: >-
+      Deliver the cross-project scaffold and optional devcontainer once
+      the building blocks above exist.
