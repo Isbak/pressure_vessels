@@ -72,7 +72,7 @@ findings:
   title: Validate geometry adapter inputs with typed errors
   severity: critical
   area: geometry
-  status: todo
+  status: in_progress
   file_path: src/pressure_vessels/geometry_module.py
   line_numbers: [56, 66]
   depends_on: []
