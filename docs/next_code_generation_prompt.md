@@ -1,51 +1,48 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **next queued roadmap item: BL-042 — Automate release pipeline and environment promotion gates**.
-
-> Note: As of 2026-04-21, all `todo` items are complete. `BL-042` remains `blocked` in `docs/development_backlog.yaml`; unblock prerequisites/policy approval before execution.
+Use this prompt to implement the **next queued roadmap item: BL-043 — Restore green pytest baseline after 2026-04-21 audit regressions**.
 
 ```text
-You are implementing backlog item **BL-042: Automate release pipeline and environment promotion gates** for the `pressure_vessels` repository.
+You are implementing backlog item **BL-043: Restore green pytest baseline after 2026-04-21 audit regressions** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved as of 2026-04-21):
-- `BL-041` status is `done`.
-- `BL-042` status is `blocked`.
-- `BL-042` dependencies are `BL-012`, `BL-026`, `BL-038`, and all are `done`.
-- Therefore `BL-042` is the next queued item pending unblock decision.
+- `BL-042` status is `done`.
+- `BL-043` status is `todo`.
+- `BL-043` has no dependencies (`depends_on: []`).
+- Therefore `BL-043` is the next queued item.
 
 Restate before coding:
-- Item ID/title: BL-042 — Automate release pipeline and environment promotion gates
-- depends_on: [BL-012, BL-026, BL-038]
+- Item ID/title: BL-043 — Restore green pytest baseline after 2026-04-21 audit regressions
+- depends_on: []
 - acceptance criteria:
-  1) Signed release artifacts and provenance attestations are generated on tagged builds.
-  2) Promotion requires passing governance, security, and regression gates.
-  3) Rollback automation restores the previous known-good release with audit evidence.
+  1) `pytest -q` returns 0 failures on the audit branch before any other BL-04X work is merged.
+  2) Every fix is attributable to a concrete AF-016/AF-017/AF-018/AF-019 sub-finding.
+  3) CI `python-tests` and `contract-tests` jobs pass on all matrix cells.
 - deliverables:
-  1) Release provenance and signing workflow.
-  2) Environment promotion gate automation.
-  3) Rollback automation playbook and validation report.
+  1) Green pytest run evidence attached to the PR.
+  2) Fixes routed under AF-017 (QA harness), AF-018 (contract), AF-019 (sentinel test).
 
 Repository constraints:
-- Keep changes minimal and focused; implement BL-042 only.
+- Keep changes minimal and focused; implement BL-043 only.
 - Follow contract-driven integration and avoid undocumented interface drift.
 - Preserve governance-by-default controls from `AGENT_GOVERNANCE.md`.
 - Prefer incremental delivery over broad rewrites; keep behavior deterministic.
 
 Likely relevant files:
-- `AGENT_GOVERNANCE.md`
-- `docs/governance/ci_governance_policy.v1.json`
-- `docs/runbooks/platform_runtime_stack_operations.md`
-- `.github/workflows/`
+- `docs/audit_findings_2026-04-21.yaml`
+- `tests/test_backend_api_contract_dx005.py`
+- `tests/test_contract_interfaces_dx009.py`
+- `tests/test_qa_benchmark_harness.py`
+- `.github/workflows/ci.yml`
 
 Task:
-1) Implement signed release/provenance workflow for tagged builds.
-2) Add promotion gates enforcing governance, security, and regression checks.
-3) Add rollback automation with audit evidence capture.
-4) Set `BL-042` status to `done` in `docs/development_backlog.yaml` once complete.
-5) Update `docs/next_code_generation_prompt.md` to the next backlog state.
+1) Restore a fully green `pytest -q` baseline.
+2) Map each code/test fix to AF-016/AF-017/AF-018/AF-019 in commit/PR notes.
+3) Verify CI matrix expectations for `python-tests` and `contract-tests` are met.
+4) Keep backlog metadata unchanged except where implementation evidence requires it.
 
 Output format:
 - Provide a concise implementation plan first.

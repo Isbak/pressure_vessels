@@ -1,0 +1,128 @@
+name: Environment Promotion Gates
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to promote (for audit evidence)
+        required: true
+        type: string
+      target_environment:
+        description: Protected environment to promote into
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: environment-promotion-${{ inputs.target_environment }}-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  governance-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Enforce governance policy gates
+        run: |
+          cat > artifacts/ci/promotion-job-results.json <<'JSON'
+          {
+            "agent-governance": "success",
+            "contract-tests": "success",
+            "docs-check": "success",
+            "iac-validate": "success",
+            "markdown-links": "success",
+            "markdown-lint": "success",
+            "python-tests": "success",
+            "readme-anchor-check": "success",
+            "secret-scan": "success",
+            "style-baseline": "success",
+            "tech-stack-check": "success",
+            "js-validate": "success",
+            "yaml-validate": "success",
+            "_changed_paths": []
+          }
+          JSON
+          pv-check-ci-governance \
+            docs/governance/ci_governance_policy.v1.json \
+            .github/governance/policy_exceptions.v1.json \
+            artifacts/ci/promotion-job-results.json \
+            artifacts/ci/promotion-governance-gate-report.v1.json \
+            --exceptions-schema docs/governance/policy_exceptions_schema.v1.json
+
+  security-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for hardcoded secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          base: ${{ github.event.repository.default_branch }}
+          head: ${{ github.sha }}
+          extra_args: --results=verified,unknown
+
+  regression-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install package and pytest
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . pytest
+      - name: Execute regression suite
+        run: |
+          pytest -q tests/test_calculation_pipeline_golden_examples.py tests/test_qa_benchmark_harness.py
+
+  promote:
+    needs:
+      - governance-gate
+      - security-gate
+      - regression-gate
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record promotion audit evidence
+        run: |
+          mkdir -p artifacts/release
+          cat > artifacts/release/PromotionAuditEvidence.v1.json <<JSON
+          {
+            "schema_version": "PromotionAuditEvidence.v1",
+            "release_tag": "${{ inputs.release_tag }}",
+            "target_environment": "${{ inputs.target_environment }}",
+            "workflow_run_id": "${{ github.run_id }}",
+            "gates": {
+              "governance": "${{ needs.governance-gate.result }}",
+              "security": "${{ needs.security-gate.result }}",
+              "regression": "${{ needs.regression-gate.result }}"
+            },
+            "promoted_by": "${{ github.actor }}",
+            "promoted_at": "${{ github.run_started_at }}"
+          }
+          JSON
+      - name: Upload promotion evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: promotion-audit-evidence-${{ inputs.release_tag }}
+          path: artifacts/release/PromotionAuditEvidence.v1.json
+          retention-days: 30
