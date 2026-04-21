@@ -1,0 +1,28 @@
+{
+  "id": "example_06_joint_efficiency_floor",
+  "description": "Edge case at the lower joint-efficiency envelope with elevated pressure and corrosion allowance.",
+  "source": "ASME BPVC Section VIII, Division 1 (2023): UG-27(c)(1), UG-32, UG-45, UG-37; independent cross-check with Megyesy Pressure Vessel Handbook (14th ed.)",
+  "tolerance": 1e-06,
+  "input": {
+    "internal_pressure_pa": 2500000.0,
+    "allowable_stress_pa": 95000000.0,
+    "joint_efficiency": 0.5,
+    "corrosion_allowance_m": 0.005,
+    "shell_inside_diameter_m": 3.2,
+    "shell_provided_thickness_m": 0.06,
+    "head_inside_diameter_m": 3.2,
+    "head_provided_thickness_m": 0.045,
+    "nozzle_inside_diameter_m": 0.45,
+    "nozzle_provided_thickness_m": 0.01
+  },
+  "expected": {
+    "UG-27-shell": {"required_thickness_m": 0.091956522, "pass_status": false},
+    "UG-32-head": {"required_thickness_m": 0.079920635, "pass_status": false},
+    "UG-45-nozzle": {"required_thickness_m": 0.017096774, "pass_status": false},
+    "UG-27-shell-mawp": {"computed_mawp_pa": 1599816.289038579, "pass_status": false},
+    "UG-32-head-mawp": {"computed_mawp_pa": 1338028.169014084, "pass_status": false},
+    "UG-45-nozzle-mawp": {"computed_mawp_pa": 1046255.506607929, "pass_status": false},
+    "UG-37-nozzle-shell-reinforcement": {"required_thickness_m": 0.041380435, "pass_status": false},
+    "UG-37-nozzle-head-reinforcement": {"required_thickness_m": 0.035964286, "pass_status": false}
+  }
+}

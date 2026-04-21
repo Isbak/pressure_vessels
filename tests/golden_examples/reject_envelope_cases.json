@@ -1,0 +1,37 @@
+{
+  "id": "reject_envelope_cases",
+  "description": "Explicit invalid-domain and extrapolation inputs that must fail closed under BL-003e envelope gating.",
+  "source": "Calculation pipeline validity envelopes declared in docs/interfaces/calculation_pipeline_contract.md",
+  "cases": [
+    {
+      "case_id": "reject_internal_pressure_below_min",
+      "dimension": "internal_pressure_pa",
+      "value": 0.999,
+      "expected_error_regex": "BL-003 model-domain gate failed: .*internal_pressure_pa=.*outside validity envelope"
+    },
+    {
+      "case_id": "reject_allowable_stress_above_max",
+      "dimension": "allowable_stress_pa",
+      "value": 500000001.0,
+      "expected_error_regex": "BL-003 model-domain gate failed: .*allowable_stress_pa=.*outside validity envelope"
+    },
+    {
+      "case_id": "reject_joint_efficiency_above_one",
+      "dimension": "joint_efficiency",
+      "value": 1.0001,
+      "expected_error_regex": "BL-003 model-domain gate failed: joint_efficiency must be in \\(0, 1\\]."
+    },
+    {
+      "case_id": "reject_nozzle_diameter_below_min",
+      "dimension": "nozzle_inside_diameter_m",
+      "value": 0.0499,
+      "expected_error_regex": "BL-003 model-domain gate failed: .*nozzle_inside_diameter_m=.*outside validity envelope"
+    },
+    {
+      "case_id": "reject_corrosion_allowance_above_max",
+      "dimension": "corrosion_allowance_m",
+      "value": 0.0201,
+      "expected_error_regex": "BL-003 model-domain gate failed: .*corrosion_allowance_m=.*outside validity envelope"
+    }
+  ]
+}

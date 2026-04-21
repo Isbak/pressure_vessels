@@ -210,6 +210,8 @@ To support ASME/PED-style review workflows:
 - Golden test set from solved textbook and code examples.
 - Cross-verification against legacy in-house calculations.
 - Boundary testing for pressure/temperature/material extremes.
+- Explicit invalid-domain/extrapolation reject vectors for validity-envelope enforcement (`tests/golden_examples/reject_envelope_cases.json`).
+- Discrepancy triage runbook for model-vs-reference delta exceedance (`docs/runbooks/validation_discrepancy_triage.md`).
 - Independent engineer review before production release.
 - Deterministic orchestration performance suite with concurrent throughput/latency benchmarks, retained profiling artifacts, and a published capacity envelope runbook (`docs/runbooks/workflow_orchestrator_performance_scale_benchmark.md`).
 

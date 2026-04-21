@@ -33,6 +33,24 @@
       "fixture_path": "tests/golden_examples/example_05_stress_high_pressure.json",
       "category": "stress",
       "description": "High-load stress case near validity envelope maxima."
+    },
+    {
+      "case_id": "example_06_joint_efficiency_floor",
+      "fixture_path": "tests/golden_examples/example_06_joint_efficiency_floor.json",
+      "category": "boundary",
+      "description": "Joint-efficiency floor edge case with independent handbook cross-check."
+    },
+    {
+      "case_id": "example_07_corrosion_allowance_ceiling",
+      "fixture_path": "tests/golden_examples/example_07_corrosion_allowance_ceiling.json",
+      "category": "boundary",
+      "description": "Corrosion-allowance ceiling edge case with thin-nozzle behavior."
+    },
+    {
+      "case_id": "reject_envelope_cases",
+      "fixture_path": "tests/golden_examples/reject_envelope_cases.json",
+      "category": "reject",
+      "description": "Explicit invalid-domain and extrapolation reject vectors."
     }
   ],
   "performance_profiles": [

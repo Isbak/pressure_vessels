@@ -1,59 +1,54 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **current next roadmap item: BL-041 — Expand engineering validation with independent references and edge envelopes**.
+Use this prompt to implement the **next queued roadmap item: BL-042 — Automate release pipeline and environment promotion gates**.
+
+> Note: As of 2026-04-21, all `todo` items are complete. `BL-042` remains `blocked` in `docs/development_backlog.yaml`; unblock prerequisites/policy approval before execution.
 
 ```text
-You are implementing backlog item **BL-041: Expand engineering validation with independent references and edge envelopes** for the `pressure_vessels` repository.
+You are implementing backlog item **BL-042: Automate release pipeline and environment promotion gates** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved as of 2026-04-21):
-- `BL-040` status is `done`.
-- `BL-041` status is `todo`.
-- `BL-041` dependencies are `BL-003e`, `BL-017`, and both are `done`.
-- Therefore `BL-041` is the next eligible item.
+- `BL-041` status is `done`.
+- `BL-042` status is `blocked`.
+- `BL-042` dependencies are `BL-012`, `BL-026`, `BL-038`, and all are `done`.
+- Therefore `BL-042` is the next queued item pending unblock decision.
 
 Restate before coding:
-- Item ID/title: BL-041 — Expand engineering validation with independent references and edge envelopes
-- depends_on: [BL-003e, BL-017]
+- Item ID/title: BL-042 — Automate release pipeline and environment promotion gates
+- depends_on: [BL-012, BL-026, BL-038]
 - acceptance criteria:
-  1) Independent reference cases cover additional ASME Div 1 edge conditions.
-  2) Explicit reject tests enforce invalid-domain or extrapolated input handling.
-  3) Discrepancy triage workflow is documented when model-vs-reference deltas exceed tolerance.
+  1) Signed release artifacts and provenance attestations are generated on tagged builds.
+  2) Promotion requires passing governance, security, and regression gates.
+  3) Rollback automation restores the previous known-good release with audit evidence.
 - deliverables:
-  1) Expanded reference-case dataset.
-  2) Domain-envelope reject test suite.
-  3) Validation discrepancy triage runbook.
+  1) Release provenance and signing workflow.
+  2) Environment promotion gate automation.
+  3) Rollback automation playbook and validation report.
 
 Repository constraints:
-- Keep changes minimal and focused; implement BL-041 only.
+- Keep changes minimal and focused; implement BL-042 only.
 - Follow contract-driven integration and avoid undocumented interface drift.
 - Preserve governance-by-default controls from `AGENT_GOVERNANCE.md`.
 - Prefer incremental delivery over broad rewrites; keep behavior deterministic.
 
 Likely relevant files:
-- `tests/golden_examples/README.md`
-- `tests/test_calculation_pipeline_golden_examples.py`
-- `docs/interfaces/calculation_pipeline_contract.md`
-- `README.md`
+- `AGENT_GOVERNANCE.md`
+- `docs/governance/ci_governance_policy.v1.json`
+- `docs/runbooks/platform_runtime_stack_operations.md`
+- `.github/workflows/`
 
 Task:
-1) Extend independent reference/edge-case benchmark dataset for calculation validation.
-2) Add explicit invalid-domain reject tests for envelope enforcement.
-3) Document discrepancy triage workflow for tolerance exceedance.
-4) Set `BL-041` status to `done` in `docs/development_backlog.yaml` once complete.
-5) Update `docs/next_code_generation_prompt.md` to the subsequent eligible backlog item.
+1) Implement signed release/provenance workflow for tagged builds.
+2) Add promotion gates enforcing governance, security, and regression checks.
+3) Add rollback automation with audit evidence capture.
+4) Set `BL-042` status to `done` in `docs/development_backlog.yaml` once complete.
+5) Update `docs/next_code_generation_prompt.md` to the next backlog state.
 
 Output format:
 - Provide a concise implementation plan first.
 - Then provide unified diffs/patches per file.
 - Then provide test/verification commands and expected results.
 ```
-
-## Upcoming queue
-
-The following items remain queued in dependency order. Select the next eligible
-item from `docs/development_backlog.yaml` after BL-041 is completed.
-
-1. **BL-042** — Automate release pipeline and environment promotion gates (`blocked`, deps: BL-012, BL-026, BL-038)
