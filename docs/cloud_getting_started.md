@@ -234,6 +234,7 @@ For a fast MVP deployment on Railway, run only the frontend `web` process bound 
 - Keep `backend` unscaled for single-service MVP deployments.
 - The backend process uses the deterministic local integration server and avoids the backend skeleton's incomplete NestJS build path.
 - The frontend `/api/prompt` route still works without backend wiring by returning deterministic placeholder responses when `BACKEND_API_BASE_URL` is unset.
+- LLM and data-plane infrastructure services (for example `infra/platform/vllm`, PostgreSQL, Redis, Neo4j, Qdrant, OpenSearch) are not launched from the root `Procfile`; run them as dedicated platform services/modules.
 
 Recommended Railway configuration:
 
