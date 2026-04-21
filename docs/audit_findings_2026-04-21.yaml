@@ -49,7 +49,7 @@ findings:
   title: Restore green pytest baseline by triaging 2026-04-21 failing tests
   severity: critical
   area: quality
-  status: todo
+  status: done
   file_path: tests/
   line_numbers: []
   depends_on: []
@@ -92,7 +92,7 @@ findings:
   title: Handle reject-category fixtures in QA benchmark cross-verification harness
   severity: high
   area: quality
-  status: todo
+  status: done
   file_path: src/pressure_vessels/qa_benchmark_pipeline.py
   line_numbers: [88, 103]
   depends_on:
@@ -138,7 +138,7 @@ findings:
   title: Realign frontend/backend contract test with DesignRunRequest schema
   severity: high
   area: integration
-  status: todo
+  status: done
   file_path: tests/test_contract_interfaces_dx009.py
   line_numbers: [46, 65]
   depends_on:
@@ -183,7 +183,7 @@ findings:
   title: Decouple next-prompt sentinel tests from sprint-local BL ids
   severity: medium
   area: quality
-  status: todo
+  status: done
   file_path: tests/test_backend_api_contract_dx005.py
   line_numbers: [60, 72]
   depends_on:
