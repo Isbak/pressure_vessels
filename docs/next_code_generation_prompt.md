@@ -1,48 +1,48 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **current next roadmap item: BL-037 — Add deterministic PDF generation and signature verification harness**.
+Use this prompt to implement the **current next roadmap item: BL-038 — Establish production security baseline for runtime interfaces**.
 
 ```text
-You are implementing backlog item **BL-037: Add deterministic PDF generation and signature verification harness** for the `pressure_vessels` repository.
+You are implementing backlog item **BL-038: Establish production security baseline for runtime interfaces** for the `pressure_vessels` repository.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
 
 Backlog context (resolved as of 2026-04-21):
-- `BL-036` status is `done`.
-- `BL-037` status is `todo`.
-- `BL-037` dependencies are `BL-015`, and it is `done`.
-- Therefore `BL-037` is the next eligible item.
+- `BL-037` status is `done`.
+- `BL-038` status is `todo`.
+- `BL-038` dependencies are `BL-022`, `BL-027`, and both are `done`.
+- Therefore `BL-038` is the next eligible item.
 
 Restate before coding:
-- Item ID/title: BL-037 — Add deterministic PDF generation and signature verification harness
-- depends_on: [BL-015]
+- Item ID/title: BL-038 — Establish production security baseline for runtime interfaces
+- depends_on: [BL-022, BL-027]
 - acceptance criteria:
-  1) PDF outputs are byte-stable or normalized-hash stable for identical inputs.
-  2) Signature validation checks pass for dossier and change-impact artifacts.
-  3) CI fails on unsigned or tampered dossier payloads.
+  1) Backend endpoints require role-scoped auth tokens for engineer/reviewer/approver personas.
+  2) Secrets are loaded through approved secrets module paths without plaintext fallbacks.
+  3) Security audit trail captures actor, action, artifact, and decision for approval gates.
 - deliverables:
-  1) Deterministic PDF rendering verifier.
-  2) Signature verification harness.
-  3) CI gate for dossier signature integrity.
+  1) Role-based API authorization policy.
+  2) Secrets integration hardening checklist and tests.
+  3) Security audit event schema and persistence.
 
 Repository constraints:
-- Keep changes minimal and focused; implement BL-037 only.
+- Keep changes minimal and focused; implement BL-038 only.
 - Follow contract-driven integration and avoid undocumented interface drift.
 - Preserve governance-by-default controls from `AGENT_GOVERNANCE.md`.
 - Prefer incremental delivery over broad rewrites; keep behavior deterministic.
 
 Likely relevant files:
-- `src/pressure_vessels/dossier_export_pipeline.py`
-- `docs/interfaces/dossier_export_pipeline_contract.md`
-- `docs/runbooks/dossier_export_pipeline_runbook.md`
-- `artifacts/bl-007/CertificationDossierExportPackage.v1.sample.json`
+- `AGENT_GOVERNANCE.md`
+- `docs/governance/ci_governance_policy.v1.json`
+- `src/pressure_vessels/enterprise_integration_pipeline.py`
+- `docs/interfaces/backend_prompt_api_contract.md`
 
 Task:
-1) Add deterministic PDF rendering verification for dossier exports.
-2) Add signature verification checks for dossier and change-impact artifacts.
-3) Add CI gate coverage for unsigned/tampered payload rejection.
-4) Set `BL-037` status to `done` in `docs/development_backlog.yaml` once complete.
+1) Add role-scoped auth token enforcement for backend runtime interfaces.
+2) Remove plaintext secret fallback paths and route through approved secrets module interfaces.
+3) Add/extend security audit trail schema coverage for approval-gate events.
+4) Set `BL-038` status to `done` in `docs/development_backlog.yaml` once complete.
 5) Update `docs/next_code_generation_prompt.md` to the subsequent eligible backlog item.
 
 Output format:
@@ -54,10 +54,9 @@ Output format:
 ## Upcoming queue
 
 The following items remain queued in dependency order. Select the next eligible
-item from `docs/development_backlog.yaml` after BL-037 is completed.
+item from `docs/development_backlog.yaml` after BL-038 is completed.
 
-1. **BL-038** — Establish production security baseline for runtime interfaces (`todo`, deps: BL-022, BL-027)
-2. **BL-039** — Define SLOs, telemetry, and incident response automation (`todo`, deps: BL-023, BL-026)
-3. **BL-040** — Implement performance and scale benchmark suite (`todo`, deps: BL-017, BL-026)
-4. **BL-041** — Expand engineering validation with independent references and edge envelopes (`todo`, deps: BL-003e, BL-017)
-5. **BL-042** — Automate release pipeline and environment promotion gates (`blocked`, deps: BL-012, BL-026, BL-038)
+1. **BL-039** — Define SLOs, telemetry, and incident response automation (`todo`, deps: BL-023, BL-026)
+2. **BL-040** — Implement performance and scale benchmark suite (`todo`, deps: BL-017, BL-026)
+3. **BL-041** — Expand engineering validation with independent references and edge envelopes (`todo`, deps: BL-003e, BL-017)
+4. **BL-042** — Automate release pipeline and environment promotion gates (`blocked`, deps: BL-012, BL-026, BL-038)

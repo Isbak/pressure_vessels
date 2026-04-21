@@ -16,6 +16,7 @@ from pressure_vessels.dossier_export_pipeline import (
     CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION,
     CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION,
     generate_certification_dossier_export,
+    verify_dossier_export_signatures,
     write_certification_dossier_export,
 )
 from pressure_vessels.requirements_pipeline import parse_prompt_to_requirement_set
@@ -122,6 +123,8 @@ def test_export_package_includes_machine_json_pdf_payload_and_required_evidence_
     assert payload["schema_version"] == CERTIFICATION_DOSSIER_EXPORT_PACKAGE_VERSION
     assert payload["pdf_payload"]["schema_version"] == CERTIFICATION_DOSSIER_PDF_PAYLOAD_VERSION
     assert payload["change_impact_report"]["schema_version"] == "ImpactReport.v1"
+    assert payload["signing"]["algorithm"] == "sha256"
+    assert payload["signing"]["signature"]
     assert payload["inspector_regulator_workflow"]
     assert payload["workflow_signoff_transitions"]
     assert payload["canonical_pdf_render"]["schema_version"] == CANONICAL_DOSSIER_PDF_RENDER_VERSION
@@ -161,6 +164,53 @@ def test_export_package_is_deterministic_with_fixed_timestamp():
         "canonicalization": "json.sort_keys+compact",
         "hash_algorithm": "sha256",
     }
+
+
+def test_signature_verification_harness_accepts_valid_export_package():
+    inputs = _build_export_inputs(_default_prompt())
+    export_package = generate_certification_dossier_export(
+        *inputs,
+        revision_id="REV-0007",
+        now_utc=FIXED_NOW,
+    )
+
+    verify_dossier_export_signatures(export_package)
+
+
+def test_signature_verification_harness_rejects_tampered_or_unsigned_payloads():
+    inputs = _build_export_inputs(_default_prompt())
+    export_package = generate_certification_dossier_export(
+        *inputs,
+        revision_id="REV-0007",
+        now_utc=FIXED_NOW,
+    )
+
+    tampered_impact_signature = replace(
+        export_package,
+        change_impact_report={
+            **export_package.change_impact_report,
+            "signing": {
+                **export_package.change_impact_report["signing"],
+                "signature": "0" * 64,
+            },
+        },
+    )
+    with pytest.raises(ValueError, match="change-impact signature mismatch"):
+        verify_dossier_export_signatures(tampered_impact_signature)
+
+    unsigned_dossier = replace(export_package, signing={"algorithm": "sha256", "signing_key_ref": "", "signature": ""})
+    with pytest.raises(ValueError, match="dossier signature is missing"):
+        verify_dossier_export_signatures(unsigned_dossier)
+
+    tampered_pdf_content = replace(
+        export_package,
+        canonical_pdf_render={
+            **export_package.canonical_pdf_render,
+            "content": export_package.canonical_pdf_render["content"] + "tampered\n",
+        },
+    )
+    with pytest.raises(ValueError, match="canonical PDF content hash mismatch"):
+        verify_dossier_export_signatures(tampered_pdf_content)
 
 
 def test_export_gate_rejects_traceability_compliance_hash_mismatch():

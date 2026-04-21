@@ -110,6 +110,7 @@ class CertificationDossierExportPackage:
     pdf_payload: dict[str, Any]
     canonical_pdf_render: dict[str, Any]
     package_artifact_refs: list[str]
+    signing: dict[str, str]
     deterministic_hash: str
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -140,6 +141,7 @@ class CertificationDossierExportPackage:
             "pdf_payload": self.pdf_payload,
             "canonical_pdf_render": self.canonical_pdf_render,
             "package_artifact_refs": self.package_artifact_refs,
+            "signing": self.signing,
             "deterministic_hash": self.deterministic_hash,
         }
 
@@ -256,6 +258,22 @@ def generate_certification_dossier_export(
         "package_artifact_refs": package_artifact_refs,
     }
     deterministic_hash = _sha256_payload(payload)
+    signing = {
+        "algorithm": "sha256",
+        "signing_key_ref": "dossier-export::bl-037",
+        "signature": _sign_payload(
+            "dossier-export::bl-037",
+            {
+                "revision_id": revision_id,
+                "source_requirement_set_hash": requirement_set.deterministic_hash,
+                "source_compliance_dossier_machine_hash": compliance_dossier_machine.deterministic_hash,
+                "source_traceability_graph_hash": traceability_graph_revision.deterministic_hash,
+                "canonical_pdf_render_sha256": canonical_pdf_render["content_sha256"],
+                "change_impact_report_signature": change_impact_report.signing["signature"],
+                "package_unsigned_payload_sha256": deterministic_hash,
+            },
+        ),
+    }
 
     finalized_refs = [
         ref.replace("#<package_hash>", f"#{deterministic_hash}") if "<package_hash>" in ref else ref
@@ -289,6 +307,7 @@ def generate_certification_dossier_export(
         pdf_payload=pdf_payload,
         canonical_pdf_render=canonical_pdf_render,
         package_artifact_refs=finalized_refs,
+        signing=signing,
         deterministic_hash=deterministic_hash,
     )
 
@@ -458,6 +477,71 @@ def render_canonical_dossier_pdf(
     signoff_transitions: list[WorkflowSignoffTransition],
 ) -> dict[str, Any]:
     """Render deterministic canonical dossier PDF content from template-driven payloads."""
+    content = _render_canonical_dossier_pdf_content(
+        pdf_payload=pdf_payload,
+        template_catalog=template_catalog,
+        impact_report_hash=impact_report.deterministic_hash,
+        signoff_transitions=signoff_transitions,
+    )
+    return {
+        "schema_version": CANONICAL_DOSSIER_PDF_RENDER_VERSION,
+        "renderer": "deterministic-template-renderer",
+        "content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+        "content": content,
+    }
+
+
+def verify_deterministic_pdf_render(export_package: CertificationDossierExportPackage) -> None:
+    """Fail closed if canonical PDF render cannot be deterministically regenerated."""
+    canonical_pdf_render = export_package.canonical_pdf_render
+    actual_sha = hashlib.sha256(canonical_pdf_render["content"].encode("utf-8")).hexdigest()
+    if canonical_pdf_render["content_sha256"] != actual_sha:
+        raise ValueError("BL-037 PDF verification failed: canonical PDF content hash mismatch.")
+    if canonical_pdf_render.get("schema_version") != CANONICAL_DOSSIER_PDF_RENDER_VERSION:
+        raise ValueError("BL-037 PDF verification failed: unsupported canonical PDF schema version.")
+
+    regenerated = _render_canonical_dossier_pdf_content(
+        pdf_payload=export_package.pdf_payload,
+        template_catalog=[
+            ReportSectionTemplate(
+                section_id=entry["section_id"],
+                title=entry["title"],
+                required=entry["required"],
+                source_refs=entry["source_refs"],
+            )
+            for entry in export_package.to_json_dict()["template_catalog"]
+        ],
+        impact_report_hash=export_package.change_impact_report["deterministic_hash"],
+        signoff_transitions=[
+            WorkflowSignoffTransition(
+                transition_id=transition["transition_id"],
+                from_step_id=transition["from_step_id"],
+                to_step_id=transition["to_step_id"],
+                trigger=transition["trigger"],
+                required_evidence_refs=transition["required_evidence_refs"],
+                state=transition["state"],
+            )
+            for transition in export_package.to_json_dict()["workflow_signoff_transitions"]
+        ],
+    )
+    if canonical_pdf_render["content"] != regenerated:
+        raise ValueError("BL-037 PDF verification failed: canonical PDF render is not deterministic.")
+
+
+def verify_dossier_export_signatures(export_package: CertificationDossierExportPackage) -> None:
+    """Validate dossier and embedded change-impact signatures (BL-037 fail-closed gate)."""
+    verify_deterministic_pdf_render(export_package)
+    _verify_change_impact_signature(export_package.change_impact_report)
+    _verify_dossier_signature(export_package)
+
+
+def _render_canonical_dossier_pdf_content(
+    *,
+    pdf_payload: dict[str, Any],
+    template_catalog: list[ReportSectionTemplate],
+    impact_report_hash: str,
+    signoff_transitions: list[WorkflowSignoffTransition],
+) -> str:
     section_lines = [f"{section.section_id}|{section.title}" for section in template_catalog if section.required]
     transition_lines = [
         f"{transition.transition_id}|{transition.from_step_id}>{transition.to_step_id}|{transition.trigger}"
@@ -469,18 +553,12 @@ def render_canonical_dossier_pdf(
         f"title={pdf_payload['title']}",
         f"revision_id={pdf_payload['revision_id']}",
         f"generated_at_utc={pdf_payload['generated_at_utc']}",
-        f"impact_report_hash={impact_report.deterministic_hash}",
+        f"impact_report_hash={impact_report_hash}",
         "sections=" + ";".join(section_lines),
         "workflow_transitions=" + ";".join(transition_lines),
         "%%EOF",
     ]
-    content = "\n".join(lines) + "\n"
-    return {
-        "schema_version": CANONICAL_DOSSIER_PDF_RENDER_VERSION,
-        "renderer": "deterministic-template-renderer",
-        "content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
-        "content": content,
-    }
+    return "\n".join(lines) + "\n"
 
 
 def _validate_handoff_gate(
@@ -540,3 +618,50 @@ def _validate_handoff_gate(
 def _sha256_payload(payload: Any) -> str:
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _sign_payload(signing_key_ref: str, payload: dict[str, Any]) -> str:
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    raw = f"{signing_key_ref}:{canonical}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _verify_change_impact_signature(change_impact_report: dict[str, Any]) -> None:
+    signing = change_impact_report.get("signing", {})
+    signing_key_ref = signing.get("signing_key_ref")
+    signature = signing.get("signature")
+    if not signing_key_ref or not signature:
+        raise ValueError("BL-037 signature verification failed: change-impact signature is missing.")
+    expected_signature = _sign_payload(
+        signing_key_ref,
+        {
+            "to_revision_id": change_impact_report["to_revision_id"],
+            "revision_delta": change_impact_report["revision_delta"],
+            "minimal_reverification_check_ids": change_impact_report["minimal_reverification_check_ids"],
+            "evidence_links": change_impact_report["evidence_links"],
+        },
+    )
+    if signature != expected_signature:
+        raise ValueError("BL-037 signature verification failed: change-impact signature mismatch.")
+
+
+def _verify_dossier_signature(export_package: CertificationDossierExportPackage) -> None:
+    signing = export_package.signing
+    signing_key_ref = signing.get("signing_key_ref")
+    signature = signing.get("signature")
+    if not signing_key_ref or not signature:
+        raise ValueError("BL-037 signature verification failed: dossier signature is missing.")
+    expected_signature = _sign_payload(
+        signing_key_ref,
+        {
+            "revision_id": export_package.revision_id,
+            "source_requirement_set_hash": export_package.source_requirement_set_hash,
+            "source_compliance_dossier_machine_hash": export_package.source_compliance_dossier_machine_hash,
+            "source_traceability_graph_hash": export_package.source_traceability_graph_hash,
+            "canonical_pdf_render_sha256": export_package.canonical_pdf_render["content_sha256"],
+            "change_impact_report_signature": export_package.change_impact_report["signing"]["signature"],
+            "package_unsigned_payload_sha256": export_package.deterministic_hash,
+        },
+    )
+    if signature != expected_signature:
+        raise ValueError("BL-037 signature verification failed: dossier signature mismatch.")
