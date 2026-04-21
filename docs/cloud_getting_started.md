@@ -193,16 +193,19 @@ On-prem checklist:
 ## 9. Suggested 30/60/90-Day Adoption Plan
 
 ### First 30 days
+
 - Stand up landing zone and baseline security controls.
 - Deploy dev environment with one end-to-end workflow.
 - Capture deployment evidence and rollback process.
 
 ### Day 31-60
+
 - Add staging with production-like controls.
 - Implement policy gates and vulnerability scanning.
 - Validate backup/restore and migration rollback.
 
 ### Day 61-90
+
 - Production rollout with SLOs, on-call runbooks, and DR tests.
 - Optimize cost and autoscaling behavior.
 - Freeze v1 cloud-agnostic platform contract documentation.
@@ -218,4 +221,3 @@ You are cloud-agnostic enough when:
 - CI/CD pipeline can target all three clouds via environment config, not code rewrites.
 - Security, audit, and traceability controls are enforced in every environment.
 - Disaster recovery exercises are repeatable and evidenced.
-
