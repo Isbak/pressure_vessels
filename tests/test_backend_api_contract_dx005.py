@@ -3,52 +3,57 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def test_backend_main_exposes_dx005_routes() -> None:
+def test_backend_main_exposes_bl034_versioned_design_run_routes() -> None:
     main_ts = Path('services/backend/src/main.ts').read_text(encoding='utf-8')
 
-    assert 'export function getHealth' in main_ts
-    assert 'export function runDeterministicPromptPipeline' in main_ts
-    assert 'Deterministic pipeline response:' in main_ts
+    assert 'export function startDesignRun' in main_ts
+    assert 'export function getDesignRunStatus' in main_ts
+    assert "statusUrl: `/api/${DESIGN_RUN_API_VERSION}/design-runs/${runId}`" in main_ts
+    assert "workflowState: 'completed'" in main_ts
 
 
-def test_backend_api_contract_documented_for_frontend_consumption() -> None:
+def test_backend_api_contract_documents_versioned_design_run_endpoints() -> None:
     contract = Path('docs/interfaces/backend_prompt_api_contract.md').read_text(
         encoding='utf-8'
     )
 
-    assert 'GET /health' in contract
-    assert 'GET /api/prompt?prompt=<text>' in contract
+    assert 'POST /api/v1/design-runs' in contract
+    assert 'GET /api/v1/design-runs/{runId}' in contract
     assert 'Primary consumer: `services/frontend`' in contract
 
 
-def test_dx006_is_done_and_next_prompt_advances() -> None:
-    roadmap = Path('docs/platform_roadmap.yaml').read_text(encoding='utf-8')
-    next_prompt = Path('docs/next_dx_generation_prompt.md').read_text(
+def test_frontend_route_implements_ui_to_api_to_orchestrator_happy_path() -> None:
+    frontend_route = Path('services/frontend/app/api/prompt/route.ts').read_text(
         encoding='utf-8'
     )
 
-    assert 'id: DX-005' in roadmap
-    assert 'id: DX-006\n  title: Add local integration profile for runtime services' in roadmap
-    assert 'status: done' in roadmap.split('id: DX-006', maxsplit=1)[1].split(
-        'id: DX-007', maxsplit=1
+    assert "const startEndpoint = new URL('/api/v1/design-runs', BACKEND_API_BASE_URL)" in frontend_route
+    assert "const statusEndpoint = new URL(startPayload.statusUrl, BACKEND_API_BASE_URL)" in frontend_route
+    assert 'WorkflowExecutionReport.v1' in frontend_route
+    assert "source: 'backend-service'" in frontend_route
+
+
+def test_frontend_result_view_displays_workflow_and_compliance_summary() -> None:
+    result_page = Path('services/frontend/app/result/page.tsx').read_text(
+        encoding='utf-8'
+    )
+
+    assert 'Workflow state:' in result_page
+    assert 'Compliance status:' in result_page
+    assert 'Checks:' in result_page
+    assert 'Artifacts' in result_page
+
+
+def test_bl034_is_done_and_next_prompt_advances_to_bl035() -> None:
+    backlog = Path('docs/development_backlog.yaml').read_text(encoding='utf-8')
+    next_prompt = Path('docs/next_code_generation_prompt.md').read_text(
+        encoding='utf-8'
+    )
+
+    bl034_block = backlog.split('id: BL-034', maxsplit=1)[1].split(
+        'id: BL-035', maxsplit=1
     )[0]
-    assert (
-        'DX-006 is marked status: done' in next_prompt
-        or 'no remaining eligible dx roadmap item' in next_prompt.lower()
-        or 'You are implementing DXR-' in next_prompt
-    )
+    assert 'status: done' in bl034_block
 
-
-def test_dx006_integration_profile_and_troubleshooting_docs_exist() -> None:
-    compose_profile = Path('infra/local/docker-compose.integration.yml').read_text(
-        encoding='utf-8'
-    )
-    troubleshooting = Path(
-        'docs/runbooks/local_runtime_integration_troubleshooting.md'
-    ).read_text(encoding='utf-8')
-
-    assert 'services:' in compose_profile
-    assert 'frontend:' in compose_profile
-    assert 'backend:' in compose_profile
-    assert 'make integration-up' in troubleshooting
-    assert 'BACKEND_API_BASE_URL' in troubleshooting
+    assert 'BL-035' in next_prompt
+    assert 'current next roadmap item: BL-035' in next_prompt

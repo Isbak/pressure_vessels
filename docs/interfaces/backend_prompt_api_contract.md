@@ -1,7 +1,7 @@
-# Backend Prompt API Contract (DX-005)
+# Backend Design-Run API Contract (BL-034)
 
-This document defines the minimal backend API contract exposed in DX-005 for
-frontend consumption.
+This document defines the minimal versioned backend API contract exposed in
+BL-034 for frontend design-run execution.
 
 ## Ownership
 
@@ -23,24 +23,30 @@ Provides a deterministic service health response for runtime checks.
 }
 ```
 
-## Endpoint: `GET /api/prompt?prompt=<text>`
+## Endpoint: `POST /api/v1/design-runs`
 
 ### Purpose
 
-Provides one deterministic prompt-processing route suitable for frontend wiring
-and local development feedback loops.
+Starts a deterministic design run from a basic pressure-vessel input payload.
 
-### Query parameters
-
-- `prompt` (required, string): free-form input text.
-
-### Response (`200 OK`)
+### Request body
 
 ```json
 {
-  "prompt": "<normalized prompt>",
-  "response": "Deterministic pipeline response: <normalized prompt>",
-  "route": "deterministic-pipeline-v1"
+  "designPressureBar": 18,
+  "designTemperatureC": 65,
+  "volumeM3": 30,
+  "code": "ASME Section VIII Div 1"
+}
+```
+
+### Response (`201 Created`)
+
+```json
+{
+  "apiVersion": "v1",
+  "runId": "run-<deterministic-id>",
+  "statusUrl": "/api/v1/design-runs/run-<deterministic-id>"
 }
 ```
 
@@ -48,12 +54,54 @@ and local development feedback loops.
 
 ```json
 {
-  "error": "prompt query parameter is required"
+  "error": "designPressureBar, designTemperatureC, volumeM3, and code are required in the request body"
+}
+```
+
+## Endpoint: `GET /api/v1/design-runs/{runId}`
+
+### Purpose
+
+Returns deterministic workflow state, compliance summary, and artifact
+references for a previously started design run.
+
+### Response (`200 OK`)
+
+```json
+{
+  "runId": "run-<deterministic-id>",
+  "workflowState": "completed",
+  "complianceSummary": {
+    "status": "pass",
+    "code": "ASME SECTION VIII DIV 1",
+    "checksPassed": 3,
+    "checksFailed": 0
+  },
+  "artifacts": [
+    {
+      "artifactId": "run-<deterministic-id>-workflow",
+      "artifactType": "WorkflowExecutionReport.v1",
+      "location": "artifacts/bl-016/WorkflowExecutionReport.v1.sample.json"
+    },
+    {
+      "artifactId": "run-<deterministic-id>-compliance",
+      "artifactType": "ComplianceDossierMachine.v1",
+      "location": "artifacts/bl-004/ComplianceDossierMachine.v1.json"
+    }
+  ]
+}
+```
+
+### Error response (`404 Not Found`)
+
+```json
+{
+  "error": "design run not found"
 }
 ```
 
 ## Determinism rules
 
-- Leading/trailing whitespace in `prompt` is trimmed.
-- Internal consecutive whitespace is collapsed to a single space.
-- The same normalized prompt always yields the same `response` string.
+- `code` is normalized to uppercase with collapsed internal whitespace.
+- Identical request payloads yield the same `runId` and status payload.
+- Artifact references are fixed to immutable sample artifact locations.
