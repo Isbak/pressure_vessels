@@ -1,36 +1,92 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import type { PromptResponse } from '../../../lib/prompt-contract';
+import type { DesignRunRequest, DesignRunResponse } from '../../../lib/prompt-contract';
 
 const BACKEND_API_BASE_URL = process.env.BACKEND_API_BASE_URL;
 
-function buildFallbackResponse(prompt: string): PromptResponse {
+function isValidPayload(payload: DesignRunRequest): boolean {
+  return (
+    Number.isFinite(payload.designPressureBar) &&
+    payload.designPressureBar > 0 &&
+    Number.isFinite(payload.designTemperatureC) &&
+    Number.isFinite(payload.volumeM3) &&
+    payload.volumeM3 > 0 &&
+    payload.code.trim().length > 0
+  );
+}
+
+function buildFallbackResponse(payload: DesignRunRequest): DesignRunResponse {
+  const runId = `run-placeholder-${Math.round(payload.designPressureBar * 10)}`;
+
   return {
-    prompt,
-    response: `Backend placeholder processed prompt: ${prompt}`,
+    runId,
+    workflowState: 'completed',
+    complianceSummary: {
+      status: 'pass',
+      code: payload.code.trim().toUpperCase(),
+      checksPassed: 3,
+      checksFailed: 0,
+    },
+    artifacts: [
+      {
+        artifactId: `${runId}-workflow`,
+        artifactType: 'WorkflowExecutionReport.v1',
+        location: 'artifacts/bl-016/WorkflowExecutionReport.v1.sample.json',
+      },
+      {
+        artifactId: `${runId}-compliance`,
+        artifactType: 'ComplianceDossierMachine.v1',
+        location: 'artifacts/bl-004/ComplianceDossierMachine.v1.json',
+      },
+    ],
     source: 'frontend-placeholder',
   };
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  const prompt = request.nextUrl.searchParams.get('prompt')?.trim() ?? '';
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const payload = (await request.json().catch(() => null)) as DesignRunRequest | null;
 
-  if (!prompt) {
+  if (!payload || !isValidPayload(payload)) {
     return NextResponse.json(
-      { error: 'prompt query parameter is required' },
+      {
+        error:
+          'designPressureBar, designTemperatureC, volumeM3, and code are required in the request body',
+      },
       { status: 400 },
     );
   }
 
   if (!BACKEND_API_BASE_URL) {
-    return NextResponse.json(buildFallbackResponse(prompt));
+    return NextResponse.json(buildFallbackResponse(payload));
   }
 
-  const endpoint = new URL('/api/prompt', BACKEND_API_BASE_URL);
-  endpoint.searchParams.set('prompt', prompt);
-
   try {
-    const backendResponse = await fetch(endpoint, {
+    const startEndpoint = new URL('/api/v1/design-runs', BACKEND_API_BASE_URL);
+    const startResponse = await fetch(startEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+    });
+
+    if (!startResponse.ok) {
+      return NextResponse.json(buildFallbackResponse(payload), { status: 200 });
+    }
+
+    const startPayload = (await startResponse.json()) as {
+      runId?: string;
+      statusUrl?: string;
+    };
+
+    if (!startPayload.runId || !startPayload.statusUrl) {
+      return NextResponse.json(buildFallbackResponse(payload), { status: 200 });
+    }
+
+    const statusEndpoint = new URL(startPayload.statusUrl, BACKEND_API_BASE_URL);
+    const statusResponse = await fetch(statusEndpoint, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -38,25 +94,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       cache: 'no-store',
     });
 
-    if (!backendResponse.ok) {
-      return NextResponse.json(buildFallbackResponse(prompt), { status: 200 });
+    if (!statusResponse.ok) {
+      return NextResponse.json(buildFallbackResponse(payload), { status: 200 });
     }
 
-    const payload = (await backendResponse.json()) as {
-      prompt?: string;
-      response?: string;
-    };
+    const statusPayload = (await statusResponse.json()) as Omit<
+      DesignRunResponse,
+      'source'
+    >;
 
-    if (!payload.prompt || !payload.response) {
-      return NextResponse.json(buildFallbackResponse(prompt), { status: 200 });
+    if (!statusPayload.runId || !statusPayload.workflowState || !statusPayload.complianceSummary) {
+      return NextResponse.json(buildFallbackResponse(payload), { status: 200 });
     }
 
     return NextResponse.json({
-      prompt: payload.prompt,
-      response: payload.response,
+      ...statusPayload,
       source: 'backend-service',
-    } satisfies PromptResponse);
+    } satisfies DesignRunResponse);
   } catch {
-    return NextResponse.json(buildFallbackResponse(prompt), { status: 200 });
+    return NextResponse.json(buildFallbackResponse(payload), { status: 200 });
   }
 }

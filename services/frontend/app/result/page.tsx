@@ -1,15 +1,43 @@
 import Link from 'next/link';
 import { headers } from 'next/headers';
 
-import type { PromptResponse } from '../../lib/prompt-contract';
+import type { DesignRunRequest, DesignRunResponse } from '../../lib/prompt-contract';
 
 type ResultPageProps = {
   searchParams: {
-    prompt?: string;
+    designPressureBar?: string;
+    designTemperatureC?: string;
+    volumeM3?: string;
+    code?: string;
   };
 };
 
-async function getPromptResult(prompt: string): Promise<PromptResponse> {
+function parsePayload(searchParams: ResultPageProps['searchParams']): DesignRunRequest | null {
+  const designPressureBar = Number(searchParams.designPressureBar ?? '');
+  const designTemperatureC = Number(searchParams.designTemperatureC ?? '');
+  const volumeM3 = Number(searchParams.volumeM3 ?? '');
+  const code = (searchParams.code ?? '').trim();
+
+  if (
+    !Number.isFinite(designPressureBar) ||
+    designPressureBar <= 0 ||
+    !Number.isFinite(designTemperatureC) ||
+    !Number.isFinite(volumeM3) ||
+    volumeM3 <= 0 ||
+    !code
+  ) {
+    return null;
+  }
+
+  return {
+    designPressureBar,
+    designTemperatureC,
+    volumeM3,
+    code,
+  };
+}
+
+async function getDesignRunResult(payload: DesignRunRequest): Promise<DesignRunResponse> {
   const headerStore = headers();
   const host = headerStore.get('host');
 
@@ -22,56 +50,79 @@ async function getPromptResult(prompt: string): Promise<PromptResponse> {
     (host.includes('localhost') ? 'http' : 'https');
 
   const endpoint = new URL('/api/prompt', `${protocol}://${host}`);
-  endpoint.searchParams.set('prompt', prompt);
 
-  const response = await fetch(endpoint, { cache: 'no-store' });
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  });
 
   if (!response.ok) {
-    throw new Error('Prompt request failed.');
+    throw new Error('Design run request failed.');
   }
 
-  return (await response.json()) as PromptResponse;
+  return (await response.json()) as DesignRunResponse;
 }
 
 export default async function ResultPage({
   searchParams,
 }: ResultPageProps): Promise<JSX.Element> {
-  const prompt = (searchParams.prompt ?? '').trim();
+  const payload = parsePayload(searchParams);
 
-  if (!prompt) {
+  if (!payload) {
     return (
       <main>
-        <h1>Prompt Result</h1>
-        <p>No prompt provided. Return to the home page and submit a prompt.</p>
-        <Link href="/">Back to prompt form</Link>
+        <h1>Design Run Result</h1>
+        <p>Invalid or missing design input payload. Submit the form again.</p>
+        <Link href="/">Back to design run form</Link>
       </main>
     );
   }
 
   try {
-    const payload = await getPromptResult(prompt);
+    const result = await getDesignRunResult(payload);
 
     return (
       <main>
-        <h1>Prompt Result</h1>
+        <h1>Design Run Result</h1>
         <p>
-          <strong>Prompt:</strong> {payload.prompt}
+          <strong>Run ID:</strong> {result.runId}
         </p>
         <p>
-          <strong>Backend response:</strong> {payload.response}
+          <strong>Workflow state:</strong> {result.workflowState}
         </p>
         <p>
-          <strong>Response source:</strong> {payload.source}
+          <strong>Compliance status:</strong> {result.complianceSummary.status} (
+          {result.complianceSummary.code})
         </p>
-        <Link href="/">Run another prompt</Link>
+        <p>
+          <strong>Checks:</strong> {result.complianceSummary.checksPassed} passed /{' '}
+          {result.complianceSummary.checksFailed} failed
+        </p>
+        <p>
+          <strong>Data source:</strong> {result.source}
+        </p>
+        <h2>Artifacts</h2>
+        <ul>
+          {result.artifacts.map((artifact) => (
+            <li key={artifact.artifactId}>
+              {artifact.artifactType}: {artifact.location}
+            </li>
+          ))}
+        </ul>
+        <Link href="/">Run another design case</Link>
       </main>
     );
   } catch {
     return (
       <main>
-        <h1>Prompt Result</h1>
-        <p>Could not load backend response for the submitted prompt.</p>
-        <Link href="/">Run another prompt</Link>
+        <h1>Design Run Result</h1>
+        <p>Could not load design run status for the submitted payload.</p>
+        <Link href="/">Run another design case</Link>
       </main>
     );
   }
