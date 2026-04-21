@@ -57,6 +57,28 @@ You can start with managed services per cloud and keep interfaces provider-neutr
 
 Use this as a starting point, not a lock-in plan.
 
+### 3.1 On-Prem Primer (for Hybrid or Regulated Deployments)
+
+If you need to run fully on-prem or in a hybrid model, use the same contracts and swap managed services for self-hosted equivalents.
+
+| Capability | Cloud-Managed Pattern | On-Prem Primer |
+|---|---|---|
+| Container orchestration | EKS/AKS/GKE | Kubernetes distribution (upstream, OpenShift, Rancher-managed, etc.) |
+| Container registry | ECR/ACR/Artifact Registry | Harbor, JFrog Artifactory, GitLab Container Registry |
+| Relational DB | Managed PostgreSQL | PostgreSQL HA cluster (Patroni/Stolon or managed appliance equivalent) |
+| Object storage | S3/Blob/Cloud Storage | S3-compatible storage (e.g., MinIO, Ceph RGW) |
+| Secrets & keys | Cloud secrets + KMS | Vault/HSM-backed key management with strict RBAC |
+| Observability | Cloud monitoring suites | OpenTelemetry + Prometheus + Grafana + centralized logs |
+| Identity federation | Cloud IAM/SSO | Entra/AD/LDAP + OIDC/SAML federation |
+
+On-prem checklist:
+
+- Provide the same `dev`/`staging`/`prod` segmentation as cloud environments.
+- Validate backup, restore, and failover using realistic recovery drills.
+- Use workload identity where possible; avoid static credentials in applications.
+- Keep IaC and policy-as-code even if provisioning targets VMware/bare metal.
+- Document hardware and capacity envelopes as part of release evidence.
+
 ---
 
 ## 4. Phase-by-Phase Rollout
