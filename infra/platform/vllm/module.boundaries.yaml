@@ -28,6 +28,14 @@ spec:
       constraints:
         - cpu-only-hosting
         - large-model-production-throughput-requires-external-gpu-endpoint
+  integration_contracts:
+    - name: backend-to-llm-serving-railway
+      caller: services/backend
+      callee: llm-serving-railway
+      protocol: http-openai-compatible
+      network_path: private-service-network
+      authn: service-token
+      authz: vllm-consumer-role-required
   access_ownership:
     roles:
       - name: vllm-admin

@@ -36,12 +36,12 @@ components:
     owner: retrieval-platform
     module_path: infra/platform/qdrant
     notes: Vector index and retrieval runtime.
-  - key: llm-serving-vllm
+  - key: llm-serving-railway
     capability: llm-serving
     status: deployed
     owner: ai-platform
     module_path: infra/platform/vllm
-    notes: Railway deployment uses vLLM-compatible runtimes (Ollama/LocalAI) for staging workloads.
+    notes: Dedicated Railway inference service using vLLM-compatible runtimes (Ollama/LocalAI) behind backend API integration.
   - key: models-llama-mistral-qwen
     capability: model-family
     status: scaffolded

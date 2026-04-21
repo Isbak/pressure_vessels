@@ -17,6 +17,7 @@ Technologies below are present in this repository today via imports and/or direc
 
 - Component: `frontend-nextjs`
 - Component: `backend-nestjs`
+- Component: `llm-serving-railway`
 
 ### Runtime stack components (scaffolded)
 
@@ -35,7 +36,6 @@ OpenTofu root modules or deployable services).
 - Component: `graph-neo4j`
 - Component: `retrieval-qdrant`
 - Component: `search-opensearch`
-- Component: `llm-serving-vllm`
 - Component: `models-llama-mistral-qwen`
 
 ## Planned

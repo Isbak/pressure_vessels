@@ -26,7 +26,7 @@ spec:
         - cache-redis
         - graph-neo4j
         - retrieval-qdrant
-        - llm-serving-vllm
+        - llm-serving-railway
         - search-opensearch
         - workflow-temporal
         - auth-keycloak
