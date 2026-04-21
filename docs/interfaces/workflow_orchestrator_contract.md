@@ -18,6 +18,7 @@ Required fields:
 - `escalation_target` when retry budget exhaustion triggers escalation
 - `approval_events[]` (immutable approval records)
 - `security_audit_events[]` (`SecurityAuditEvent.v1` records for approval gates)
+- `telemetry_metric_events[]` (`TelemetryMetricEvent.v1` records for RED/USE/SLO instrumentation)
 - `execution_trace[]` (audit-ready sequence of gate/attempt transitions)
 
 ### Stage State Vocabulary
@@ -69,6 +70,33 @@ Derived deterministically from each immutable `ApprovalGateEvent.v1` event:
 - `decision` (`approved` or `rejected`)
 - `recorded_at_utc`
 
+## Telemetry Metric Event Schema (BL-039)
+
+### `TelemetryMetricEvent.v1`
+
+Deterministic telemetry emitted per workflow run for RED, USE, and SLO signals:
+
+- `metric_id` (`<workflow_id>:<stage_id>:<family>:<name>` stable identifier)
+- `workflow_id`
+- `stage_id` (stage identifier or `workflow` for roll-up SLO metrics)
+- `metric_family` (`RED`, `USE`, or `SLO`)
+- `metric_name`
+- `value` (numeric measurement)
+- `unit` (`count`, `ms`, or `ratio`)
+- `labels` (dimension map for dashboard/alert routing)
+- `measured_window` (`per_workflow_run` or `rolling_30d`)
+
+Required metrics per stage:
+
+- RED: `stage_requests_total`, `stage_errors_total`, `stage_latency_ms`
+- USE: `worker_utilization_ratio`, `retry_budget_saturation_ratio`, `worker_error_ratio`
+
+Required workflow-level SLO metrics:
+
+- `orchestration_latency_ms` (objective label: `P95<=5000ms`)
+- `run_success_ratio` (objective label: `>=0.995`)
+- `artifact_export_success_ratio` (objective label: `>=0.999`)
+
 ## Deterministic Retry + Escalation Model
 
 Stage execution is deterministic and controlled through stage spec fields:
@@ -92,6 +120,7 @@ Workflow events can be persisted via `PostgresqlWorkflowEventStore` as append-on
 - immutable `revision_id` format: `<workflow_id>:rev:<zero-padded-sequence>`
 - `event_kind`: `approval_event`, `execution_trace_event`, `workflow_summary`
 - `event_kind`: `security_audit_event` persists approval-gate security audit rows
+- `event_kind`: `telemetry_metric_event` persists RED/USE/SLO metric rows
 - deterministic ordering by `event_sequence`
 
 Recovery API:

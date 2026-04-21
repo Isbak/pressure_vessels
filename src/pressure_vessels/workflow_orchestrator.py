@@ -9,6 +9,7 @@ from typing import Any
 WORKFLOW_EXECUTION_REPORT_VERSION = "WorkflowExecutionReport.v1"
 APPROVAL_GATE_EVENT_VERSION = "ApprovalGateEvent.v1"
 SECURITY_AUDIT_EVENT_VERSION = "SecurityAuditEvent.v1"
+TELEMETRY_METRIC_EVENT_VERSION = "TelemetryMetricEvent.v1"
 
 
 @dataclass(frozen=True)
@@ -81,6 +82,23 @@ class WorkflowExecutionTraceEvent:
 
 
 @dataclass(frozen=True)
+class TelemetryMetricEvent:
+    schema_version: str
+    metric_id: str
+    workflow_id: str
+    stage_id: str
+    metric_family: str
+    metric_name: str
+    value: float
+    unit: str
+    labels: dict[str, str]
+    measured_window: str
+
+    def to_json_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class WorkflowExecutionReport:
     schema_version: str
     workflow_id: str
@@ -91,6 +109,7 @@ class WorkflowExecutionReport:
     escalation_target: str | None
     approval_events: list[ApprovalGateEvent]
     security_audit_events: list[SecurityAuditEvent]
+    telemetry_metric_events: list[TelemetryMetricEvent]
     execution_trace: list[WorkflowExecutionTraceEvent]
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -104,6 +123,7 @@ class WorkflowExecutionReport:
             "escalation_target": self.escalation_target,
             "approval_events": [event.to_json_dict() for event in self.approval_events],
             "security_audit_events": [event.to_json_dict() for event in self.security_audit_events],
+            "telemetry_metric_events": [event.to_json_dict() for event in self.telemetry_metric_events],
             "execution_trace": [event.to_json_dict() for event in self.execution_trace],
         }
 
@@ -188,6 +208,18 @@ class PostgresqlWorkflowEventStore:
             )
             sequence += 1
 
+        for metric in report.telemetry_metric_events:
+            rows.append(
+                WorkflowExecutionEventRecord(
+                    revision_id=_build_workflow_revision_id(report.workflow_id, sequence),
+                    workflow_id=report.workflow_id,
+                    event_sequence=sequence,
+                    event_kind="telemetry_metric_event",
+                    payload=metric.to_json_dict(),
+                )
+            )
+            sequence += 1
+
         rows.append(
             WorkflowExecutionEventRecord(
                 revision_id=_build_workflow_revision_id(report.workflow_id, sequence),
@@ -220,6 +252,7 @@ class PostgresqlWorkflowEventStore:
         approval_events: list[ApprovalGateEvent] = []
         execution_trace: list[WorkflowExecutionTraceEvent] = []
         security_audit_events: list[SecurityAuditEvent] = []
+        telemetry_metric_events: list[TelemetryMetricEvent] = []
         summary_payload: dict[str, Any] | None = None
 
         for row in rows:
@@ -229,6 +262,8 @@ class PostgresqlWorkflowEventStore:
                 execution_trace.append(WorkflowExecutionTraceEvent(**row.payload))
             elif row.event_kind == "security_audit_event":
                 security_audit_events.append(SecurityAuditEvent(**row.payload))
+            elif row.event_kind == "telemetry_metric_event":
+                telemetry_metric_events.append(TelemetryMetricEvent(**row.payload))
             elif row.event_kind == "workflow_summary":
                 summary_payload = row.payload
 
@@ -247,6 +282,7 @@ class PostgresqlWorkflowEventStore:
             escalation_target=summary_payload["escalation_target"],
             approval_events=approval_events,
             security_audit_events=security_audit_events,
+            telemetry_metric_events=telemetry_metric_events,
             execution_trace=execution_trace,
         )
 
@@ -397,6 +433,13 @@ def orchestrate_workflow(
         security_audit_events=_build_security_audit_events(
             workflow_id=workflow_id,
             approval_events=approval_events,
+        ),
+        telemetry_metric_events=_build_telemetry_metric_events(
+            workflow_id=workflow_id,
+            stage_specs=stage_specs,
+            stage_states=stage_states,
+            failed_stage=failed_stage,
+            execution_trace=execution_trace,
         ),
         execution_trace=execution_trace,
     )
@@ -577,3 +620,152 @@ def _build_security_audit_events(
 
 def _build_workflow_revision_id(workflow_id: str, event_sequence: int) -> str:
     return f"{workflow_id}:rev:{event_sequence:05d}"
+
+
+def _build_telemetry_metric_events(
+    *,
+    workflow_id: str,
+    stage_specs: list[WorkflowStageSpec],
+    stage_states: dict[str, str],
+    failed_stage: str | None,
+    execution_trace: list[WorkflowExecutionTraceEvent],
+) -> list[TelemetryMetricEvent]:
+    stage_attempts: dict[str, int] = {stage.stage_id: 0 for stage in stage_specs}
+    for row in execution_trace:
+        if row.event_type == "execution_attempt":
+            stage_attempts[row.stage_id] = stage_attempts.get(row.stage_id, 0) + 1
+
+    metrics: list[TelemetryMetricEvent] = []
+    for stage in stage_specs:
+        attempts = max(1, stage_attempts.get(stage.stage_id, 0))
+        failed_attempts = max(0, attempts - 1)
+        stage_state = stage_states.get(stage.stage_id, "pending")
+        success_value = 1.0 if stage_state == "completed" else 0.0
+        utilization_value = min(1.0, attempts / float(stage.max_retries + 1))
+
+        metrics.extend(
+            [
+                TelemetryMetricEvent(
+                    schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                    metric_id=f"{workflow_id}:{stage.stage_id}:red:requests",
+                    workflow_id=workflow_id,
+                    stage_id=stage.stage_id,
+                    metric_family="RED",
+                    metric_name="stage_requests_total",
+                    value=float(attempts),
+                    unit="count",
+                    labels={"stage_status": stage_state},
+                    measured_window="per_workflow_run",
+                ),
+                TelemetryMetricEvent(
+                    schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                    metric_id=f"{workflow_id}:{stage.stage_id}:red:errors",
+                    workflow_id=workflow_id,
+                    stage_id=stage.stage_id,
+                    metric_family="RED",
+                    metric_name="stage_errors_total",
+                    value=float(failed_attempts),
+                    unit="count",
+                    labels={"stage_status": stage_state},
+                    measured_window="per_workflow_run",
+                ),
+                TelemetryMetricEvent(
+                    schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                    metric_id=f"{workflow_id}:{stage.stage_id}:red:latency",
+                    workflow_id=workflow_id,
+                    stage_id=stage.stage_id,
+                    metric_family="RED",
+                    metric_name="stage_latency_ms",
+                    value=float(attempts * 250),
+                    unit="ms",
+                    labels={"stage_status": stage_state},
+                    measured_window="per_workflow_run",
+                ),
+                TelemetryMetricEvent(
+                    schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                    metric_id=f"{workflow_id}:{stage.stage_id}:use:utilization",
+                    workflow_id=workflow_id,
+                    stage_id=stage.stage_id,
+                    metric_family="USE",
+                    metric_name="worker_utilization_ratio",
+                    value=utilization_value,
+                    unit="ratio",
+                    labels={"capacity_scope": "orchestrator_worker"},
+                    measured_window="per_workflow_run",
+                ),
+                TelemetryMetricEvent(
+                    schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                    metric_id=f"{workflow_id}:{stage.stage_id}:use:saturation",
+                    workflow_id=workflow_id,
+                    stage_id=stage.stage_id,
+                    metric_family="USE",
+                    metric_name="retry_budget_saturation_ratio",
+                    value=utilization_value,
+                    unit="ratio",
+                    labels={"capacity_scope": "retry_budget"},
+                    measured_window="per_workflow_run",
+                ),
+                TelemetryMetricEvent(
+                    schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                    metric_id=f"{workflow_id}:{stage.stage_id}:use:errors",
+                    workflow_id=workflow_id,
+                    stage_id=stage.stage_id,
+                    metric_family="USE",
+                    metric_name="worker_error_ratio",
+                    value=0.0 if attempts == 0 else failed_attempts / float(attempts),
+                    unit="ratio",
+                    labels={"capacity_scope": "orchestrator_worker"},
+                    measured_window="per_workflow_run",
+                ),
+            ]
+        )
+
+    metrics.extend(
+        [
+            TelemetryMetricEvent(
+                schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                metric_id=f"{workflow_id}:slo:orchestration_latency_ms",
+                workflow_id=workflow_id,
+                stage_id="workflow",
+                metric_family="SLO",
+                metric_name="orchestration_latency_ms",
+                value=float(sum(max(1, stage_attempts.get(stage.stage_id, 0)) * 250 for stage in stage_specs)),
+                unit="ms",
+                labels={"objective": "P95<=5000ms", "window": "rolling_30d"},
+                measured_window="rolling_30d",
+            ),
+            TelemetryMetricEvent(
+                schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                metric_id=f"{workflow_id}:slo:run_success_ratio",
+                workflow_id=workflow_id,
+                stage_id="workflow",
+                metric_family="SLO",
+                metric_name="run_success_ratio",
+                value=1.0 if failed_stage is None else 0.0,
+                unit="ratio",
+                labels={"objective": ">=0.995", "window": "rolling_30d"},
+                measured_window="rolling_30d",
+            ),
+            TelemetryMetricEvent(
+                schema_version=TELEMETRY_METRIC_EVENT_VERSION,
+                metric_id=f"{workflow_id}:slo:artifact_export_success_ratio",
+                workflow_id=workflow_id,
+                stage_id="workflow",
+                metric_family="SLO",
+                metric_name="artifact_export_success_ratio",
+                value=(
+                    1.0
+                    if all(
+                        stage_states.get(stage.stage_id) == "completed"
+                        for stage in stage_specs
+                        if "export" in stage.stage_id or "publish" in stage.stage_id
+                    )
+                    else 0.0
+                ),
+                unit="ratio",
+                labels={"objective": ">=0.999", "window": "rolling_30d"},
+                measured_window="rolling_30d",
+            ),
+        ]
+    )
+    return metrics

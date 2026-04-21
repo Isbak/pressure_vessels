@@ -90,3 +90,41 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
   - `docs/platform_runtime_stack_registry.yaml`
   - `docs/tech-stack.md`
 - Re-run CI gate before merge to keep stack contract consistent.
+
+## BL-039 Runtime SLOs and Deterministic Measurement Windows
+
+The runtime stack publishes the following service-level objectives against deterministic windows:
+
+| SLO ID | Objective | Metric name | Window | Deterministic measurement rule |
+| --- | --- | --- | --- | --- |
+| `slo.orchestration_latency` | P95 orchestration latency ≤ 5000 ms | `orchestration_latency_ms` | rolling 30 days | Derived from per-stage deterministic latency events (`stage_latency_ms`) aggregated per workflow run. |
+| `slo.run_success_rate` | Successful workflow runs ≥ 99.5% | `run_success_ratio` | rolling 30 days | `1.0` for runs without terminal failure/escalation; `0.0` otherwise. |
+| `slo.artifact_export_success` | Artifact export success ≥ 99.9% | `artifact_export_success_ratio` | rolling 30 days | `1.0` when all `*export*`/`*publish*` stages complete; `0.0` otherwise. |
+
+Dashboard coverage (required panels):
+
+1. `pv-runtime-overview`:
+   - SLO burn-down panel for the three SLO metrics above.
+   - Stage-level RED panels: `stage_requests_total`, `stage_errors_total`, `stage_latency_ms`.
+2. `pv-runtime-capacity`:
+   - Stage-level USE panels: `worker_utilization_ratio`, `retry_budget_saturation_ratio`, `worker_error_ratio`.
+   - Saturation heatmap by `stage_id` for retry pressure.
+
+## BL-039 Alert Routing Matrix and Incident Drill Coverage
+
+| Alert | Trigger | Route | Escalation SLA |
+| --- | --- | --- | --- |
+| `api_latency_slo_breach` | `orchestration_latency_ms` exceeds objective for 3 consecutive windows | Platform Runtime primary on-call | 15 minutes |
+| `workflow_run_success_breach` | `run_success_ratio` drops below objective over rolling window | Platform Runtime primary on-call, then Engineering Reviewer | 15 minutes / 60 minutes |
+| `artifact_export_success_breach` | `artifact_export_success_ratio` drops below objective over rolling window | Reporting Operations on-call + Platform Runtime secondary | 15 minutes / 60 minutes |
+| `workflow_backlog_growth` | queue depth or retry saturation exceeds threshold | Orchestration Platform on-call | 30 minutes |
+
+Simulated failure drill evidence is recorded in:
+
+- `docs/incidents/2026-04-21_bl-039_incident_drill.md`
+
+The drill validates:
+
+1. alert routing dispatch to primary + secondary responders,
+2. runbook execution timeline with deterministic timestamps,
+3. closure criteria and follow-up action capture.
