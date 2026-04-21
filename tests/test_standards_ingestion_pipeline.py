@@ -4,9 +4,12 @@ import json
 import pytest
 
 from pressure_vessels.standards_ingestion_pipeline import (
+    ApprovalRecord,
+    ProjectClauseDependency,
     RegressionExample,
     StandardSource,
     StandardsPackageCollisionError,
+    promote_standards_package,
     run_standards_ingestion,
     write_standards_package,
 )
@@ -64,6 +67,167 @@ def test_ingestion_pipeline_covers_parse_normalize_link_validate_and_release():
 
     assert package.regression_results
     assert all(result.passed for result in package.regression_results)
+    assert package.lifecycle.stage == "draft"
+    assert package.cross_version_regression is None
+    assert package.impact_analysis is None
+
+
+def test_lifecycle_promotion_requires_sequential_transitions_and_approvals():
+    package = run_standards_ingestion(
+        source_documents=[_sample_source()],
+        standard_key="ASME_VIII_1",
+        standard_version="2025.2",
+        release_label="r-lifecycle",
+        regression_examples=_regression_examples(),
+        now_utc=FIXED_NOW,
+    )
+    with pytest.raises(ValueError, match="transitions must be sequential"):
+        promote_standards_package(
+            package,
+            target_stage="released",
+            promoted_by="approver-1",
+            approvals=[
+                ApprovalRecord(
+                    role="engineering_reviewer",
+                    approver_id="eng-1",
+                    approved_at_utc="2026-04-18T00:01:00+00:00",
+                ),
+                ApprovalRecord(
+                    role="domain_reviewer",
+                    approver_id="dom-1",
+                    approved_at_utc="2026-04-18T00:02:00+00:00",
+                ),
+            ],
+            now_utc=FIXED_NOW,
+        )
+
+    candidate = promote_standards_package(
+        package,
+        target_stage="candidate",
+        promoted_by="approver-1",
+        approvals=[
+            ApprovalRecord(
+                role="engineering_reviewer",
+                approver_id="eng-1",
+                approved_at_utc="2026-04-18T00:01:00+00:00",
+            )
+        ],
+        now_utc=FIXED_NOW,
+    )
+    released = promote_standards_package(
+        candidate,
+        target_stage="released",
+        promoted_by="approver-2",
+        approvals=[
+            ApprovalRecord(
+                role="engineering_reviewer",
+                approver_id="eng-1",
+                approved_at_utc="2026-04-18T00:01:00+00:00",
+            ),
+            ApprovalRecord(
+                role="domain_reviewer",
+                approver_id="dom-1",
+                approved_at_utc="2026-04-18T00:02:00+00:00",
+            ),
+        ],
+        now_utc=FIXED_NOW,
+    )
+    assert released.lifecycle.stage == "released"
+
+
+def test_cross_version_regression_and_impact_analysis_detect_drift_and_scope():
+    baseline = run_standards_ingestion(
+        source_documents=[_sample_source()],
+        standard_key="ASME_VIII_1",
+        standard_version="2025.1",
+        release_label="r1",
+        regression_examples=_regression_examples(),
+        lifecycle_stage="released",
+        promoted_by="release-bot",
+        approvals=[
+            ApprovalRecord(
+                role="engineering_reviewer",
+                approver_id="eng-1",
+                approved_at_utc="2026-04-17T00:00:00+00:00",
+            ),
+            ApprovalRecord(
+                role="domain_reviewer",
+                approver_id="dom-1",
+                approved_at_utc="2026-04-17T00:05:00+00:00",
+            ),
+        ],
+        now_utc=FIXED_NOW,
+    )
+    changed_source = StandardSource(
+        source_id="ASME_BPVC_VIII_DIV1_2025_MAIN",
+        title="ASME BPVC Section VIII Division 1 (sample)",
+        publisher="ASME",
+        edition="2025",
+        revision="2025.3",
+        content_text=(
+            "UG-27: Cylindrical shell thickness for internal pressure; equation = "
+            "t = (P*R)/(S*E-0.5*P); See UG-16.\n"
+            "UG-16: Minimum thickness requirements for pressure parts.\n"
+            "UG-32: Head thickness under internal pressure; equation = "
+            "t = (0.885*P*D)/(2*S*E-0.2*P); See UG-27.\n"
+        ),
+    )
+    with pytest.raises(ValueError, match="cross-version regression detected drift"):
+        run_standards_ingestion(
+            source_documents=[changed_source],
+            standard_key="ASME_VIII_1",
+            standard_version="2025.3",
+            release_label="r2",
+            regression_examples=_regression_examples(),
+            lifecycle_stage="released",
+            promoted_by="release-bot",
+            approvals=[
+                ApprovalRecord(
+                    role="engineering_reviewer",
+                    approver_id="eng-1",
+                    approved_at_utc="2026-04-18T00:10:00+00:00",
+                ),
+                ApprovalRecord(
+                    role="domain_reviewer",
+                    approver_id="dom-1",
+                    approved_at_utc="2026-04-18T00:11:00+00:00",
+                ),
+            ],
+            baseline_package=baseline,
+            project_clause_dependencies=[
+                ProjectClauseDependency(project_id="PROJECT-ALPHA", referenced_clause_ids=["UG-27"]),
+                ProjectClauseDependency(project_id="PROJECT-BETA", referenced_clause_ids=["UG-16"]),
+            ],
+            now_utc=FIXED_NOW,
+        )
+
+    candidate = run_standards_ingestion(
+        source_documents=[changed_source],
+        standard_key="ASME_VIII_1",
+        standard_version="2025.3",
+        release_label="r2",
+        regression_examples=_regression_examples(),
+        lifecycle_stage="candidate",
+        promoted_by="release-bot",
+        approvals=[
+            ApprovalRecord(
+                role="engineering_reviewer",
+                approver_id="eng-1",
+                approved_at_utc="2026-04-18T00:10:00+00:00",
+            )
+        ],
+        baseline_package=baseline,
+        project_clause_dependencies=[
+            ProjectClauseDependency(project_id="PROJECT-ALPHA", referenced_clause_ids=["UG-27"]),
+            ProjectClauseDependency(project_id="PROJECT-BETA", referenced_clause_ids=["UG-16"]),
+        ],
+        now_utc=FIXED_NOW,
+    )
+    assert candidate.cross_version_regression is not None
+    assert candidate.cross_version_regression.drift_detected is True
+    assert candidate.impact_analysis is not None
+    assert "UG-27" in candidate.impact_analysis.changed_clause_ids
+    assert candidate.impact_analysis.affected_projects == ["PROJECT-ALPHA"]
 
 
 def test_ingestion_fails_closed_for_incomplete_source_metadata_and_content():

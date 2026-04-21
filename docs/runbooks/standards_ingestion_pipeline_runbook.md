@@ -1,8 +1,8 @@
-# Runbook: BL-005 Standards Ingestion Pipeline
+# Runbook: BL-005 / BL-036 Standards Ingestion Pipeline
 
 ## Purpose
 
-Operational runbook for producing immutable, versioned `StandardsPackage.v1` artifacts.
+Operational runbook for producing immutable, versioned `StandardsPackage.v1` artifacts with lifecycle promotions and migration checks.
 
 ## Inputs
 
@@ -11,6 +11,8 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 - `standard_version` (for example `2025.2`)
 - `release_label` (for example `r1`)
 - One or more `RegressionExample` records.
+- Optional baseline `StandardsPackage` for migration checks.
+- Optional `ProjectClauseDependency` list to generate selective re-verification scope.
 
 ## Procedure
 
@@ -20,6 +22,12 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 4. Confirm all regression examples pass.
 5. Persist the package with `write_standards_package(...)`.
 6. Store output package under controlled artifact storage.
+7. Promote lifecycle stage with `promote_standards_package(...)`:
+   - `draft -> candidate` requires engineering reviewer approval.
+   - `candidate -> released` requires engineering + domain approvals.
+8. If baseline package is provided, review:
+   - `cross_version_regression` for clause/link drift.
+   - `impact_analysis` for affected projects and selective re-verification scope.
 
 ## Deterministic Controls
 
@@ -39,6 +47,9 @@ Operational runbook for producing immutable, versioned `StandardsPackage.v1` art
 - Parsed/normalized mismatch.
 - Semantic links to unknown clauses.
 - Missing/failed regression examples.
+- Invalid lifecycle stage or missing required stage approvals.
+- Non-sequential lifecycle transition attempts.
+- Release stage with baseline package where cross-version drift is detected.
 - Duplicate package write path (immutable package overwrite attempt), raised as
   `StandardsPackageCollisionError` naming the `package_id` and colliding path.
 
