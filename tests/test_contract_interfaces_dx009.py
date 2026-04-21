@@ -51,18 +51,22 @@ def test_frontend_backend_contract_shapes_remain_compatible() -> None:
     )
     backend_impl = Path('services/backend/src/main.ts').read_text(encoding='utf-8')
 
-    assert "prompt: string" in frontend_contract
-    assert "response: string" in frontend_contract
+    assert "designPressureBar: number;" in frontend_contract
+    assert "designTemperatureC: number;" in frontend_contract
+    assert "volumeM3: number;" in frontend_contract
+    assert "code: string;" in frontend_contract
     assert "source: 'frontend-placeholder' | 'backend-service'" in frontend_contract
 
-    assert 'const endpoint = new URL(\'/api/prompt\', BACKEND_API_BASE_URL);' in frontend_bff_route
-    assert "if (!payload.prompt || !payload.response)" in frontend_bff_route
+    assert "const startEndpoint = new URL('/api/v1/design-runs', BACKEND_API_BASE_URL)" in frontend_bff_route
+    assert "const statusEndpoint = new URL(startPayload.statusUrl, BACKEND_API_BASE_URL)" in frontend_bff_route
+    assert 'designPressureBar, designTemperatureC, volumeM3, and code are required' in frontend_bff_route
     assert "source: 'backend-service'" in frontend_bff_route
 
-    assert 'GET /api/prompt?prompt=<text>' in backend_contract
-    assert 'route": "deterministic-pipeline-v1"' in backend_contract
-    assert "export function runDeterministicPromptPipeline" in backend_impl
-    assert "route: 'deterministic-pipeline-v1'" in backend_impl
+    assert 'POST /api/v1/design-runs' in backend_contract
+    assert 'GET /api/v1/design-runs/{runId}' in backend_contract
+    assert "export type DesignRunRequest = {" in backend_impl
+    assert "export function startDesignRun" in backend_impl
+    assert "statusUrl: `/api/${DESIGN_RUN_API_VERSION}/design-runs/${runId}`" in backend_impl
 
 
 def test_requirements_pipeline_contract_constants_are_enforced() -> None:
