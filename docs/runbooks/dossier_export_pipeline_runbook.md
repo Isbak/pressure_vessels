@@ -19,7 +19,11 @@ Operational runbook for producing deterministic certification dossier exports wi
 ## Execution
 
 ```python
-from pressure_vessels.dossier_export_pipeline import generate_certification_dossier_export, write_certification_dossier_export
+from pressure_vessels.dossier_export_pipeline import (
+    generate_certification_dossier_export,
+    verify_dossier_export_signatures,
+    write_certification_dossier_export,
+)
 
 export = generate_certification_dossier_export(
     requirement_set,
@@ -37,6 +41,7 @@ export = generate_certification_dossier_export(
 )
 
 package_path, payload_path, canonical_pdf_path = write_certification_dossier_export(export, "artifacts/")
+verify_dossier_export_signatures(export)  # fail-closed: raises ValueError on tamper/unsigned payloads
 ```
 
 ## Expected Outputs
@@ -50,6 +55,7 @@ The package must include:
 - `change_impact_report` populated from signed BL-008 `ImpactReport.v1`.
 - `workflow_signoff_transitions` with deterministic transition states and evidence refs.
 - `canonical_pdf_render.content_sha256` and matching `CanonicalDossierPDF.v1#...` entry in `package_artifact_refs`.
+- `signing.signature` populated and verifiable against package deterministic fields.
 
 ## Failure Modes
 
@@ -59,9 +65,12 @@ The package must include:
   - Cause: report payload is not `ImpactReport.v1`.
 - `ValueError: ... traceability graph compliance hash mismatch.`
   - Cause: BL-007 handoff evidence chain is inconsistent.
+- `ValueError: BL-037 signature verification failed: ...`
+  - Cause: unsigned payload, tampered signature fields, or canonical PDF hash/content mismatch.
 
 ## Audit Checklist
 
 1. Verify `package_artifact_refs` includes `ImpactReport.v1#<hash>` and `CanonicalDossierPDF.v1#<hash>`.
 2. Verify `workflow_signoff_transitions` contains `WF-T001`, `WF-T002`, and `WF-T003`.
 3. Re-run export with the same fixed inputs and timestamp; confirm identical `deterministic_hash`.
+4. Run `verify_dossier_export_signatures(export)` and confirm no exception is raised.
