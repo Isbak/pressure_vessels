@@ -241,3 +241,44 @@ Recommended Railway configuration:
    - `NODE_ENV=production`
    - Optional: `BACKEND_API_BASE_URL=<your backend URL>` only when a compatible backend is deployed.
 4. **Health check**: `GET /` (or `GET /result` after first deploy).
+
+### Railway multi-service environment variable matrix
+
+Use the matrix below when running frontend and backend as separate Railway services
+inside one project. Keep service-scoped secrets on the owning service, and expose
+only cross-service endpoints needed for API calls.
+
+| Railway service | Variable | Required | Example value | Notes |
+| --- | --- | --- | --- | --- |
+| `frontend` | `NODE_ENV` | Yes | `production` | Next.js runtime mode in Railway deployment. |
+| `frontend` | `BACKEND_API_BASE_URL` | Optional* | `https://<backend-service>.up.railway.app` | Set when frontend `/api/prompt` should call a deployed backend service. |
+| `backend` | `PV_BACKEND_AUTH_TOKEN_SECRET` | Yes** | `replace-with-long-random-secret` | Required secret consumed by backend runtime and enforced by backend security baseline. |
+| `backend` | `BACKEND_HOST` | No | `0.0.0.0` | Bind host; local profile default is retained here for clarity. |
+| `backend` | `BACKEND_PORT` | No | `8000` | Service port if backend runtime uses explicit port configuration. |
+
+- \* Optional for bootstrap mode: frontend falls back to deterministic placeholder responses when `BACKEND_API_BASE_URL` is unset.
+- \** Required whenever backend auth-protected runtime paths are enabled.
+
+#### Infra/platform service coverage (what else to configure)
+
+The platform stack includes additional modules under `infra/platform/*`. These are
+tracked in the runtime stack registry and environment bootstrap manifests. Include
+them in Railway/environment planning even when canonical variable names are managed
+by provider modules or external secret stores.
+
+| Stack component key | Module path | Dev | Staging | Variable source of truth |
+| --- | --- | --- | --- | --- |
+| `frontend-nextjs` | `services/frontend` | ✅ | ✅ | Railway service variables (for example `NODE_ENV`, `BACKEND_API_BASE_URL`). |
+| `backend-nestjs` | `services/backend` | ✅ | ✅ | Railway service variables + approved secret module (`PV_BACKEND_AUTH_TOKEN_SECRET`). |
+| `datastore-postgresql` | `infra/platform/postgresql` | ✅ | ✅ | Provider-managed DB variables/secrets (module-owned; no repo-global env var contract yet). |
+| `cache-redis` | `infra/platform/redis` | ✅ | ✅ | Provider-managed cache variables/secrets (module-owned; no repo-global env var contract yet). |
+| `auth-keycloak` | `infra/platform/keycloak` | ✅ | ✅ | Identity-provider variables/secrets per Keycloak module boundaries. |
+| `graph-neo4j` | `infra/platform/neo4j` | ❌ | ✅ | Graph service variables/secrets per module boundaries. |
+| `retrieval-qdrant` | `infra/platform/qdrant` | ❌ | ✅ | Vector retrieval variables/secrets per module boundaries. |
+| `llm-serving-railway` | `infra/platform/vllm` | ❌ | ✅ | Dedicated Railway LLM service variables/secrets per vLLM module boundaries. |
+| `search-opensearch` | `infra/platform/opensearch` | ❌ | ✅ | Search cluster variables/secrets per module boundaries. |
+| `workflow-temporal` | `infra/platform/temporal` | ❌ | ✅ | Workflow service variables/secrets per module boundaries. |
+| `observability-prometheus-grafana-loki-tempo` | `infra/platform/observability` | ✅ | ✅ | Observability stack variables/secrets per module boundaries. |
+| `secrets-vault-or-sops-age` | `infra/platform/secrets` | ❌ | ✅ | Centralized secret issuance/encryption source of truth. |
+| `iac-opentofu-or-terraform` | `infra/platform/iac` | ✅ | ✅ | IaC backend/provider credentials managed by platform module boundaries. |
+| `runtime-docker-kubernetes` | `infra/platform/runtime` | ✅ | ✅ | Runtime target variables/secrets per deployment module boundaries. |
