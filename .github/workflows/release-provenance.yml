@@ -1,0 +1,52 @@
+name: Release Provenance
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-provenance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  signed-release-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build deterministic release bundle
+        run: |
+          mkdir -p artifacts/release
+          git archive --format=tar.gz --output artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.tar.gz HEAD
+          sha256sum artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.tar.gz > artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.sha256
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+      - name: Sign release bundle and digest (keyless)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          cosign sign-blob --yes \
+            --output-signature artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.tar.gz.sig \
+            --output-certificate artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.tar.gz.pem \
+            artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.tar.gz
+          cosign sign-blob --yes \
+            --output-signature artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.sha256.sig \
+            --output-certificate artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.sha256.pem \
+            artifacts/release/pressure_vessels-${GITHUB_REF_NAME}.sha256
+      - name: Generate provenance attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            artifacts/release/pressure_vessels-${{ github.ref_name }}.tar.gz
+            artifacts/release/pressure_vessels-${{ github.ref_name }}.sha256
+      - name: Upload signed release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-release-${{ github.ref_name }}
+          path: artifacts/release/
+          retention-days: 30

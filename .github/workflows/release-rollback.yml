@@ -1,0 +1,59 @@
+name: Release Rollback Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      failed_release_tag:
+        description: Failed currently deployed release tag
+        required: true
+        type: string
+      rollback_to_tag:
+        description: Previous known-good release tag
+        required: true
+        type: string
+      target_environment:
+        description: Protected environment to rollback
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      rollback_reason:
+        description: Reason for rollback
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-rollback-${{ inputs.target_environment }}-${{ inputs.failed_release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture rollback audit evidence
+        run: |
+          mkdir -p artifacts/release
+          cat > artifacts/release/RollbackAuditEvidence.v1.json <<JSON
+          {
+            "schema_version": "RollbackAuditEvidence.v1",
+            "failed_release_tag": "${{ inputs.failed_release_tag }}",
+            "rollback_to_tag": "${{ inputs.rollback_to_tag }}",
+            "target_environment": "${{ inputs.target_environment }}",
+            "rollback_reason": "${{ inputs.rollback_reason }}",
+            "rollback_actor": "${{ github.actor }}",
+            "rollback_run_id": "${{ github.run_id }}",
+            "rollback_timestamp": "${{ github.run_started_at }}"
+          }
+          JSON
+      - name: Upload rollback evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-audit-evidence-${{ inputs.failed_release_tag }}
+          path: artifacts/release/RollbackAuditEvidence.v1.json
+          retention-days: 30
