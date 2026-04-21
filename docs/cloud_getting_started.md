@@ -218,4 +218,3 @@ You are cloud-agnostic enough when:
 - CI/CD pipeline can target all three clouds via environment config, not code rewrites.
 - Security, audit, and traceability controls are enforced in every environment.
 - Disaster recovery exercises are repeatable and evidenced.
-
