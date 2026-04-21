@@ -969,3 +969,144 @@ items:
   - Release provenance and signing workflow
   - Environment promotion gate automation
   - Rollback automation playbook and validation report
+---
+version: 1.0.0
+generated_on: '2026-04-19'
+version: 1.1.0
+generated_on: '2026-04-21'
+project: pressure_vessels
+description: Machine-readable development backlog derived from repository roadmap, architecture, and semantic workflow documents.
+description: Machine-readable development backlog derived from repository roadmap, architecture, and semantic workflow documents. Extended 2026-04-21 with BL-043..BL-046 following the full-repo audit (docs/audit_findings_2026-04-21.yaml).
+status_values:
+- todo
+- in_progress
+
+Expand 952 hidden lines
+  - AGENT_GOVERNANCE.md
+  - docs/governance/ci_governance_policy.v1.json
+  - docs/runbooks/platform_runtime_stack_operations.md
+  - docs/audit_findings_2026-04-21.yaml#AF-021
+  blocked_reason: >-
+    All depends_on items (BL-012, BL-026, BL-038) are done, but the release
+    policy approver has not signed off. Tracked via AF-021 (docs/audit_findings_2026-04-21.yaml).
+  acceptance_criteria:
+  - Signed release artifacts and provenance attestations are generated on tagged builds.
+  - Promotion requires passing governance, security, and regression gates.
+
+Expand 2 hidden lines
+  - Release provenance and signing workflow
+  - Environment promotion gate automation
+  - Rollback automation playbook and validation report
+- id: BL-043
+  title: Restore green pytest baseline after 2026-04-21 audit regressions
+  area: quality
+  phase: 'Phase 6: Productization'
+  priority: P0
+  status: todo
+  effort: S
+  depends_on: []
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-016
+  - docs/audit_findings_2026-04-21.yaml#AF-017
+  - docs/audit_findings_2026-04-21.yaml#AF-018
+  - docs/audit_findings_2026-04-21.yaml#AF-019
+  - tests/test_backend_api_contract_dx005.py
+  - tests/test_contract_interfaces_dx009.py
+  - tests/test_qa_benchmark_harness.py
+  source: audit 2026-04-21, AF-016 umbrella
+  acceptance_criteria:
+  - "`pytest -q` returns 0 failures on the audit branch before any other BL-04X work is merged."
+  - Every fix is attributable to a concrete AF-016/AF-017/AF-018/AF-019 sub-finding.
+  - CI `python-tests` and `contract-tests` jobs pass on all matrix cells.
+  deliverables:
+  - Green pytest run evidence attached to the PR
+  - Fixes routed under AF-017 (QA harness), AF-018 (contract), AF-019 (sentinel test)
+- id: BL-044
+  title: Teach QA benchmark harness to evaluate reject-category fixtures
+  area: quality
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: blocked
+  effort: S
+  depends_on:
+  - BL-043
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-017
+  - docs/audit_findings_2026-04-21.yaml#AF-022
+  - src/pressure_vessels/qa_benchmark_pipeline.py
+  - tests/golden_examples/benchmark_manifest.json
+  - tests/golden_examples/reject_envelope_cases.json
+  - BL-017
+  - BL-041
+  source: audit 2026-04-21, AF-017
+  acceptance_criteria:
+  - >-
+    `run_cross_verification_harness` dispatches on manifest category and supports
+    golden, boundary, stress, and reject cases deterministically.
+  - >-
+    Reject cases assert that `run_calculation_pipeline` raises the configured
+    domain-gate exception for each dimension/value probe.
+  - >-
+    `docs/interfaces/qa_benchmark_quality_gate_contract.md` enumerates the
+    reject category and its payload shape.
+  deliverables:
+  - Category-aware harness dispatch
+  - Reject-case regression test
+  - Contract-doc update
+- id: BL-045
+  title: Resolve BL-042 block status with a tracked unblock decision
+  area: governance
+  phase: 'Phase 6: Productization'
+  priority: P1
+  status: blocked
+  effort: XS
+  depends_on:
+  - BL-043
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-021
+  - docs/governance/policy_backlog.yaml
+  - AGENT_GOVERNANCE.md
+  - BL-042
+  source: audit 2026-04-21, AF-021
+  acceptance_criteria:
+  - >-
+    BL-042 is either `status: todo` with prerequisites documented, or
+    `status: blocked` with a matching entry in
+    `docs/governance/policy_backlog.yaml` naming approver and target date.
+  - "`docs/next_code_generation_prompt.md` points to a real queued item."
+  - No silent blockers remain on the Phase 6 backlog.
+  deliverables:
+  - BL-042 status update
+  - Optional policy_backlog entry
+  - next_code_generation_prompt.md refresh
+- id: BL-046
+  title: Backfill onboarding, coverage, and skeleton-module documentation
+  area: developer-onboarding
+  phase: 'Phase 6: Productization'
+  priority: P2
+  status: blocked
+  effort: S
+  depends_on:
+  - BL-043
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-023
+  - docs/audit_findings_2026-04-21.yaml#AF-024
+  - docs/audit_findings_2026-04-21.yaml#AF-025
+  - .env.example
+  - infra/platform/
+  - pyproject.toml
+  source: audit 2026-04-21, AF-023/AF-024/AF-025
+  acceptance_criteria:
+  - >-
+    `.env.example` enumerates every env var consumed by the bootstrap path
+    (including AF-010 temperature bounds).
+  - >-
+    Each `infra/platform/<module>/` skeleton is self-describing (per-module
+    README or consolidated index) and matches the runtime registry status.
+  - >-
+    pytest coverage reporting is wired into CI with a documented floor and
+    artifact retention consistent with `ci_governance_policy.v1.json`.
+  deliverables:
+  - Updated .env.example
+  - Skeleton-module README(s)
+  - pytest-cov config and CI wiring
