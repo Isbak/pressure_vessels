@@ -18,7 +18,7 @@ def test_benchmark_manifest_is_versioned_and_references_existing_fixtures() -> N
 
     assert manifest.schema_version == QA_BENCHMARK_DATASET_MANIFEST_VERSION
     categories = {case.category for case in manifest.cases}
-    assert {"golden", "boundary", "stress"}.issubset(categories)
+    assert {"golden", "boundary", "stress", "reject"}.issubset(categories)
 
     for case in manifest.cases:
         assert (Path(case.fixture_path)).exists(), f"Missing fixture for {case.case_id}"
@@ -50,3 +50,6 @@ def test_quality_gate_report_artifact_is_written_with_stable_payload(tmp_path: P
     persisted = json.loads(artifact_path.read_text(encoding="utf-8"))
     assert persisted == report
     assert persisted["overall_status"] == "pass"
+    reject_case = next(case for case in persisted["case_results"] if case["category"] == "reject")
+    assert reject_case["calculation_hash"] is None
+    assert all("observed_error" in result for result in reject_case["check_results"])

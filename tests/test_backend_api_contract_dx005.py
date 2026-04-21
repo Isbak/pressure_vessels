@@ -3,6 +3,57 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def _parse_backlog_items() -> list[dict[str, object]]:
+    lines = Path('docs/development_backlog.yaml').read_text(encoding='utf-8').splitlines()
+    items: list[dict[str, object]] = []
+    current: dict[str, object] | None = None
+    in_depends_on = False
+
+    for line in lines:
+        if line.startswith('- id: '):
+            if current is not None:
+                items.append(current)
+            current = {'id': line.split(': ', maxsplit=1)[1].strip(), 'status': '', 'depends_on': []}
+            in_depends_on = False
+            continue
+
+        if current is None:
+            continue
+
+        if line.startswith('  status: '):
+            current['status'] = line.split(': ', maxsplit=1)[1].strip()
+            in_depends_on = False
+            continue
+
+        if line.startswith('  depends_on:'):
+            in_depends_on = True
+            continue
+
+        if in_depends_on and line.startswith('  - '):
+            current['depends_on'].append(line.strip()[2:])
+            continue
+
+        if in_depends_on and not line.startswith('  - '):
+            in_depends_on = False
+
+    if current is not None:
+        items.append(current)
+
+    return items
+
+
+def _next_eligible_backlog_id() -> str:
+    items = _parse_backlog_items()
+    item_by_id = {str(item['id']): item for item in items}
+    for item in items:
+        if str(item['status']) != 'todo':
+            continue
+        depends_on = [str(dep) for dep in item['depends_on']]
+        if all(str(item_by_id[dep]['status']) == 'done' for dep in depends_on):
+            return str(item['id'])
+    raise AssertionError('No eligible todo backlog item found.')
+
+
 def test_backend_main_exposes_bl034_versioned_design_run_routes() -> None:
     main_ts = Path('services/backend/src/main.ts').read_text(encoding='utf-8')
 
@@ -68,5 +119,11 @@ def test_bl040_is_done_and_next_prompt_advances_to_bl041() -> None:
     )[0]
     assert 'status: done' in bl039_block
 
-    assert 'BL-041' in next_prompt
-    assert 'current next roadmap item: BL-041' in next_prompt
+    bl040_block = backlog.split('id: BL-040', maxsplit=1)[1].split('id: BL-041', maxsplit=1)[0]
+    assert 'status: done' in bl040_block
+    bl041_block = backlog.split('id: BL-041', maxsplit=1)[1].split('id: BL-042', maxsplit=1)[0]
+    assert 'status: done' in bl041_block
+
+    expected_next_backlog_id = _next_eligible_backlog_id()
+    assert expected_next_backlog_id in next_prompt
+    assert f'next queued roadmap item: {expected_next_backlog_id}' in next_prompt

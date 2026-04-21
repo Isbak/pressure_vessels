@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-import tomllib
 from pathlib import Path
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback for local test runners
+    import tomli as tomllib
 
 
 def test_project_scripts_include_ci_governance_helper_commands() -> None:
