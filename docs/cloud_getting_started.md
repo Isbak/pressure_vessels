@@ -221,3 +221,23 @@ You are cloud-agnostic enough when:
 - CI/CD pipeline can target all three clouds via environment config, not code rewrites.
 - Security, audit, and traceability controls are enforced in every environment.
 - Disaster recovery exercises are repeatable and evidenced.
+
+---
+
+## 11. Railway Quickstart (Single-Service MVP)
+
+For a fast MVP deployment on Railway, run the frontend service as the process bound to Railway's `PORT`.
+
+- Root `Procfile` uses:
+  - `cd services/frontend && npm ci && npm run build && npm run start -- --hostname 0.0.0.0 --port ${PORT:-3000}`
+- This avoids the backend skeleton's NestJS build path, which is intentionally incomplete in this repository bootstrap.
+- The frontend `/api/prompt` route still works without backend wiring by returning deterministic placeholder responses when `BACKEND_API_BASE_URL` is unset.
+
+Recommended Railway configuration:
+
+1. **Root Directory**: repository root.
+2. **Start Command**: leave blank so Railway honors `Procfile` (or copy the command above explicitly).
+3. **Environment Variables**:
+   - `NODE_ENV=production`
+   - Optional: `BACKEND_API_BASE_URL=<your backend URL>` only when a compatible backend is deployed.
+4. **Health check**: `GET /` (or `GET /result` after first deploy).
