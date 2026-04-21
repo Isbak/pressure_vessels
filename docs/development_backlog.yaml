@@ -887,7 +887,7 @@ items:
   area: operations
   phase: 'Phase 6: Productization'
   priority: P1
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-023

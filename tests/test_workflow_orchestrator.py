@@ -5,6 +5,7 @@ from pressure_vessels.workflow_orchestrator import (
     PostgresqlWorkflowEventStore,
     PostgresqlWorkflowEventStoreBackend,
     SECURITY_AUDIT_EVENT_VERSION,
+    TELEMETRY_METRIC_EVENT_VERSION,
     WORKFLOW_EXECUTION_REPORT_VERSION,
     WorkflowStageSpec,
     build_approval_gate_event,
@@ -60,6 +61,17 @@ def test_orchestrator_runs_deterministic_approved_path():
     ]
     assert [event.sequence for event in report.execution_trace] == list(
         range(1, len(report.execution_trace) + 1)
+    )
+    assert report.telemetry_metric_events
+    assert all(
+        event.schema_version == TELEMETRY_METRIC_EVENT_VERSION
+        for event in report.telemetry_metric_events
+    )
+    assert any(
+        event.metric_name == "orchestration_latency_ms"
+        and event.metric_family == "SLO"
+        and event.measured_window == "rolling_30d"
+        for event in report.telemetry_metric_events
     )
 
 
@@ -218,3 +230,26 @@ def test_bl035_recovery_resume_loads_persisted_report_after_restart_without_evid
     assert resumed is True
     assert resumed_report.to_json_dict() == initial_report.to_json_dict()
     assert resumed_report.security_audit_events[0].decision == "approved"
+    assert any(
+        event.metric_name == "run_success_ratio"
+        for event in resumed_report.telemetry_metric_events
+    )
+
+
+def test_red_use_metrics_capture_retry_and_saturation_for_critical_stages():
+    report = orchestrate_workflow(
+        workflow_id="wf-bl039-telemetry-001",
+        stage_specs=[
+            WorkflowStageSpec(stage_id="orchestration_prepare", requires_approval=False),
+            WorkflowStageSpec(stage_id="artifact_export", requires_approval=False, max_retries=2, fail_first_attempts=1),
+        ],
+        approval_events=[],
+    )
+
+    by_name = {(event.stage_id, event.metric_name): event for event in report.telemetry_metric_events}
+    assert by_name[("artifact_export", "stage_requests_total")].value == 2.0
+    assert by_name[("artifact_export", "stage_errors_total")].value == 1.0
+    assert by_name[("artifact_export", "retry_budget_saturation_ratio")].value == pytest.approx(
+        2.0 / 3.0
+    )
+    assert by_name[("workflow", "artifact_export_success_ratio")].value == 1.0
