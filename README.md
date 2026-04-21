@@ -211,6 +211,7 @@ To support ASME/PED-style review workflows:
 - Cross-verification against legacy in-house calculations.
 - Boundary testing for pressure/temperature/material extremes.
 - Independent engineer review before production release.
+- Deterministic orchestration performance suite with concurrent throughput/latency benchmarks, retained profiling artifacts, and a published capacity envelope runbook (`docs/runbooks/workflow_orchestrator_performance_scale_benchmark.md`).
 
 ---
 
