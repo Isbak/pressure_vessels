@@ -1,7 +1,15 @@
 {
+  "cross_version_regression": null,
   "deterministic_hash": "365b7f1ea51709d1b1057d9091b8b8d178286e05162ceb86c91e4549cb5249a7",
   "generated_at_utc": "2026-04-18T00:00:00+00:00",
+  "impact_analysis": null,
   "immutable": true,
+  "lifecycle": {
+    "approvals": [],
+    "promoted_at_utc": "2026-04-18T00:00:00+00:00",
+    "promoted_by": "system",
+    "stage": "draft"
+  },
   "normalized_clauses": [
     {
       "canonical_equation": null,
