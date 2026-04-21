@@ -57,16 +57,16 @@ def test_frontend_result_view_displays_workflow_and_compliance_summary() -> None
     assert 'Artifacts' in result_page
 
 
-def test_bl039_is_done_and_next_prompt_advances_to_bl040() -> None:
+def test_bl040_is_done_and_next_prompt_advances_to_bl041() -> None:
     backlog = Path('docs/development_backlog.yaml').read_text(encoding='utf-8')
     next_prompt = Path('docs/next_code_generation_prompt.md').read_text(
         encoding='utf-8'
     )
 
     bl039_block = backlog.split('id: BL-039', maxsplit=1)[1].split(
-        'id: BL-040', maxsplit=1
+        'id: BL-041', maxsplit=1
     )[0]
     assert 'status: done' in bl039_block
 
-    assert 'BL-040' in next_prompt
-    assert 'current next roadmap item: BL-040' in next_prompt
+    assert 'BL-041' in next_prompt
+    assert 'current next roadmap item: BL-041' in next_prompt

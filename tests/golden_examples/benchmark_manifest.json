@@ -2,7 +2,7 @@
   "schema_version": "QABenchmarkDatasetManifest.v1",
   "manifest_id": "bl017-qa-benchmark-manifest",
   "deterministic_timestamp_utc": "2026-04-18T00:00:00Z",
-  "benchmark_prompt": "Design a horizontal pressure vessel for propane storage, 18 bar design pressure, 65°C design temperature, 30 m3 capacity, ASME Section VIII Div 1, corrosion allowance 3 mm.",
+  "benchmark_prompt": "Design a horizontal pressure vessel for propane storage, 18 bar design pressure, 65\u00b0C design temperature, 30 m3 capacity, ASME Section VIII Div 1, corrosion allowance 3 mm.",
   "cases": [
     {
       "case_id": "example_01_ug27_ug32_ug45",
@@ -33,6 +33,20 @@
       "fixture_path": "tests/golden_examples/example_05_stress_high_pressure.json",
       "category": "stress",
       "description": "High-load stress case near validity envelope maxima."
+    }
+  ],
+  "performance_profiles": [
+    {
+      "profile_id": "bl040_concurrency_baseline",
+      "concurrent_workers": 1,
+      "runs_per_worker": 3,
+      "description": "Deterministic baseline profile for orchestration benchmark harness."
+    },
+    {
+      "profile_id": "bl040_concurrency_scale",
+      "concurrent_workers": 4,
+      "runs_per_worker": 3,
+      "description": "Deterministic scale profile for capacity envelope verification."
     }
   ]
 }
