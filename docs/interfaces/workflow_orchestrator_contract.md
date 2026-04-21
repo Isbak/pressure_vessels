@@ -69,12 +69,29 @@ Every attempt is emitted into `execution_trace[]` with ordered `sequence` values
 - `success`
 - `escalated`
 
+## PostgreSQL Persistence and Recovery (BL-035)
+
+Workflow events can be persisted via `PostgresqlWorkflowEventStore` as append-only rows:
+
+- immutable `revision_id` format: `<workflow_id>:rev:<zero-padded-sequence>`
+- `event_kind`: `approval_event`, `execution_trace_event`, `workflow_summary`
+- deterministic ordering by `event_sequence`
+
+Recovery API:
+
+- `orchestrate_or_resume_workflow(...) -> (report, resumed)`
+  - loads persisted report when workflow already exists (`resumed=True`)
+  - otherwise executes `orchestrate_workflow`, persists rows, and returns `resumed=False`
+
 ## Example Usage
 
 ```python
 from pressure_vessels.workflow_orchestrator import (
+    PostgresqlWorkflowEventStore,
+    PostgresqlWorkflowEventStoreBackend,
     WorkflowStageSpec,
     build_approval_gate_event,
+    orchestrate_or_resume_workflow,
     orchestrate_workflow,
 )
 
@@ -98,5 +115,18 @@ report = orchestrate_workflow(
         WorkflowStageSpec(stage_id="publish_release", requires_approval=False),
     ],
     approval_events=[approval],
+)
+
+backend = PostgresqlWorkflowEventStoreBackend()
+store = PostgresqlWorkflowEventStore(backend)
+persisted_report, resumed = orchestrate_or_resume_workflow(
+    workflow_id="wf-001",
+    stage_specs=[
+        WorkflowStageSpec(stage_id="prepare_inputs", requires_approval=False),
+        WorkflowStageSpec(stage_id="compliance_review", requires_approval=True),
+        WorkflowStageSpec(stage_id="publish_release", requires_approval=False),
+    ],
+    approval_events=[approval],
+    event_store=store,
 )
 ```

@@ -8,6 +8,8 @@ from pressure_vessels.compliance_pipeline import generate_compliance_dossier
 from pressure_vessels.design_basis_pipeline import build_design_basis
 from pressure_vessels.requirements_pipeline import parse_prompt_to_requirement_set
 from pressure_vessels.traceability_pipeline import (
+    Neo4jTraceabilityStore,
+    Neo4jTraceabilityStoreBackend,
     ApprovalRecord,
     TraceabilityLink,
     build_audit_report_template,
@@ -160,3 +162,25 @@ def test_audit_report_template_is_deterministic_and_clause_scoped():
     assert report["clause_scope"] == "UG-45"
     assert report["summary_lines"][1] == "Immutable: true"
     assert all(row["clause_id"] in {"UG-45", "-"} for row in report["evidence_rows"])
+
+
+def test_bl035_neo4j_store_persists_revision_and_supports_query_examples():
+    req, design_basis, matrix, machine = _build_graph_inputs(_default_prompt())
+    graph = build_traceability_graph_revision(
+        req,
+        design_basis,
+        matrix,
+        machine,
+        revision_id="REV-035-0001",
+        now_utc=FIXED_NOW,
+    )
+    backend = Neo4jTraceabilityStoreBackend()
+    store = Neo4jTraceabilityStore(backend)
+
+    store.persist_revision(graph)
+    fetched = store.get_revision("REV-035-0001")
+    assert fetched.to_json_dict() == graph.to_json_dict()
+
+    clause_links = store.query_clause_links(clause_id="UG-27", revision_id="REV-035-0001")
+    assert clause_links
+    assert all(link.clause_id == "UG-27" or link.source_ref == "UG-27" or link.target_ref == "UG-27" for link in clause_links)

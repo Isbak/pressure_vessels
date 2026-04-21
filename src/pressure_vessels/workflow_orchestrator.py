@@ -89,6 +89,156 @@ class WorkflowExecutionReport:
         }
 
 
+@dataclass(frozen=True)
+class WorkflowExecutionEventRecord:
+    """Append-only event row persisted in PostgreSQL-backed workflow event store."""
+
+    revision_id: str
+    workflow_id: str
+    event_sequence: int
+    event_kind: str
+    payload: dict[str, Any]
+
+    def to_json_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class PostgresqlWorkflowEventStoreBackend:
+    """Deterministic in-memory stand-in for a PostgreSQL append-only table."""
+
+    def __init__(self) -> None:
+        self._rows_by_workflow: dict[str, list[WorkflowExecutionEventRecord]] = {}
+        self._all_revision_ids: set[str] = set()
+
+    def append(self, record: WorkflowExecutionEventRecord) -> None:
+        if record.revision_id in self._all_revision_ids:
+            raise ValueError(
+                f"BL-035 persistence failed: immutable revision_id '{record.revision_id}' already exists."
+            )
+        workflow_rows = self._rows_by_workflow.setdefault(record.workflow_id, [])
+        workflow_rows.append(record)
+        self._all_revision_ids.add(record.revision_id)
+
+    def list_by_workflow(self, workflow_id: str) -> list[WorkflowExecutionEventRecord]:
+        return list(sorted(self._rows_by_workflow.get(workflow_id, []), key=lambda row: row.event_sequence))
+
+
+class PostgresqlWorkflowEventStore:
+    """PostgreSQL-facing event store abstraction used by workflow orchestration."""
+
+    def __init__(self, backend: PostgresqlWorkflowEventStoreBackend) -> None:
+        self._backend = backend
+
+    def persist_report(self, report: WorkflowExecutionReport) -> list[WorkflowExecutionEventRecord]:
+        rows: list[WorkflowExecutionEventRecord] = []
+        sequence = 1
+
+        for approval in report.approval_events:
+            rows.append(
+                WorkflowExecutionEventRecord(
+                    revision_id=_build_workflow_revision_id(report.workflow_id, sequence),
+                    workflow_id=report.workflow_id,
+                    event_sequence=sequence,
+                    event_kind="approval_event",
+                    payload=approval.to_json_dict(),
+                )
+            )
+            sequence += 1
+
+        for event in report.execution_trace:
+            rows.append(
+                WorkflowExecutionEventRecord(
+                    revision_id=_build_workflow_revision_id(report.workflow_id, sequence),
+                    workflow_id=report.workflow_id,
+                    event_sequence=sequence,
+                    event_kind="execution_trace_event",
+                    payload=event.to_json_dict(),
+                )
+            )
+            sequence += 1
+
+        rows.append(
+            WorkflowExecutionEventRecord(
+                revision_id=_build_workflow_revision_id(report.workflow_id, sequence),
+                workflow_id=report.workflow_id,
+                event_sequence=sequence,
+                event_kind="workflow_summary",
+                payload={
+                    "schema_version": report.schema_version,
+                    "workflow_id": report.workflow_id,
+                    "stage_states": report.stage_states,
+                    "completed_stages": report.completed_stages,
+                    "blocked_stage": report.blocked_stage,
+                    "failed_stage": report.failed_stage,
+                    "escalation_target": report.escalation_target,
+                },
+            )
+        )
+
+        for row in rows:
+            self._backend.append(row)
+        return rows
+
+    def load_report(self, workflow_id: str) -> WorkflowExecutionReport:
+        rows = self._backend.list_by_workflow(workflow_id)
+        if not rows:
+            raise ValueError(
+                f"BL-035 recovery failed: workflow '{workflow_id}' has no persisted events."
+            )
+
+        approval_events: list[ApprovalGateEvent] = []
+        execution_trace: list[WorkflowExecutionTraceEvent] = []
+        summary_payload: dict[str, Any] | None = None
+
+        for row in rows:
+            if row.event_kind == "approval_event":
+                approval_events.append(ApprovalGateEvent(**row.payload))
+            elif row.event_kind == "execution_trace_event":
+                execution_trace.append(WorkflowExecutionTraceEvent(**row.payload))
+            elif row.event_kind == "workflow_summary":
+                summary_payload = row.payload
+
+        if summary_payload is None:
+            raise ValueError(
+                f"BL-035 recovery failed: workflow '{workflow_id}' has no terminal summary event."
+            )
+
+        return WorkflowExecutionReport(
+            schema_version=summary_payload["schema_version"],
+            workflow_id=summary_payload["workflow_id"],
+            stage_states=summary_payload["stage_states"],
+            completed_stages=summary_payload["completed_stages"],
+            blocked_stage=summary_payload["blocked_stage"],
+            failed_stage=summary_payload["failed_stage"],
+            escalation_target=summary_payload["escalation_target"],
+            approval_events=approval_events,
+            execution_trace=execution_trace,
+        )
+
+
+def orchestrate_or_resume_workflow(
+    *,
+    workflow_id: str,
+    stage_specs: list[WorkflowStageSpec],
+    approval_events: list[ApprovalGateEvent],
+    event_store: PostgresqlWorkflowEventStore,
+) -> tuple[WorkflowExecutionReport, bool]:
+    """Resume from persisted report when available, otherwise execute and persist deterministically."""
+    try:
+        return event_store.load_report(workflow_id), True
+    except ValueError as error:
+        if "has no persisted events" not in str(error):
+            raise
+
+    report = orchestrate_workflow(
+        workflow_id=workflow_id,
+        stage_specs=stage_specs,
+        approval_events=approval_events,
+    )
+    event_store.persist_report(report)
+    return report, False
+
+
 def orchestrate_workflow(
     *,
     workflow_id: str,
@@ -363,3 +513,7 @@ def _validate_approval_events(
             raise ValueError(
                 "BL-016 orchestration failed: decided_at_utc must include timezone information."
             )
+
+
+def _build_workflow_revision_id(workflow_id: str, event_sequence: int) -> str:
+    return f"{workflow_id}:rev:{event_sequence:05d}"

@@ -2,9 +2,12 @@ import pytest
 
 from pressure_vessels.workflow_orchestrator import (
     APPROVAL_GATE_EVENT_VERSION,
+    PostgresqlWorkflowEventStore,
+    PostgresqlWorkflowEventStoreBackend,
     WORKFLOW_EXECUTION_REPORT_VERSION,
     WorkflowStageSpec,
     build_approval_gate_event,
+    orchestrate_or_resume_workflow,
     orchestrate_workflow,
 )
 
@@ -159,3 +162,44 @@ def test_workflow_stage_spec_accepts_upper_bounds():
 
     assert stage.max_retries == 10
     assert stage.fail_first_attempts == 10
+
+
+def test_bl035_recovery_resume_loads_persisted_report_after_restart_without_evidence_loss():
+    stage_specs = [
+        WorkflowStageSpec(stage_id="prepare_inputs", requires_approval=False),
+        WorkflowStageSpec(stage_id="compliance_review", requires_approval=True),
+    ]
+    approvals = [
+        build_approval_gate_event(
+            event_id="APR-035-001",
+            workflow_id="wf-bl035-001",
+            stage_id="compliance_review",
+            gate_id="human_approval",
+            decision="approved",
+            approver_role="authorized_inspector",
+            approver_id="insp-035",
+            decided_at_utc="2026-04-21T09:30:00+00:00",
+            rationale="Approved for persisted release run.",
+        )
+    ]
+    backend = PostgresqlWorkflowEventStoreBackend()
+
+    first_process_store = PostgresqlWorkflowEventStore(backend)
+    initial_report, resumed = orchestrate_or_resume_workflow(
+        workflow_id="wf-bl035-001",
+        stage_specs=stage_specs,
+        approval_events=approvals,
+        event_store=first_process_store,
+    )
+    assert resumed is False
+
+    # Simulate process restart by creating a new store instance with shared backend datastore.
+    restarted_process_store = PostgresqlWorkflowEventStore(backend)
+    resumed_report, resumed = orchestrate_or_resume_workflow(
+        workflow_id="wf-bl035-001",
+        stage_specs=stage_specs,
+        approval_events=approvals,
+        event_store=restarted_process_store,
+    )
+    assert resumed is True
+    assert resumed_report.to_json_dict() == initial_report.to_json_dict()

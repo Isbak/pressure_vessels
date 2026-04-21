@@ -74,6 +74,52 @@ class TraceabilityGraphRevision:
         }
 
 
+class Neo4jTraceabilityStoreBackend:
+    """Deterministic in-memory stand-in for Neo4j revisioned graph writes."""
+
+    def __init__(self) -> None:
+        self._revisions: dict[str, TraceabilityGraphRevision] = {}
+
+    def write_revision(self, revision: TraceabilityGraphRevision) -> None:
+        if revision.revision_id in self._revisions:
+            raise ValueError(
+                f"BL-035 neo4j write failed: immutable revision '{revision.revision_id}' already exists."
+            )
+        self._revisions[revision.revision_id] = revision
+
+    def read_revision(self, revision_id: str) -> TraceabilityGraphRevision:
+        try:
+            return self._revisions[revision_id]
+        except KeyError as error:
+            raise ValueError(
+                f"BL-035 neo4j read failed: revision '{revision_id}' not found."
+            ) from error
+
+    def read_all(self) -> list[TraceabilityGraphRevision]:
+        return [self._revisions[key] for key in sorted(self._revisions.keys())]
+
+
+class Neo4jTraceabilityStore:
+    """Neo4j-facing repository wrapper with deterministic read/query helpers."""
+
+    def __init__(self, backend: Neo4jTraceabilityStoreBackend) -> None:
+        self._backend = backend
+
+    def persist_revision(self, graph_revision: TraceabilityGraphRevision) -> None:
+        self._backend.write_revision(graph_revision)
+
+    def get_revision(self, revision_id: str) -> TraceabilityGraphRevision:
+        return self._backend.read_revision(revision_id)
+
+    def query_clause_links(
+        self,
+        *,
+        clause_id: str,
+        revision_id: str | None = None,
+    ) -> list[TraceabilityLink]:
+        return query_clause_evidence(self._backend.read_all(), clause_id, revision_id=revision_id)
+
+
 def build_traceability_graph_revision(
     requirement_set: RequirementSet,
     design_basis: DesignBasis,
