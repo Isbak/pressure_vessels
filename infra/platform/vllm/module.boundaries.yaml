@@ -18,6 +18,24 @@ spec:
         sustained_tokens_per_second: 12000
         burst_tokens_per_second: 18000
         autoscaling_policy: approval-required-threshold-update
+  deployment_targets:
+    - platform: railway
+      strategy: vllm-compatible-runtime
+      providers:
+        - ollama
+        - localai
+      rollout_status: deployed
+      constraints:
+        - cpu-only-hosting
+        - large-model-production-throughput-requires-external-gpu-endpoint
+  integration_contracts:
+    - name: backend-to-llm-serving-railway
+      caller: services/backend
+      callee: llm-serving-railway
+      protocol: http-openai-compatible
+      network_path: private-service-network
+      authn: service-token
+      authz: vllm-consumer-role-required
   access_ownership:
     roles:
       - name: vllm-admin
