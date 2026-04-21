@@ -33,6 +33,18 @@ BL-003 fails closed when caller inputs are outside deterministic engineering-mod
   - `"BL-003 model-domain gate failed: <check_id> input <name>=<value> is outside validity envelope [<min>, <max>]."`
 - Envelope coverage is deterministic for conditional checks (UG-28 checks are validated only when `external_pressure` is declared).
 
+### Validation Discrepancy Triage (BL-041)
+
+When golden/reference validation deltas exceed fixture tolerance, triage is mandatory before
+accepting any fixture or model update:
+
+- Reference dataset: `tests/golden_examples/example_*.json`
+- Explicit reject vectors: `tests/golden_examples/reject_envelope_cases.json`
+- Triage runbook: `docs/runbooks/validation_discrepancy_triage.md`
+
+Disposition is fail-closed by default: discrepancies must be classified as model regression,
+reference defect, or domain misuse, and resolved according to the runbook before merge.
+
 ## Materials + Corrosion Integration (BL-013)
 
 When `sizing_input=None`, the pipeline now resolves allowable stress, joint efficiency, and corrosion policy from a standards-backed material allowables package selected by `design_basis.primary_standard_version`. Material records include deterministic provenance (`standards_package_id`, `effective_date`) and fail closed when a configured package path is missing or expired for the `design_basis.generated_at_utc` date. Corrosion allowance policy is explicit and persisted in both `material_basis` and `applied_defaults`.
