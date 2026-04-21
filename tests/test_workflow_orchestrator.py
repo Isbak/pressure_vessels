@@ -4,6 +4,7 @@ from pressure_vessels.workflow_orchestrator import (
     APPROVAL_GATE_EVENT_VERSION,
     PostgresqlWorkflowEventStore,
     PostgresqlWorkflowEventStoreBackend,
+    SECURITY_AUDIT_EVENT_VERSION,
     WORKFLOW_EXECUTION_REPORT_VERSION,
     WorkflowStageSpec,
     build_approval_gate_event,
@@ -44,6 +45,19 @@ def test_orchestrator_runs_deterministic_approved_path():
         "compliance_review": "completed",
         "publish_release": "completed",
     }
+    assert [event.to_json_dict() for event in report.security_audit_events] == [
+        {
+            "schema_version": SECURITY_AUDIT_EVENT_VERSION,
+            "event_id": "APR-0001:security",
+            "workflow_id": "wf-release-001",
+            "stage_id": "compliance_review",
+            "actor": "authorized_inspector:insp-007",
+            "action": "approval_gate_decision",
+            "artifact": "human_approval",
+            "decision": "approved",
+            "recorded_at_utc": "2026-04-18T10:00:00+00:00",
+        }
+    ]
     assert [event.sequence for event in report.execution_trace] == list(
         range(1, len(report.execution_trace) + 1)
     )
@@ -203,3 +217,4 @@ def test_bl035_recovery_resume_loads_persisted_report_after_restart_without_evid
     )
     assert resumed is True
     assert resumed_report.to_json_dict() == initial_report.to_json_dict()
+    assert resumed_report.security_audit_events[0].decision == "approved"

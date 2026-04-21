@@ -29,6 +29,19 @@ Provides a deterministic service health response for runtime checks.
 
 Starts a deterministic design run from a basic pressure-vessel input payload.
 
+### Authorization
+
+Requires `Authorization` header with bearer token format:
+
+`Authorization: Bearer v1:<actorId>:<role>:<scope>:<secret>`
+
+Where:
+
+- `role` must be one of `engineer`, `reviewer`, `approver`.
+- `scope` must be `design_runs:write` for this endpoint.
+- `<secret>` must be resolved from runtime secret `PV_BACKEND_AUTH_TOKEN_SECRET`
+  loaded via approved module path `infra/platform/secrets/module.boundaries.yaml`.
+
 ### Request body
 
 ```json
@@ -58,12 +71,41 @@ Starts a deterministic design run from a basic pressure-vessel input payload.
 }
 ```
 
+### Error responses (`401 Unauthorized`, `403 Forbidden`)
+
+```json
+{
+  "error": "missing authorization token"
+}
+```
+
+```json
+{
+  "error": "invalid authorization token"
+}
+```
+
+```json
+{
+  "error": "insufficient scope: requires design_runs:write"
+}
+```
+
 ## Endpoint: `GET /api/v1/design-runs/{runId}`
 
 ### Purpose
 
 Returns deterministic workflow state, compliance summary, and artifact
 references for a previously started design run.
+
+### Authorization
+
+Requires `Authorization` header with bearer token format:
+
+`Authorization: Bearer v1:<actorId>:<role>:<scope>:<secret>`
+
+- `role` must be one of `engineer`, `reviewer`, `approver`.
+- `scope` must be `design_runs:read` or `design_runs:write`.
 
 ### Response (`200 OK`)
 
@@ -100,8 +142,29 @@ references for a previously started design run.
 }
 ```
 
+### Error responses (`401 Unauthorized`, `403 Forbidden`)
+
+```json
+{
+  "error": "missing authorization token"
+}
+```
+
+```json
+{
+  "error": "invalid authorization token"
+}
+```
+
+```json
+{
+  "error": "insufficient scope: requires design_runs:read"
+}
+```
+
 ## Determinism rules
 
 - `code` is normalized to uppercase with collapsed internal whitespace.
 - Identical request payloads yield the same `runId` and status payload.
 - Artifact references are fixed to immutable sample artifact locations.
+- Auth role parsing and scope enforcement are deterministic and fail closed.

@@ -8,6 +8,7 @@ from typing import Any
 
 WORKFLOW_EXECUTION_REPORT_VERSION = "WorkflowExecutionReport.v1"
 APPROVAL_GATE_EVENT_VERSION = "ApprovalGateEvent.v1"
+SECURITY_AUDIT_EVENT_VERSION = "SecurityAuditEvent.v1"
 
 
 @dataclass(frozen=True)
@@ -52,6 +53,22 @@ class ApprovalGateEvent:
 
 
 @dataclass(frozen=True)
+class SecurityAuditEvent:
+    schema_version: str
+    event_id: str
+    workflow_id: str
+    stage_id: str
+    actor: str
+    action: str
+    artifact: str
+    decision: str
+    recorded_at_utc: str
+
+    def to_json_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class WorkflowExecutionTraceEvent:
     sequence: int
     stage_id: str
@@ -73,6 +90,7 @@ class WorkflowExecutionReport:
     failed_stage: str | None
     escalation_target: str | None
     approval_events: list[ApprovalGateEvent]
+    security_audit_events: list[SecurityAuditEvent]
     execution_trace: list[WorkflowExecutionTraceEvent]
 
     def to_json_dict(self) -> dict[str, Any]:
@@ -85,6 +103,7 @@ class WorkflowExecutionReport:
             "failed_stage": self.failed_stage,
             "escalation_target": self.escalation_target,
             "approval_events": [event.to_json_dict() for event in self.approval_events],
+            "security_audit_events": [event.to_json_dict() for event in self.security_audit_events],
             "execution_trace": [event.to_json_dict() for event in self.execution_trace],
         }
 
@@ -145,6 +164,18 @@ class PostgresqlWorkflowEventStore:
             )
             sequence += 1
 
+        for security_event in report.security_audit_events:
+            rows.append(
+                WorkflowExecutionEventRecord(
+                    revision_id=_build_workflow_revision_id(report.workflow_id, sequence),
+                    workflow_id=report.workflow_id,
+                    event_sequence=sequence,
+                    event_kind="security_audit_event",
+                    payload=security_event.to_json_dict(),
+                )
+            )
+            sequence += 1
+
         for event in report.execution_trace:
             rows.append(
                 WorkflowExecutionEventRecord(
@@ -188,6 +219,7 @@ class PostgresqlWorkflowEventStore:
 
         approval_events: list[ApprovalGateEvent] = []
         execution_trace: list[WorkflowExecutionTraceEvent] = []
+        security_audit_events: list[SecurityAuditEvent] = []
         summary_payload: dict[str, Any] | None = None
 
         for row in rows:
@@ -195,6 +227,8 @@ class PostgresqlWorkflowEventStore:
                 approval_events.append(ApprovalGateEvent(**row.payload))
             elif row.event_kind == "execution_trace_event":
                 execution_trace.append(WorkflowExecutionTraceEvent(**row.payload))
+            elif row.event_kind == "security_audit_event":
+                security_audit_events.append(SecurityAuditEvent(**row.payload))
             elif row.event_kind == "workflow_summary":
                 summary_payload = row.payload
 
@@ -212,6 +246,7 @@ class PostgresqlWorkflowEventStore:
             failed_stage=summary_payload["failed_stage"],
             escalation_target=summary_payload["escalation_target"],
             approval_events=approval_events,
+            security_audit_events=security_audit_events,
             execution_trace=execution_trace,
         )
 
@@ -359,6 +394,10 @@ def orchestrate_workflow(
         failed_stage=failed_stage,
         escalation_target=escalation_target,
         approval_events=sorted(approval_events, key=lambda item: item.event_id),
+        security_audit_events=_build_security_audit_events(
+            workflow_id=workflow_id,
+            approval_events=approval_events,
+        ),
         execution_trace=execution_trace,
     )
 
@@ -513,6 +552,27 @@ def _validate_approval_events(
             raise ValueError(
                 "BL-016 orchestration failed: decided_at_utc must include timezone information."
             )
+
+
+def _build_security_audit_events(
+    *,
+    workflow_id: str,
+    approval_events: list[ApprovalGateEvent],
+) -> list[SecurityAuditEvent]:
+    return [
+        SecurityAuditEvent(
+            schema_version=SECURITY_AUDIT_EVENT_VERSION,
+            event_id=f"{event.event_id}:security",
+            workflow_id=workflow_id,
+            stage_id=event.stage_id,
+            actor=f"{event.approver_role}:{event.approver_id}",
+            action="approval_gate_decision",
+            artifact=event.gate_id,
+            decision=event.decision,
+            recorded_at_utc=event.decided_at_utc,
+        )
+        for event in sorted(approval_events, key=lambda item: item.event_id)
+    ]
 
 
 def _build_workflow_revision_id(workflow_id: str, event_sequence: int) -> str:
