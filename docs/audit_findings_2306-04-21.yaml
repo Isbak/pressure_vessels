@@ -1,0 +1,462 @@
+---
+version: 1.0.0
+generated_on: '2026-04-21'
+project: pressure_vessels
+description: >-
+  Machine-readable audit findings derived from the full-repo code audit on
+  2026-04-21. Schema mirrors docs/audit_findings_2026-04-20.yaml so the same
+  generation flow (docs/next_audit_generation_prompt.md) can consume it. The
+  predecessor manifest's findings are all status: done; this is a fresh
+  cycle.
+source_audit: Full-repo audit 2026-04-21 (branch claude/audit-setup-update-docs-PmLuP)
+predecessor_manifest: docs/audit_findings_2026-04-20.yaml
+severity_values:
+- critical
+- high
+- medium
+- low
+status_values:
+- todo
+- in_progress
+- blocked
+- done
+prompt_conventions:
+  branch_pattern: claude/fix-<finding-id>
+  required_checks:
+  - pytest
+  - ./markdownlint-cli2 "**/*.md"
+  - python scripts/check_ci_governance.py
+  backlog_update_rule: >-
+    Add or update docs/development_backlog.yaml only if the finding requires a
+    tracked backlog entry. Otherwise cite the finding id in the commit body.
+  dependency_rule: >-
+    Do not introduce new runtime dependencies without adding them to
+    pyproject.toml.
+audit_preconditions:
+  tests_green_at_audit_start: false
+  failing_tests_at_audit_start:
+  - tests/test_backend_api_contract_dx005.py::test_bl040_is_done_and_next_prompt_advances_to_bl041
+  - tests/test_contract_interfaces_dx009.py::test_frontend_backend_contract_shapes_remain_compatible
+  - tests/test_qa_benchmark_harness.py::test_cross_verification_harness_is_deterministic_and_passing
+  - tests/test_qa_benchmark_harness.py::test_quality_gate_report_artifact_is_written_with_stable_payload
+  observed_pytest_summary: '4 failed, 256 passed, 44 warnings'
+findings:
+ 
+# ---------------------------------------------------------------------------
+# CRITICAL
+# ---------------------------------------------------------------------------
+- id: AF-016
+  title: Restore green pytest baseline by triaging 2026-04-21 failing tests
+  severity: critical
+  area: quality
+  status: todo
+  file_path: tests/
+  line_numbers: []
+  depends_on: []
+  references:
+  - tests/test_backend_api_contract_dx005.py
+  - tests/test_contract_interfaces_dx009.py
+  - tests/test_qa_benchmark_harness.py
+  - BL-017
+  - BL-012
+  problem: >-
+    `pytest -q` on main yields 4 failures (256 passed). The failing tests span
+    frontend/backend contract, next-prompt sentinel, and the QA benchmark
+    cross-verification harness. A red baseline blocks every downstream
+    governance gate and makes every other audit finding harder to triage.
+  risk: >-
+    Governance-gate enforcement (BL-012) and QA evidence (BL-017) both depend
+    on a green pytest signal. With 4 failing tests, every PR merges with a
+    known-red local `make validate`, which normalizes ignoring the signal and
+    masks genuine regressions introduced later.
+  recommendation: >-
+    Treat this as a single triage task. For each failure: (a) classify as
+    stale-test vs. real-code regression, (b) fix real-code regressions under
+    their own finding ids (see AF-017, AF-018), (c) rewrite stale tests so they
+    are decoupled from sprint-specific sentinels (see AF-019).
+  acceptance_criteria:
+  - "`pytest -q` returns 0 failures on the audit branch."
+  - Each previously-failing test is either fixed or replaced with a
+    determinism-preserving equivalent that does not pin on sprint-local state.
+  - A short triage note is added to the commit body citing AF-016 and the
+    sub-finding ids it unblocks.
+  deliverables:
+  - Green pytest baseline
+  - Per-failure classification recorded in the commit body
+  - Updated tests and/or code fixes under AF-017/AF-018/AF-019
+ 
+# ---------------------------------------------------------------------------
+# HIGH
+# ---------------------------------------------------------------------------
+- id: AF-017
+  title: Handle reject-category fixtures in QA benchmark cross-verification harness
+  severity: high
+  area: quality
+  status: todo
+  file_path: src/pressure_vessels/qa_benchmark_pipeline.py
+  line_numbers: [88, 103]
+  depends_on:
+  - AF-016
+  references:
+  - tests/golden_examples/benchmark_manifest.json
+  - tests/golden_examples/reject_envelope_cases.json
+  - docs/interfaces/qa_benchmark_quality_gate_contract.md
+  - BL-017
+  - BL-041
+  problem: >-
+    `run_cross_verification_harness` unconditionally reads
+    `fixture["input"]` for every case in the benchmark manifest. The manifest
+    now includes a reject-category case (`reject_envelope_cases`) whose
+    fixture has no `input` key (it carries a `cases[]` list of dimension/value
+    probes instead). The harness raises KeyError('input') on that case and
+    never evaluates the BL-041 reject envelope in CI.
+  risk: >-
+    The reject-envelope discipline introduced by BL-041 is silently skipped
+    in the automated quality gate. Regressions to the BL-003e validity
+    envelope would not be caught by the harness, undermining the
+    fail-closed-on-invalid-domain guarantee.
+  recommendation: >-
+    Branch on `case.category`. For category `reject`, load
+    `fixture["cases"]` and assert that `run_calculation_pipeline` raises a
+    matching domain-gate exception for each dimension/value probe. Emit a
+    reject-specific case payload shape in the quality-gate report and update
+    `docs/interfaces/qa_benchmark_quality_gate_contract.md` to enumerate the
+    `reject` category.
+  acceptance_criteria:
+  - Cross-verification harness runs deterministically across all manifest
+    categories (golden, boundary, stress, reject).
+  - Report payload documents a `reject` case shape that is stable across
+    reruns.
+  - Regression test exercises the reject fixture and fails if the envelope
+    guard is relaxed.
+  deliverables:
+  - Updated harness with category-aware case dispatch
+  - Contract/doc update for the reject category
+  - Regression tests in tests/test_qa_benchmark_harness.py
+ 
+- id: AF-018
+  title: Realign frontend/backend contract test with DesignRunRequest schema
+  severity: high
+  area: integration
+  status: todo
+  file_path: tests/test_contract_interfaces_dx009.py
+  line_numbers: [46, 65]
+  depends_on:
+  - AF-016
+  references:
+  - services/frontend/lib/prompt-contract.ts
+  - services/backend/src/main.ts
+  - docs/interfaces/backend_prompt_api_contract.md
+  - BL-034
+  problem: >-
+    `test_frontend_backend_contract_shapes_remain_compatible` still asserts
+    the original `prompt: string` / `response: string` schema plus the legacy
+    `/api/prompt?prompt=<text>` endpoint. The actual contract evolved under
+    BL-034 to `DesignRunRequest { designPressureBar, designTemperatureC,
+    volumeM3, code }` and `POST /api/v1/design-runs`. The test has been red
+    since the schema change landed.
+  risk: >-
+    Because the CI-required contract-tests job imports the whole file, a
+    single stale assertion collapses the entire contract gate. Any real
+    drift between `services/frontend/lib/prompt-contract.ts` and
+    `services/backend/src/main.ts` would be masked by the preexisting
+    failure.
+  recommendation: >-
+    Replace the legacy assertions with checks against the current
+    `DesignRunRequest`/`DesignRunResponse` types, the versioned
+    `POST /api/v1/design-runs` route, and the `source: 'backend-service'`
+    envelope. Keep the assertion set aligned with the source of truth in
+    `docs/interfaces/backend_prompt_api_contract.md`.
+  acceptance_criteria:
+  - Test enforces current `DesignRunRequest` field names and types.
+  - Test fails if any of `designPressureBar`, `designTemperatureC`,
+    `volumeM3`, `code`, or the `v1` route prefix drift out of sync.
+  - No legacy prompt/response sentinels remain in the file.
+  deliverables:
+  - Updated test assertions
+  - Short note in the backend contract doc referencing the guarded fields
+ 
+# ---------------------------------------------------------------------------
+# MEDIUM
+# ---------------------------------------------------------------------------
+- id: AF-019
+  title: Decouple next-prompt sentinel tests from sprint-local BL ids
+  severity: medium
+  area: quality
+  status: todo
+  file_path: tests/test_backend_api_contract_dx005.py
+  line_numbers: [60, 72]
+  depends_on:
+  - AF-016
+  references:
+  - docs/next_code_generation_prompt.md
+  - docs/development_backlog.yaml
+  - BL-012
+  problem: >-
+    `test_bl040_is_done_and_next_prompt_advances_to_bl041` pins on the exact
+    literal `current next roadmap item: BL-041` in
+    `docs/next_code_generation_prompt.md`. That file advances every time a
+    backlog item is closed; the test has no way to remain correct across
+    sprints and fails any audit run that refreshes the prompt.
+  risk: >-
+    Sentinel drift becomes the de-facto signal for "is CI aware of the
+    current sprint?", rather than the backlog/finding integrity. Teams end
+    up editing the test in lockstep with prompt wording, which provides no
+    real governance value and invites churn.
+  recommendation: >-
+    Parameterize the test against `docs/development_backlog.yaml`: assert
+    that the first `status: todo` item whose `depends_on` are all `done`
+    appears, quoted by id, in `docs/next_code_generation_prompt.md`. Do not
+    hard-code any specific BL id. Retain BL-040/BL-041 closure assertions
+    against the backlog (not the prompt).
+  acceptance_criteria:
+  - Test derives the expected BL id from the backlog at runtime.
+  - Test passes regardless of which BL id is current.
+  - No literal BL-0XX id appears as a sentinel in the test body except for
+    the historical closure assertion.
+  deliverables:
+  - Refactored test with backlog-driven expectation
+  - Helper (if useful) in tests/ for resolving "next queued BL"
+ 
+- id: AF-020
+  title: Narrow broad Exception catch in standards ingestion write
+  severity: medium
+  area: knowledge
+  status: todo
+  file_path: src/pressure_vessels/standards_ingestion_pipeline.py
+  line_numbers: [421]
+  depends_on: []
+  references:
+  - AF-001
+  - BL-005
+  problem: >-
+    The atomic-write helper added for AF-001 wraps its body in
+    `except Exception:` to unlink the tempfile on any failure. The handler
+    re-raises, but it also swallows and re-raises system-exit-class
+    exceptions (BaseException is excluded, which is correct) without
+    documenting why the broad class is necessary or logging the exception
+    type.
+  risk: >-
+    A future refactor could inadvertently suppress an unrelated exception if
+    the re-raise is dropped. Auditors reviewing the ingestion path cannot
+    see at a glance why the broad catch is intentional.
+  recommendation: >-
+    Replace with an explicit tuple of expected exceptions (OSError,
+    ValueError, json.JSONDecodeError) plus a narrow final `Exception`
+    re-raise with a docstring or inline comment citing the cleanup
+    invariant. Alternatively, restructure with `try/finally` so no `except`
+    is needed for the cleanup path.
+  acceptance_criteria:
+  - Cleanup path is structurally obvious (finally-only or explicit tuple).
+  - Rationale for any remaining broad catch is documented inline.
+  - Existing AF-001 concurrency test remains green.
+  deliverables:
+  - Refactored atomic-write helper
+  - Unit-test update if the exception taxonomy shifts
+ 
+- id: AF-021
+  title: Record BL-042 unblock decision in governance policy backlog
+  severity: medium
+  area: governance
+  status: todo
+  file_path: docs/development_backlog.yaml
+  line_numbers: [949, 972]
+  depends_on: []
+  references:
+  - docs/governance/policy_backlog.yaml
+  - AGENT_GOVERNANCE.md
+  - BL-042
+  problem: >-
+    BL-042 (release pipeline automation) is `status: blocked` with
+    dependencies `BL-012`, `BL-026`, `BL-038` all marked `done`. There is no
+    tracked unblock decision in `docs/governance/policy_backlog.yaml`, so
+    the block reason is implicit (presumably "pending policy approval") and
+    invisible to future reviewers.
+  risk: >-
+    The blocker becomes a forever-blocker. Work legitimately dependent on
+    BL-042 (ephemeral promotions, rollback evidence) has no visible path
+    forward, and the roadmap silently decays.
+  recommendation: >-
+    Either move BL-042 to `status: todo` with a commit-body note, or add a
+    tracked entry in `docs/governance/policy_backlog.yaml` naming the
+    approver, required decision, and target resolution date. Reflect the
+    decision in `docs/next_code_generation_prompt.md` so the prompt points
+    to the now-unblocked item.
+  acceptance_criteria:
+  - >-
+    BL-042 status is defensible: either todo with prerequisites noted, or
+    blocked with an explicit policy-backlog entry.
+  - next_code_generation_prompt.md points to a real queued item.
+  - No silent blockers remain on the Phase 6 backlog.
+  deliverables:
+  - Backlog status update
+  - Optional policy_backlog entry
+  - Updated next-prompt file
+ 
+- id: AF-022
+  title: Document reject benchmark category in the quality-gate contract
+  severity: medium
+  area: documentation
+  status: todo
+  file_path: docs/interfaces/qa_benchmark_quality_gate_contract.md
+  line_numbers: []
+  depends_on:
+  - AF-017
+  references:
+  - tests/golden_examples/benchmark_manifest.json
+  - BL-041
+  problem: >-
+    `benchmark_manifest.json` now carries a `reject` category used for
+    validity-envelope probes (introduced under BL-041), but
+    `qa_benchmark_quality_gate_contract.md` enumerates only the golden,
+    boundary, and stress categories. The contract is out of date relative
+    to the manifest it governs.
+  risk: >-
+    Contract consumers expect three categories and may reject the
+    reject-category rows, or silently ignore them. The contract cannot be
+    used as the single source of truth for the harness's payload shape.
+  recommendation: >-
+    Add a `reject` category section describing the fixture shape
+    (dimension/value/expected_error_regex), the expected harness behaviour
+    (must raise a domain-gate exception), and the report payload shape
+    emitted by AF-017. Link to `tests/golden_examples/reject_envelope_cases.json`.
+  acceptance_criteria:
+  - Contract enumerates all four categories used in the manifest.
+  - Reject-case payload shape is fully specified.
+  - Linked from the BL-041 runbook.
+  deliverables:
+  - Contract doc update
+  - Cross-link from BL-041 validation_discrepancy_triage.md if applicable
+ 
+# ---------------------------------------------------------------------------
+# LOW
+# ---------------------------------------------------------------------------
+- id: AF-023
+  title: Surface temperature-envelope env vars in .env.example
+  severity: low
+  area: developer-onboarding
+  status: todo
+  file_path: .env.example
+  line_numbers: []
+  depends_on: []
+  references:
+  - src/pressure_vessels/requirements_pipeline.py
+  - docs/interfaces/requirements_pipeline_contract.md
+  - AF-010
+  problem: >-
+    AF-010 added bounded temperature conversion, configurable via env vars
+    in requirements_pipeline.py. `.env.example` only documents compose
+    networking (FRONTEND_PORT, BACKEND_PORT, BACKEND_HOST,
+    BACKEND_API_BASE_URL) and omits the bound-override variables, so new
+    contributors must read the module to discover the knob.
+  risk: >-
+    Onboarding contributors silently inherit defaults they never saw, and
+    reports about "why was this rejected?" become hard to answer without
+    cross-referencing the module source.
+  recommendation: >-
+    Add commented env-var entries for the temperature-bound overrides
+    (defaults + example values) and cross-reference the requirements
+    pipeline contract.
+  acceptance_criteria:
+  - "`.env.example` documents every env var consumed by the runtime path it is supposed to bootstrap."
+  - Defaults match the module's compiled defaults.
+  deliverables:
+  - Updated .env.example with commented defaults
+ 
+- id: AF-024
+  title: Add stub README/boundary markers to skeleton infra modules
+  severity: low
+  area: platform
+  status: todo
+  file_path: infra/platform/
+  line_numbers: []
+  depends_on: []
+  references:
+  - docs/platform_runtime_stack_registry.yaml
+  - infra/platform/environment.bootstrap.yaml
+  - BL-021
+  problem: >-
+    Each `infra/platform/<module>/` currently carries two boundary files
+    and no README. A reader cannot tell from directory contents alone which
+    modules are scaffold-only vs. awaiting a real implementation. The
+    runtime registry lists them as `status: scaffolded`, but the
+    correspondence is implicit.
+  risk: >-
+    Contributors may either overestimate readiness ("there's a module, so
+    it's live") or underestimate it ("two YAML files, probably dead").
+    Either way, BL-021 through BL-033 ownership is harder to reason about.
+  recommendation: >-
+    Add a one-paragraph README.md per skeleton module stating: owner,
+    registry key, scaffolded vs. deployed, and the backlog id that will
+    graduate it to deployed. Or, if per-module overhead is undesired, add a
+    single `infra/platform/README.md` that enumerates the current state of
+    every module.
+  acceptance_criteria:
+  - Every skeleton module directory is self-describing.
+  - Registry status and directory state are in sync.
+  deliverables:
+  - Per-module README (or consolidated index)
+ 
+- id: AF-025
+  title: Configure coverage reporting for safety-critical pipelines
+  severity: low
+  area: ci
+  status: todo
+  file_path: pyproject.toml
+  line_numbers: []
+  depends_on: []
+  references:
+  - .github/workflows/ci.yml
+  - docs/governance/ci_governance_policy.v1.json
+  - AGENT_GOVERNANCE.md
+  problem: >-
+    CI runs `pytest -q` and uploads a junit artifact, but does not measure
+    or publish coverage. For a system whose calculation pipeline underpins
+    certification claims, an explicit coverage floor for
+    `src/pressure_vessels/calculation_pipeline.py` and the other core
+    pipelines would strengthen the determinism/explainability claim in
+    README#9.
+  risk: >-
+    Regressions that delete tests (rather than add failing ones) pass
+    silently. Coverage drift is invisible until a governance review
+    rediscovers it.
+  recommendation: >-
+    Add pytest-cov to dev dependencies, configure a `[tool.coverage]`
+    section targeting `src/pressure_vessels`, and wire a minimum floor
+    (suggested 80% line coverage) into the python-tests job. Publish the
+    coverage summary as a CI artifact with the existing retention window.
+  acceptance_criteria:
+  - CI reports per-run coverage percentage.
+  - Floor is enforced on the main branch.
+  - Floor value and rationale are recorded in AGENT_GOVERNANCE.md or the
+    CI policy JSON.
+  deliverables:
+  - pyproject.toml coverage config
+  - CI job update
+  - Governance policy note
+ 
+# ---------------------------------------------------------------------------
+# SUGGESTED EXECUTION ORDER
+# ---------------------------------------------------------------------------
+execution_order:
+- step: 1
+  group: [AF-016, AF-017, AF-018, AF-019]
+  rationale: >-
+    Re-green the pytest baseline first. AF-016 is the umbrella; the three
+    child findings split the fix work along clear responsibility lines (QA
+    harness bug, contract drift, sentinel-test pattern).
+- step: 2
+  group: [AF-020, AF-022]
+  rationale: >-
+    Low-risk hygiene on the now-green baseline: narrow the broad Exception
+    catch introduced by AF-001, and align the quality-gate contract with
+    the manifest taxonomy surfaced during AF-017.
+- step: 3
+  group: [AF-021]
+  rationale: >-
+    Resolve the BL-042 blocked state so the next_code_generation_prompt has
+    a defensible target.
+- step: 4
+  group: [AF-023, AF-024, AF-025]
+  rationale: >-
+    Low-severity onboarding/observability polish; batch when convenient.
