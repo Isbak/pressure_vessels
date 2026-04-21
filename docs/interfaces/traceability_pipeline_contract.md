@@ -50,6 +50,16 @@ Allowed endpoint kinds:
   - returns `TraceabilityAuditReportTemplate.v1`
   - includes deterministic `summary_lines` and `evidence_rows`
 
+## Neo4j Persistence Path (BL-035)
+
+`Neo4jTraceabilityStore` provides deterministic runtime persistence wrappers:
+
+- `persist_revision(graph_revision)` appends immutable revision writes
+- `get_revision(revision_id)` reads one revision snapshot
+- `query_clause_links(clause_id, revision_id=None)` returns clause-scoped evidence links
+
+Immutability is enforced by revision ID; duplicate `revision_id` writes fail closed.
+
 ## Write and Immutability Rules
 
 - `write_traceability_graph_revision()` writes `<revision_id>.traceability_graph.json` with file mode `x` (no overwrite).
@@ -62,6 +72,8 @@ Allowed endpoint kinds:
 from datetime import datetime, timezone
 
 from pressure_vessels.traceability_pipeline import (
+    Neo4jTraceabilityStore,
+    Neo4jTraceabilityStoreBackend,
     ApprovalRecord,
     build_traceability_graph_revision,
     build_audit_report_template,
@@ -87,4 +99,10 @@ graph = build_traceability_graph_revision(
 
 ug27_links = query_clause_evidence([graph], "UG-27", revision_id="REV-0001")
 audit_payload = build_audit_report_template(graph, clause_id="UG-27")
+
+backend = Neo4jTraceabilityStoreBackend()
+store = Neo4jTraceabilityStore(backend)
+store.persist_revision(graph)
+same_revision = store.get_revision("REV-0001")
+ug27_links = store.query_clause_links(clause_id="UG-27", revision_id="REV-0001")
 ```
