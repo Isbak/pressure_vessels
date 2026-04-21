@@ -195,3 +195,103 @@ items:
   deliverables:
   - Preview environment workflow
   - Preview lifecycle operations runbook
+- id: DX-011
+  title: Keep local `make validate` green across audit cycles
+  area: quality
+  phase: 'Phase 4: Audit-Driven DX Hardening'
+  priority: P0
+  status: todo
+  effort: S
+  depends_on:
+  - DX-003
+  - DX-009
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-016
+  - docs/development_backlog.yaml#BL-043
+  - Makefile
+  - .github/workflows/ci.yml
+  acceptance_criteria:
+  - >-
+    `make validate` returns 0 on main at all times; an audit cycle must not
+    leave a red baseline.
+  - Any audit that introduces failing tests files a corresponding BL-* item
+    and opens a remediation PR before the audit is considered closed.
+  - Developers can reproduce the CI-required signal locally via a single
+    bootstrap + validate invocation documented in docs/developer_quickstart.md.
+  deliverables:
+  - Green-baseline check in place on every audit branch
+  - Documented expectation in AGENT_GOVERNANCE.md or developer_quickstart.md
+- id: DX-012
+  title: Guard sprint-brittle tests with backlog-derived expectations
+  area: quality
+  phase: 'Phase 4: Audit-Driven DX Hardening'
+  priority: P1
+  status: todo
+  effort: S
+  depends_on:
+  - DX-011
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-019
+  - docs/development_backlog.yaml#BL-043
+  - tests/test_backend_api_contract_dx005.py
+  - tests/test_backlog_consistency.py
+  acceptance_criteria:
+  - Tests that assert "next queued backlog item" derive the expected id from
+    `docs/development_backlog.yaml` at runtime.
+  - No literal BL-0XX sentinel remains in a prompt-progression test body
+    except for historical closure assertions.
+  - A test-authoring note (AGENT_GOVERNANCE or a test README) names the
+    anti-pattern so future audits do not reintroduce it.
+  deliverables:
+  - Refactored sentinel tests
+  - Authoring guidance note
+- id: DX-013
+  title: Surface coverage and harness signal to developers
+  area: quality
+  phase: 'Phase 4: Audit-Driven DX Hardening'
+  priority: P2
+  status: todo
+  effort: S
+  depends_on:
+  - DX-011
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-025
+  - docs/development_backlog.yaml#BL-046
+  - .github/workflows/ci.yml
+  - pyproject.toml
+  acceptance_criteria:
+  - Pytest coverage is reported per run with a documented floor.
+  - Developers see the coverage delta locally via a `make` target or
+    documented invocation.
+  - CI publishes a coverage artifact alongside the existing pytest junit
+    report using the retention defined in ci_governance_policy.v1.json.
+  deliverables:
+  - pyproject coverage config
+  - CI artifact wiring
+  - Developer command reference update
+- id: DX-014
+  title: Align onboarding env example and skeleton-module READMEs
+  area: developer-onboarding
+  phase: 'Phase 4: Audit-Driven DX Hardening'
+  priority: P2
+  status: todo
+  effort: XS
+  depends_on:
+  - DX-001
+  references:
+  - docs/audit_findings_2026-04-21.yaml#AF-023
+  - docs/audit_findings_2026-04-21.yaml#AF-024
+  - docs/development_backlog.yaml#BL-046
+  - .env.example
+  - infra/platform/
+  acceptance_criteria:
+  - "`.env.example` documents every env var read by the local runtime path."
+  - >-
+    Each `infra/platform/<module>/` skeleton has a discoverable status
+    marker (per-module README or consolidated index) matching
+    platform_runtime_stack_registry.yaml.
+  - Onboarding can proceed from a clean clone without reading module source
+    to discover env vars or module state.
+  deliverables:
+  - Updated .env.example
+  - Skeleton-module README(s) or consolidated index
