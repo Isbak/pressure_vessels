@@ -42,6 +42,12 @@ def test_vllm_module_boundary_contract_requires_approved_catalog_and_capacity_en
     assert "endpoint_ownership:" in text
     assert "capacity_envelope:" in text
     assert "access_ownership:" in text
+    assert "deployment_targets:" in text
+    assert "platform: railway" in text
+    assert "providers:" in text
+    assert "ollama" in text
+    assert "localai" in text
+    assert "rollout_status: deployed" in text
     assert "direct_service_access:" in text
     assert "allowed: false" in text
     assert "approved_model_catalog_required: true" in text
@@ -54,7 +60,7 @@ def test_only_staging_references_vllm_module() -> None:
     assert "llm-serving-vllm" not in _modules_for_environment("dev")
 
 
-def test_registry_marks_vllm_component_scaffolded() -> None:
+def test_registry_marks_vllm_component_deployed() -> None:
     lines = REGISTRY_PATH.read_text(encoding="utf-8").splitlines()
     in_vllm_entry = False
     status: str | None = None
@@ -68,4 +74,4 @@ def test_registry_marks_vllm_component_scaffolded() -> None:
             status = line.split(": ", 1)[1].strip()
             break
 
-    assert status == "scaffolded"
+    assert status == "deployed"
