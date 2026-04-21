@@ -139,8 +139,10 @@ from .governance_pipeline import (
 
 from .workflow_orchestrator import (
     APPROVAL_GATE_EVENT_VERSION,
+    SECURITY_AUDIT_EVENT_VERSION,
     WORKFLOW_EXECUTION_REPORT_VERSION,
     ApprovalGateEvent,
+    SecurityAuditEvent,
     WorkflowExecutionReport,
     WorkflowExecutionTraceEvent,
     WorkflowStageSpec,
@@ -248,8 +250,10 @@ __all__ = [
     "build_governance_policy",
     "evaluate_governance_gates",
     "APPROVAL_GATE_EVENT_VERSION",
+    "SECURITY_AUDIT_EVENT_VERSION",
     "WORKFLOW_EXECUTION_REPORT_VERSION",
     "ApprovalGateEvent",
+    "SecurityAuditEvent",
     "WorkflowExecutionReport",
     "WorkflowExecutionTraceEvent",
     "WorkflowStageSpec",

@@ -8,6 +8,8 @@ def test_backend_main_exposes_bl034_versioned_design_run_routes() -> None:
 
     assert 'export function startDesignRun' in main_ts
     assert 'export function getDesignRunStatus' in main_ts
+    assert 'authorizeRuntimeToken' in main_ts
+    assert "['engineer', 'reviewer', 'approver']" in main_ts
     assert "statusUrl: `/api/${DESIGN_RUN_API_VERSION}/design-runs/${runId}`" in main_ts
     assert "workflowState: 'completed'" in main_ts
 
@@ -20,6 +22,17 @@ def test_backend_api_contract_documents_versioned_design_run_endpoints() -> None
     assert 'POST /api/v1/design-runs' in contract
     assert 'GET /api/v1/design-runs/{runId}' in contract
     assert 'Primary consumer: `services/frontend`' in contract
+    assert 'Authorization: Bearer v1:<actorId>:<role>:<scope>:<secret>' in contract
+    assert 'engineer' in contract
+    assert 'reviewer' in contract
+    assert 'approver' in contract
+
+
+def test_backend_secrets_integration_uses_approved_module_path_without_plaintext_fallback() -> None:
+    secrets_ts = Path('services/backend/src/secrets.ts').read_text(encoding='utf-8')
+    assert "infra/platform/secrets/module.boundaries.yaml" in secrets_ts
+    assert 'PV_BACKEND_AUTH_TOKEN_SECRET' in secrets_ts
+    assert 'fallback' not in secrets_ts.lower()
 
 
 def test_frontend_route_implements_ui_to_api_to_orchestrator_happy_path() -> None:
@@ -55,5 +68,5 @@ def test_bl036_is_done_and_next_prompt_advances_to_bl037() -> None:
     )[0]
     assert 'status: done' in bl036_block
 
-    assert 'BL-037' in next_prompt
-    assert 'current next roadmap item: BL-037' in next_prompt
+    assert 'BL-039' in next_prompt
+    assert 'current next roadmap item: BL-039' in next_prompt

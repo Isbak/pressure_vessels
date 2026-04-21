@@ -17,6 +17,7 @@ Required fields:
 - `failed_stage` for terminal rejection/failure/escalation
 - `escalation_target` when retry budget exhaustion triggers escalation
 - `approval_events[]` (immutable approval records)
+- `security_audit_events[]` (`SecurityAuditEvent.v1` records for approval gates)
 - `execution_trace[]` (audit-ready sequence of gate/attempt transitions)
 
 ### Stage State Vocabulary
@@ -53,6 +54,21 @@ Immutability constraints enforced by orchestrator input validation:
 - duplicate `(stage_id, gate_id)` disallowed
 - schema mismatch fails closed
 
+## Security Audit Event Schema (BL-038)
+
+### `SecurityAuditEvent.v1`
+
+Derived deterministically from each immutable `ApprovalGateEvent.v1` event:
+
+- `event_id` (`<approval_event_id>:security`)
+- `workflow_id`
+- `stage_id`
+- `actor` (`<approver_role>:<approver_id>`)
+- `action` (`approval_gate_decision`)
+- `artifact` (`gate_id`)
+- `decision` (`approved` or `rejected`)
+- `recorded_at_utc`
+
 ## Deterministic Retry + Escalation Model
 
 Stage execution is deterministic and controlled through stage spec fields:
@@ -75,6 +91,7 @@ Workflow events can be persisted via `PostgresqlWorkflowEventStore` as append-on
 
 - immutable `revision_id` format: `<workflow_id>:rev:<zero-padded-sequence>`
 - `event_kind`: `approval_event`, `execution_trace_event`, `workflow_summary`
+- `event_kind`: `security_audit_event` persists approval-gate security audit rows
 - deterministic ordering by `event_sequence`
 
 Recovery API:

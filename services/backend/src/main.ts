@@ -1,3 +1,5 @@
+import { getRuntimeAuthSecret } from './secrets';
+
 export type BackendResponse<T> = {
   status: number;
   body: T;
@@ -44,6 +46,16 @@ export type ErrorResponse = {
 };
 
 const DESIGN_RUN_API_VERSION = 'v1';
+const AUTH_TOKEN_VERSION = 'v1';
+const ALLOWED_AUTH_ROLES = ['engineer', 'reviewer', 'approver'] as const;
+
+type AuthRole = (typeof ALLOWED_AUTH_ROLES)[number];
+
+export type RuntimeAuthContext = {
+  actorId: string;
+  role: AuthRole;
+  scope: 'design_runs:write' | 'design_runs:read';
+};
 
 function normalizeCode(code: string): string {
   return code.trim().toUpperCase().replace(/\s+/g, ' ');
@@ -112,7 +124,13 @@ export function getHealth(): BackendResponse<HealthResponse> {
 
 export function startDesignRun(
   request: DesignRunRequest,
+  authToken: string,
 ): BackendResponse<StartDesignRunResponse | ErrorResponse> {
+  const authResult = authorizeRuntimeToken(authToken, 'design_runs:write');
+  if (authResult.status !== 200) {
+    return authResult;
+  }
+
   if (!isValidDesignRunRequest(request)) {
     return {
       status: 400,
@@ -140,7 +158,13 @@ export function startDesignRun(
 
 export function getDesignRunStatus(
   runId: string,
+  authToken: string,
 ): BackendResponse<DesignRunRecord | ErrorResponse> {
+  const authResult = authorizeRuntimeToken(authToken, 'design_runs:read');
+  if (authResult.status !== 200) {
+    return authResult;
+  }
+
   const resolvedRequest = parseRunId(runId);
 
   if (!resolvedRequest) {
@@ -181,4 +205,53 @@ export function getDesignRunStatus(
 
 export function bootstrap(): string {
   return 'pressure-vessels backend API initialized';
+}
+
+export function authorizeRuntimeToken(
+  authToken: string,
+  requiredScope: RuntimeAuthContext['scope'],
+): BackendResponse<RuntimeAuthContext | ErrorResponse> {
+  if (!authToken || authToken.trim().length === 0) {
+    return {
+      status: 401,
+      body: {
+        error: 'missing authorization token',
+      },
+    };
+  }
+
+  const secret = getRuntimeAuthSecret();
+  const [version, actorId, role, scope, tokenSecret] = authToken.split(':');
+  if (
+    version !== AUTH_TOKEN_VERSION ||
+    !actorId ||
+    !ALLOWED_AUTH_ROLES.includes(role as AuthRole) ||
+    (scope !== 'design_runs:write' && scope !== 'design_runs:read') ||
+    tokenSecret !== secret
+  ) {
+    return {
+      status: 401,
+      body: {
+        error: 'invalid authorization token',
+      },
+    };
+  }
+
+  if (scope !== requiredScope && !(requiredScope === 'design_runs:read' && scope === 'design_runs:write')) {
+    return {
+      status: 403,
+      body: {
+        error: `insufficient scope: requires ${requiredScope}`,
+      },
+    };
+  }
+
+  return {
+    status: 200,
+    body: {
+      actorId,
+      role,
+      scope,
+    },
+  };
 }
