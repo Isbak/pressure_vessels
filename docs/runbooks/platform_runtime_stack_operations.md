@@ -95,6 +95,30 @@ split services.
 - Confirm cross-service routing target for frontend:
   - `BACKEND_API_BASE_URL` points to backend private/public Railway URL.
 
+Starter variable blocks (Railway dashboard):
+
+Backend service:
+
+```bash
+PV_AUTH_PROVIDER_ISSUER=https://<your-keycloak-host>/realms/pv
+PV_AUTH_PROVIDER_AUDIENCE=pressure-vessels-backend
+PV_AUTH_PROVIDER_JWKS_JSON={"keys":[{"kid":"<kid>","alg":"HS256","k":"<base64url-secret>"}]}
+PV_BACKEND_AUTH_TOKEN_SECRET=<long-random-secret>
+PV_POSTGRES_URL=postgresql://<user>:<password>@<host>:<port>/<database>
+PV_POSTGRES_SCHEMA=public
+PV_REDIS_URL=redis://<host>:<port>
+PV_REDIS_NAMESPACE=pv
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+```
+
+Frontend service:
+
+```bash
+NODE_ENV=production
+BACKEND_API_BASE_URL=https://backend.railway.internal
+```
+
 ### Deploy + verification sequence
 
 1. Deploy `backend` service.
@@ -107,6 +131,26 @@ split services.
 6. For staging-only dependencies (`llm-serving-railway`, Neo4j, Qdrant,
    OpenSearch, Temporal), keep `*_MODE=deterministic-fallback` until explicit
    endpoint + credential checks pass.
+
+Optional staging integration starter block:
+
+```bash
+PV_LLM_SERVING_MODE=deterministic-fallback
+PV_LLM_SERVING_ENDPOINT=https://<llm-serving-url>
+PV_LLM_SERVING_API_KEY=<secret>
+PV_NEO4J_MODE=deterministic-fallback
+PV_NEO4J_ENDPOINT=bolt://<neo4j-host>:7687
+PV_NEO4J_TOKEN=<secret>
+PV_QDRANT_MODE=deterministic-fallback
+PV_QDRANT_ENDPOINT=https://<qdrant-host>
+PV_QDRANT_API_KEY=<secret>
+PV_OPENSEARCH_MODE=deterministic-fallback
+PV_OPENSEARCH_ENDPOINT=https://<opensearch-host>
+PV_OPENSEARCH_API_KEY=<secret>
+PV_TEMPORAL_MODE=deterministic-fallback
+PV_TEMPORAL_ENDPOINT=<temporal-endpoint>
+PV_TEMPORAL_TOKEN=<secret>
+```
 
 ### Rollback procedure
 

@@ -274,6 +274,33 @@ Use service-scoped variables. Required values come from backend API contract and
 | `backend` | `BACKEND_HOST` | No | `0.0.0.0` | Bind host. |
 | `backend` | `BACKEND_PORT` | No | `8000` | Explicit backend runtime port. |
 
+### 11.3.1 Copy/paste starter blocks (Railway dashboard)
+
+Use these as starter values when populating Railway service variables.
+Replace placeholders before deployment.
+
+Backend service (required first):
+
+```bash
+PV_AUTH_PROVIDER_ISSUER=https://<your-keycloak-host>/realms/pv
+PV_AUTH_PROVIDER_AUDIENCE=pressure-vessels-backend
+PV_AUTH_PROVIDER_JWKS_JSON={"keys":[{"kid":"<kid>","alg":"HS256","k":"<base64url-secret>"}]}
+PV_BACKEND_AUTH_TOKEN_SECRET=<long-random-secret>
+PV_POSTGRES_URL=postgresql://<user>:<password>@<host>:<port>/<database>
+PV_POSTGRES_SCHEMA=public
+PV_REDIS_URL=redis://<host>:<port>
+PV_REDIS_NAMESPACE=pv
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+```
+
+Frontend service:
+
+```bash
+NODE_ENV=production
+BACKEND_API_BASE_URL=https://backend.railway.internal
+```
+
 ### 11.4 Optional staging-only dependencies
 
 Staging may add platform integrations while keeping production cutover
@@ -291,6 +318,26 @@ controlled and fail-closed:
 
 Recommendation: set optional services to `deterministic-fallback` until each
 endpoint + credential pair is validated in staging.
+
+Optional staging integration starter block:
+
+```bash
+PV_LLM_SERVING_MODE=deterministic-fallback
+PV_LLM_SERVING_ENDPOINT=https://<llm-serving-url>
+PV_LLM_SERVING_API_KEY=<secret>
+PV_NEO4J_MODE=deterministic-fallback
+PV_NEO4J_ENDPOINT=bolt://<neo4j-host>:7687
+PV_NEO4J_TOKEN=<secret>
+PV_QDRANT_MODE=deterministic-fallback
+PV_QDRANT_ENDPOINT=https://<qdrant-host>
+PV_QDRANT_API_KEY=<secret>
+PV_OPENSEARCH_MODE=deterministic-fallback
+PV_OPENSEARCH_ENDPOINT=https://<opensearch-host>
+PV_OPENSEARCH_API_KEY=<secret>
+PV_TEMPORAL_MODE=deterministic-fallback
+PV_TEMPORAL_ENDPOINT=<temporal-endpoint>
+PV_TEMPORAL_TOKEN=<secret>
+```
 
 ### 11.5 Backend deployment checklist (Railway)
 
