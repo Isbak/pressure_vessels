@@ -35,6 +35,10 @@ See `docs/interfaces/backend_prompt_api_contract.md` for request/response detail
 
 If any required variable is missing, design-run endpoints fail closed with `503`.
 
+BL-047 runtime adapters execute through `psql` and `redis-cli` clients to persist
+and read design-run state from configured PostgreSQL and Redis services (no
+in-memory placeholder persistence).
+
 ## Optional platform integration interface variables
 
 Each integration defaults to deterministic fallback mode and can be promoted to required mode.

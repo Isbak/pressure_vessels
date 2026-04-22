@@ -54,7 +54,9 @@ configured from environment:
 - `PV_REDIS_NAMESPACE`
 
 The backend must persist run state using the PostgreSQL adapter and write/read
-hot run status through the Redis adapter.
+hot run status through the Redis adapter. Runtime implementations use the
+`psql` and `redis-cli` runtime clients so adapter wiring remains environment
+driven and fails closed when either client or endpoint is unavailable.
 
 ### Request body
 

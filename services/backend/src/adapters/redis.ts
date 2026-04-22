@@ -1,6 +1,21 @@
+import { execFileSync } from 'node:child_process';
+
 import { AdapterResult, DesignRunCacheAdapter, PersistedDesignRunRecord } from './interfaces';
 
-const cache = new Map<string, PersistedDesignRunRecord>();
+function toKey(namespace: string, runId: string): string {
+  return `${namespace}:${runId}`;
+}
+
+function toRedisUnavailable(message: string): AdapterResult<never> {
+  return {
+    ok: false,
+    error: {
+      code: 'ADAPTER_UNAVAILABLE',
+      adapter: 'redis',
+      message,
+    },
+  };
+}
 
 export class RedisDesignRunCacheAdapter implements DesignRunCacheAdapter {
   readonly name = 'redis' as const;
@@ -19,8 +34,16 @@ export class RedisDesignRunCacheAdapter implements DesignRunCacheAdapter {
       };
     }
 
-    cache.set(record.runId, record);
-    return { ok: true, value: undefined };
+    try {
+      execFileSync(
+        'redis-cli',
+        ['-u', this.redisUrl, 'SET', toKey(this.namespace, record.runId), JSON.stringify(record)],
+        { stdio: 'pipe' },
+      );
+      return { ok: true, value: undefined };
+    } catch (error) {
+      return toRedisUnavailable(`Redis write failed: ${String(error)}`);
+    }
   }
 
   read(runId: string): AdapterResult<PersistedDesignRunRecord | null> {
@@ -35,6 +58,19 @@ export class RedisDesignRunCacheAdapter implements DesignRunCacheAdapter {
       };
     }
 
-    return { ok: true, value: cache.get(runId) ?? null };
+    try {
+      const output = execFileSync('redis-cli', ['-u', this.redisUrl, 'GET', toKey(this.namespace, runId)], {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }).trim();
+
+      if (!output) {
+        return { ok: true, value: null };
+      }
+
+      return { ok: true, value: JSON.parse(output) as PersistedDesignRunRecord };
+    } catch (error) {
+      return toRedisUnavailable(`Redis read failed: ${String(error)}`);
+    }
   }
 }

@@ -28,6 +28,23 @@ def test_backend_adapter_registry_fails_closed_without_postgres_or_redis_configu
     assert 'assertPlatformServicesReady(registry.platformServices)' in registry_ts
 
 
+def test_backend_state_adapters_use_runtime_clients_instead_of_in_memory_maps() -> None:
+    postgres_adapter = Path('services/backend/src/adapters/postgresql.ts').read_text(
+        encoding='utf-8'
+    )
+    redis_adapter = Path('services/backend/src/adapters/redis.ts').read_text(
+        encoding='utf-8'
+    )
+
+    assert "execFileSync('psql'" in postgres_adapter
+    assert 'CREATE TABLE IF NOT EXISTS' in postgres_adapter
+    assert 'Map<string, PersistedDesignRunRecord>' not in postgres_adapter
+
+    assert "execFileSync('redis-cli'" in redis_adapter
+    assert "['-u', this.redisUrl, 'SET'" in redis_adapter
+    assert 'Map<string, PersistedDesignRunRecord>' not in redis_adapter
+
+
 def test_platform_service_interfaces_define_required_and_deterministic_fallback_modes() -> None:
     interfaces_ts = Path('services/backend/src/adapters/interfaces.ts').read_text(
         encoding='utf-8'
@@ -69,6 +86,8 @@ def test_backend_contract_and_environment_bootstrap_document_adapter_wiring_expe
     assert 'PV_TEMPORAL_MODE' in contract
     assert 'PV_LLM_SERVING_MODE' in contract
     assert 'Any other mode value fails closed during adapter registry bootstrap' in contract
+    assert 'psql' in contract
+    assert 'redis-cli' in contract
 
     assert 'backend_adapter_env:' in bootstrap
     assert 'required:' in bootstrap
