@@ -1,0 +1,81 @@
+version: v1
+kind: RailwayServiceManifestSet
+metadata:
+  backlog_item: BL-050
+  title: Deploy LLM/Neo4j/Qdrant/OpenSearch/Temporal services on Railway
+  environment: staging
+spec:
+  backend_service: backend
+  private_networking: required
+  services:
+    - key: llm-serving-railway
+      railway_service: llm-serving
+      dependency_type: llm-serving
+      endpoint_variable: PV_LLM_SERVING_ENDPOINT
+      credential_variable: PV_LLM_SERVING_API_KEY
+      mode_variable: PV_LLM_SERVING_MODE
+      required_mode_value: required
+      smoke_test:
+        command: >-
+          railway variables --service backend --set PV_LLM_SERVING_MODE=required
+          && railway redeploy --service backend
+          && curl -sS "${BACKEND_URL}/health"
+        expected: HTTP 200 and backend startup logs contain no ADAPTER_CONFIG_MISSING for llm-serving
+    - key: graph-neo4j
+      railway_service: neo4j
+      dependency_type: neo4j
+      endpoint_variable: PV_NEO4J_ENDPOINT
+      credential_variable: PV_NEO4J_TOKEN
+      mode_variable: PV_NEO4J_MODE
+      required_mode_value: required
+      smoke_test:
+        command: >-
+          railway variables --service backend --set PV_NEO4J_MODE=required
+          && railway redeploy --service backend
+          && curl -sS "${BACKEND_URL}/health"
+        expected: HTTP 200 and backend startup logs contain no ADAPTER_CONFIG_MISSING for neo4j
+    - key: retrieval-qdrant
+      railway_service: qdrant
+      dependency_type: qdrant
+      endpoint_variable: PV_QDRANT_ENDPOINT
+      credential_variable: PV_QDRANT_API_KEY
+      mode_variable: PV_QDRANT_MODE
+      required_mode_value: required
+      smoke_test:
+        command: >-
+          railway variables --service backend --set PV_QDRANT_MODE=required
+          && railway redeploy --service backend
+          && curl -sS "${BACKEND_URL}/health"
+        expected: HTTP 200 and backend startup logs contain no ADAPTER_CONFIG_MISSING for qdrant
+    - key: search-opensearch
+      railway_service: opensearch
+      dependency_type: opensearch
+      endpoint_variable: PV_OPENSEARCH_ENDPOINT
+      credential_variable: PV_OPENSEARCH_API_KEY
+      mode_variable: PV_OPENSEARCH_MODE
+      required_mode_value: required
+      smoke_test:
+        command: >-
+          railway variables --service backend --set PV_OPENSEARCH_MODE=required
+          && railway redeploy --service backend
+          && curl -sS "${BACKEND_URL}/health"
+        expected: HTTP 200 and backend startup logs contain no ADAPTER_CONFIG_MISSING for opensearch
+    - key: workflow-temporal
+      railway_service: temporal
+      dependency_type: temporal
+      endpoint_variable: PV_TEMPORAL_ENDPOINT
+      credential_variable: PV_TEMPORAL_TOKEN
+      mode_variable: PV_TEMPORAL_MODE
+      required_mode_value: required
+      smoke_test:
+        command: >-
+          railway variables --service backend --set PV_TEMPORAL_MODE=required
+          && railway redeploy --service backend
+          && curl -sS "${BACKEND_URL}/health"
+        expected: HTTP 200 and backend startup logs contain no ADAPTER_CONFIG_MISSING for temporal
+  deployment_checklist:
+    - Verify each dependency service is deployed as a distinct Railway service in the same project and private network.
+    - Wire backend env vars for all endpoint/credential/mode variables listed above.
+    - Set all mode variables to required in staging before promotion.
+    - Restart backend deployment after every env var update to force fail-closed startup checks.
+    - Capture deploy IDs, timestamps, and smoke test output in BL-050 evidence template.

@@ -128,29 +128,54 @@ BACKEND_API_BASE_URL=https://backend.railway.internal
    - `GET /api/v1/design-runs/{runId}` returns `200` with valid JWT.
 4. Deploy/update `frontend` service with `BACKEND_API_BASE_URL` set.
 5. Run end-to-end `/api/prompt` smoke test from frontend.
-6. For staging-only dependencies (`llm-serving-railway`, Neo4j, Qdrant,
-   OpenSearch, Temporal), keep `*_MODE=deterministic-fallback` until explicit
-   endpoint + credential checks pass.
+6. For BL-050 staging promotion, configure dedicated Railway services for
+   `llm-serving-railway`, Neo4j, Qdrant, OpenSearch, and Temporal with all
+   `*_MODE` values set to `required`.
 
-Optional staging integration starter block:
+BL-050 staging integration starter block:
 
 ```bash
-PV_LLM_SERVING_MODE=deterministic-fallback
+PV_LLM_SERVING_MODE=required
 PV_LLM_SERVING_ENDPOINT=https://<llm-serving-url>
 PV_LLM_SERVING_API_KEY=<secret>
-PV_NEO4J_MODE=deterministic-fallback
+PV_NEO4J_MODE=required
 PV_NEO4J_ENDPOINT=bolt://<neo4j-host>:7687
 PV_NEO4J_TOKEN=<secret>
-PV_QDRANT_MODE=deterministic-fallback
+PV_QDRANT_MODE=required
 PV_QDRANT_ENDPOINT=https://<qdrant-host>
 PV_QDRANT_API_KEY=<secret>
-PV_OPENSEARCH_MODE=deterministic-fallback
+PV_OPENSEARCH_MODE=required
 PV_OPENSEARCH_ENDPOINT=https://<opensearch-host>
 PV_OPENSEARCH_API_KEY=<secret>
-PV_TEMPORAL_MODE=deterministic-fallback
+PV_TEMPORAL_MODE=required
 PV_TEMPORAL_ENDPOINT=<temporal-endpoint>
 PV_TEMPORAL_TOKEN=<secret>
 ```
+
+### BL-050 service-by-service staging smoke tests
+
+Run after backend deploy with required integration vars configured.
+
+1. Baseline runtime checks:
+   - `GET /health` returns `200`.
+   - `POST /api/v1/design-runs` returns `201` with valid JWT.
+2. Integration variable fail-closed checks (one service at a time):
+   - Temporarily unset target credential variable in Railway.
+   - Redeploy backend service.
+   - Confirm backend startup fails with `ADAPTER_CONFIG_MISSING` for that
+     adapter.
+   - Restore variable and redeploy.
+   - Confirm `GET /health` returns `200`.
+3. Repeat step 2 for:
+   - `PV_LLM_SERVING_API_KEY`
+   - `PV_NEO4J_TOKEN`
+   - `PV_QDRANT_API_KEY`
+   - `PV_OPENSEARCH_API_KEY`
+   - `PV_TEMPORAL_TOKEN`
+
+Reference manifest/checklist:
+
+- `infra/platform/railway/bl-050.service-manifests.yaml`
 
 ### Rollback procedure
 
@@ -158,7 +183,10 @@ PV_TEMPORAL_TOKEN=<secret>
 2. Roll back backend service to previous release when health/auth/design-run checks fail.
 3. Revert environment variable edits to approved baseline.
 4. Re-run backend `/health` and design-run smoke checks.
-5. Record rollback evidence and incident timeline.
+5. Record rollback evidence and incident timeline using BL-050 evidence template.
+6. If dependency-specific failure caused rollback, pin related service
+   `*_MODE=deterministic-fallback` and open follow-up incident before next
+   promotion window.
 
 ### Evidence capture (platform governance)
 
@@ -170,6 +198,8 @@ Capture and retain the following artifacts for each Railway release window:
   `GET /api/v1/design-runs/{runId}`, and frontend `/api/prompt` smoke checks.
 - Variable change log containing variable names only (no secret values).
 - Rollback decision record and post-rollback validation results (if rollback occurs).
+- Completed BL-050 staging evidence template:
+  `docs/runbooks/templates/bl-050_railway_staging_evidence_template.md`.
 
 ## Incident Operations
 
