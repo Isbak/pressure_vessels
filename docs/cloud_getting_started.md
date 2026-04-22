@@ -226,12 +226,15 @@ You are cloud-agnostic enough when:
 
 ## 11. Railway Quickstart (Single-Service MVP)
 
-For a fast MVP deployment on Railway, run the frontend service as the process bound to Railway's `PORT`.
+For a fast MVP deployment on Railway, run only the frontend `web` process bound to Railway's `PORT`.
 
-- Root `Procfile` uses:
-  - `cd services/frontend && npm ci && npm run build && npm run start -- --hostname 0.0.0.0 --port ${PORT:-3000}`
-- This avoids the backend skeleton's NestJS build path, which is intentionally incomplete in this repository bootstrap.
+- Root `Procfile` now defines:
+  - `web`: `cd services/frontend && npm ci && npm run build && npm run start -- --hostname 0.0.0.0 --port ${PORT:-3000}`
+  - `backend`: `cd services/backend && npm ci && BACKEND_HOST=0.0.0.0 BACKEND_PORT=${BACKEND_PORT:-8000} node local-integration-server.js`
+- Keep `backend` unscaled for single-service MVP deployments.
+- The backend process uses the deterministic local integration server and avoids the backend skeleton's incomplete NestJS build path.
 - The frontend `/api/prompt` route still works without backend wiring by returning deterministic placeholder responses when `BACKEND_API_BASE_URL` is unset.
+- LLM and data-plane infrastructure services (for example `infra/platform/vllm`, PostgreSQL, Redis, Neo4j, Qdrant, OpenSearch) are not launched from the root `Procfile`; run them as dedicated platform services/modules.
 
 Recommended Railway configuration:
 
