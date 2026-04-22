@@ -1,3 +1,8 @@
+import {
+  DesignRunArtifact,
+  PersistedDesignRunRecord,
+} from './adapters/interfaces';
+import { createAdapterRegistry, readDesignRunRecord } from './adapters/registry';
 import { getRuntimeAuthSecret } from './secrets';
 
 export type BackendResponse<T> = {
@@ -17,23 +22,7 @@ export type DesignRunRequest = {
   code: string;
 };
 
-export type DesignRunArtifact = {
-  artifactId: string;
-  artifactType: 'WorkflowExecutionReport.v1' | 'ComplianceDossierMachine.v1';
-  location: string;
-};
-
-export type DesignRunRecord = {
-  runId: string;
-  workflowState: 'completed';
-  complianceSummary: {
-    status: 'pass';
-    code: string;
-    checksPassed: number;
-    checksFailed: number;
-  };
-  artifacts: DesignRunArtifact[];
-};
+export type DesignRunRecord = PersistedDesignRunRecord;
 
 export type StartDesignRunResponse = {
   apiVersion: 'v1';
@@ -57,6 +46,8 @@ export type RuntimeAuthContext = {
   scope: 'design_runs:write' | 'design_runs:read';
 };
 
+const adapterRegistry = createAdapterRegistry(process.env);
+
 function normalizeCode(code: string): string {
   return code.trim().toUpperCase().replace(/\s+/g, ' ');
 }
@@ -73,34 +64,6 @@ function toDeterministicRunId(request: DesignRunRequest): string {
   return `run-${encoded}`;
 }
 
-function parseRunId(runId: string): DesignRunRequest | null {
-  if (!runId.startsWith('run-')) {
-    return null;
-  }
-
-  try {
-    const decoded = Buffer.from(runId.slice(4), 'base64url').toString('utf-8');
-    const [pressure, temperature, volume, code] = decoded.split('|');
-    const parsed: DesignRunRequest = {
-      designPressureBar: Number(pressure),
-      designTemperatureC: Number(temperature),
-      volumeM3: Number(volume),
-      code: code ?? '',
-    };
-
-    if (!isValidDesignRunRequest(parsed)) {
-      return null;
-    }
-
-    return {
-      ...parsed,
-      code: normalizeCode(parsed.code),
-    };
-  } catch {
-    return null;
-  }
-}
-
 function isValidDesignRunRequest(request: DesignRunRequest): boolean {
   return (
     Number.isFinite(request.designPressureBar) &&
@@ -110,6 +73,51 @@ function isValidDesignRunRequest(request: DesignRunRequest): boolean {
     request.volumeM3 > 0 &&
     normalizeCode(request.code).length > 0
   );
+}
+
+function toDesignRunArtifacts(runId: string): DesignRunArtifact[] {
+  return [
+    {
+      artifactId: `${runId}-workflow`,
+      artifactType: 'WorkflowExecutionReport.v1',
+      location: 'artifacts/bl-016/WorkflowExecutionReport.v1.sample.json',
+    },
+    {
+      artifactId: `${runId}-compliance`,
+      artifactType: 'ComplianceDossierMachine.v1',
+      location: 'artifacts/bl-004/ComplianceDossierMachine.v1.json',
+    },
+  ];
+}
+
+function toPersistedRecord(runId: string, request: DesignRunRequest): PersistedDesignRunRecord {
+  return {
+    runId,
+    workflowState: 'completed',
+    complianceSummary: {
+      status: 'pass',
+      code: normalizeCode(request.code),
+      checksPassed: 3,
+      checksFailed: 0,
+    },
+    artifacts: toDesignRunArtifacts(runId),
+  };
+}
+
+function toAdapterConfigurationError(): BackendResponse<ErrorResponse> {
+  if (adapterRegistry.ok) {
+    return {
+      status: 500,
+      body: { error: 'unexpected adapter configuration state' },
+    };
+  }
+
+  return {
+    status: 503,
+    body: {
+      error: `backend adapter configuration error (${adapterRegistry.error.adapter}): ${adapterRegistry.error.message}`,
+    },
+  };
 }
 
 export function getHealth(): BackendResponse<HealthResponse> {
@@ -131,6 +139,10 @@ export function startDesignRun(
     return authResult;
   }
 
+  if (!adapterRegistry.ok) {
+    return toAdapterConfigurationError();
+  }
+
   if (!isValidDesignRunRequest(request)) {
     return {
       status: 400,
@@ -145,6 +157,27 @@ export function startDesignRun(
     ...request,
     code: normalizeCode(request.code),
   });
+  const record = toPersistedRecord(runId, request);
+
+  const persisted = adapterRegistry.value.runStateStore.persist(record);
+  if (!persisted.ok) {
+    return {
+      status: 503,
+      body: {
+        error: `failed to persist design run via ${persisted.error.adapter}: ${persisted.error.message}`,
+      },
+    };
+  }
+
+  const cached = adapterRegistry.value.runCache.write(record);
+  if (!cached.ok) {
+    return {
+      status: 503,
+      body: {
+        error: `failed to cache design run via ${cached.error.adapter}: ${cached.error.message}`,
+      },
+    };
+  }
 
   return {
     status: 201,
@@ -165,9 +198,21 @@ export function getDesignRunStatus(
     return authResult;
   }
 
-  const resolvedRequest = parseRunId(runId);
+  if (!adapterRegistry.ok) {
+    return toAdapterConfigurationError();
+  }
 
-  if (!resolvedRequest) {
+  const record = readDesignRunRecord(adapterRegistry.value, runId);
+  if (!record.ok) {
+    return {
+      status: 503,
+      body: {
+        error: `failed to read design run via ${record.error.adapter}: ${record.error.message}`,
+      },
+    };
+  }
+
+  if (!record.value) {
     return {
       status: 404,
       body: {
@@ -178,28 +223,7 @@ export function getDesignRunStatus(
 
   return {
     status: 200,
-    body: {
-      runId,
-      workflowState: 'completed',
-      complianceSummary: {
-        status: 'pass',
-        code: normalizeCode(resolvedRequest.code),
-        checksPassed: 3,
-        checksFailed: 0,
-      },
-      artifacts: [
-        {
-          artifactId: `${runId}-workflow`,
-          artifactType: 'WorkflowExecutionReport.v1',
-          location: 'artifacts/bl-016/WorkflowExecutionReport.v1.sample.json',
-        },
-        {
-          artifactId: `${runId}-compliance`,
-          artifactType: 'ComplianceDossierMachine.v1',
-          location: 'artifacts/bl-004/ComplianceDossierMachine.v1.json',
-        },
-      ],
-    },
+    body: record.value,
   };
 }
 

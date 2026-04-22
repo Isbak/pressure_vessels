@@ -1,7 +1,8 @@
-# Backend Design-Run API Contract (BL-034)
+# Backend Design-Run API Contract (BL-034, BL-047)
 
-This document defines the minimal versioned backend API contract exposed in
-BL-034 for frontend design-run execution.
+This document defines the versioned backend API contract exposed for frontend
+integration and the BL-047 adapter wiring semantics used by runtime platform
+services.
 
 ## Ownership
 
@@ -42,6 +43,19 @@ Where:
 - `<secret>` must be resolved from runtime secret `PV_BACKEND_AUTH_TOKEN_SECRET`
   loaded via approved module path `infra/platform/secrets/module.boundaries.yaml`.
 
+### Required adapter configuration (fail-closed)
+
+The endpoint fails closed (`503`) when required runtime adapters are not fully
+configured from environment:
+
+- `PV_POSTGRES_URL`
+- `PV_POSTGRES_SCHEMA`
+- `PV_REDIS_URL`
+- `PV_REDIS_NAMESPACE`
+
+The backend must persist run state using the PostgreSQL adapter and write/read
+hot run status through the Redis adapter.
+
 ### Request body
 
 ```json
@@ -71,7 +85,7 @@ Where:
 }
 ```
 
-### Error responses (`401 Unauthorized`, `403 Forbidden`)
+### Error responses (`401 Unauthorized`, `403 Forbidden`, `503 Service Unavailable`)
 
 ```json
 {
@@ -88,6 +102,12 @@ Where:
 ```json
 {
   "error": "insufficient scope: requires design_runs:write"
+}
+```
+
+```json
+{
+  "error": "backend adapter configuration error (postgresql): PV_POSTGRES_URL and PV_POSTGRES_SCHEMA are required for backend design-run state"
 }
 ```
 
@@ -142,7 +162,7 @@ Requires `Authorization` header with bearer token format:
 }
 ```
 
-### Error responses (`401 Unauthorized`, `403 Forbidden`)
+### Error responses (`401 Unauthorized`, `403 Forbidden`, `503 Service Unavailable`)
 
 ```json
 {
@@ -162,9 +182,45 @@ Requires `Authorization` header with bearer token format:
 }
 ```
 
+```json
+{
+  "error": "failed to read design run via redis: Redis adapter is not configured for reads"
+}
+```
+
+## Platform integration interfaces and deterministic semantics (BL-047)
+
+BL-047 requires explicit interface slots for platform integrations used by
+traceability, retrieval, orchestration, and LLM-assist features.
+
+Environment mode variable for each service:
+
+- `PV_NEO4J_MODE`
+- `PV_QDRANT_MODE`
+- `PV_OPENSEARCH_MODE`
+- `PV_TEMPORAL_MODE`
+- `PV_LLM_SERVING_MODE`
+
+Each mode accepts:
+
+- `required`: endpoint + credential are mandatory; missing values fail closed.
+- `deterministic-fallback` (default): endpoint/credential may be omitted and the
+  adapter reports deterministic fallback mode.
+
+Expected endpoint + credential variables by service:
+
+- Neo4j: `PV_NEO4J_ENDPOINT`, `PV_NEO4J_TOKEN`
+- Qdrant: `PV_QDRANT_ENDPOINT`, `PV_QDRANT_API_KEY`
+- OpenSearch: `PV_OPENSEARCH_ENDPOINT`, `PV_OPENSEARCH_API_KEY`
+- Temporal: `PV_TEMPORAL_ENDPOINT`, `PV_TEMPORAL_TOKEN`
+- LLM serving: `PV_LLM_SERVING_ENDPOINT`, `PV_LLM_SERVING_API_KEY`
+
 ## Determinism rules
 
 - `code` is normalized to uppercase with collapsed internal whitespace.
-- Identical request payloads yield the same `runId` and status payload.
+- Identical request payloads yield the same `runId`.
+- Run status resolution order is deterministic: Redis cache first, then
+  PostgreSQL persistence.
 - Artifact references are fixed to immutable sample artifact locations.
 - Auth role parsing and scope enforcement are deterministic and fail closed.
+- Required adapter configuration failures return deterministic `503` errors.
