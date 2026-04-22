@@ -78,7 +78,6 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 - Confirm model catalog boundary module exists:
   - `test -f infra/platform/model-catalog/module.boundaries.yaml`
 
-
 ## BL-049 Railway Backend-First Rollout Operations
 
 Use this sequence for Railway runtime promotion when frontend and backend are
