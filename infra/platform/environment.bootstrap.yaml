@@ -7,6 +7,12 @@ spec:
     - name: dev
       cluster: pv-dev
       region: us-central1
+      backend_adapter_env:
+        required:
+          - PV_POSTGRES_URL
+          - PV_POSTGRES_SCHEMA
+          - PV_REDIS_URL
+          - PV_REDIS_NAMESPACE
       modules:
         - frontend-nextjs
         - backend-nestjs
@@ -19,6 +25,28 @@ spec:
     - name: staging
       cluster: pv-staging
       region: us-central1
+      backend_adapter_env:
+        required:
+          - PV_POSTGRES_URL
+          - PV_POSTGRES_SCHEMA
+          - PV_REDIS_URL
+          - PV_REDIS_NAMESPACE
+        optional:
+          - PV_NEO4J_MODE
+          - PV_NEO4J_ENDPOINT
+          - PV_NEO4J_TOKEN
+          - PV_QDRANT_MODE
+          - PV_QDRANT_ENDPOINT
+          - PV_QDRANT_API_KEY
+          - PV_OPENSEARCH_MODE
+          - PV_OPENSEARCH_ENDPOINT
+          - PV_OPENSEARCH_API_KEY
+          - PV_TEMPORAL_MODE
+          - PV_TEMPORAL_ENDPOINT
+          - PV_TEMPORAL_TOKEN
+          - PV_LLM_SERVING_MODE
+          - PV_LLM_SERVING_ENDPOINT
+          - PV_LLM_SERVING_API_KEY
       modules:
         - frontend-nextjs
         - backend-nestjs

@@ -11,17 +11,39 @@ This directory is the bootstrap skeleton for the BL-018 platform backend runtime
 
 ## Bootstrap structure
 
-- `src/main.ts`: Minimal backend API handlers with deterministic local behavior.
+- `src/main.ts`: Backend API handlers and runtime adapter usage.
+- `src/adapters/`: BL-047 adapter interfaces and runtime adapter implementations.
 - `package.json`: Placeholder package metadata for deterministic bootstrapping.
 
-## Backend API skeleton (DX-005)
+## Backend API skeleton (DX-005, BL-047)
 
 - `GET /health`
   - Returns backend service liveliness for local/runtime checks.
-- `GET /api/prompt?prompt=<text>`
-  - Deterministic pipeline route used by frontend integration in DX-005.
+- `POST /api/v1/design-runs`
+  - Starts design run and persists run state through configured adapters.
+- `GET /api/v1/design-runs/{runId}`
+  - Reads run status from adapter-backed runtime state.
 
-See `docs/interfaces/backend_prompt_api_contract.md` for request/response details.
+See `docs/interfaces/backend_prompt_api_contract.md` for request/response details and fail-closed semantics.
+
+## Required backend adapter environment variables
+
+- `PV_POSTGRES_URL`
+- `PV_POSTGRES_SCHEMA`
+- `PV_REDIS_URL`
+- `PV_REDIS_NAMESPACE`
+
+If any required variable is missing, design-run endpoints fail closed with `503`.
+
+## Optional platform integration interface variables
+
+Each integration defaults to deterministic fallback mode and can be promoted to required mode.
+
+- Neo4j: `PV_NEO4J_MODE`, `PV_NEO4J_ENDPOINT`, `PV_NEO4J_TOKEN`
+- Qdrant: `PV_QDRANT_MODE`, `PV_QDRANT_ENDPOINT`, `PV_QDRANT_API_KEY`
+- OpenSearch: `PV_OPENSEARCH_MODE`, `PV_OPENSEARCH_ENDPOINT`, `PV_OPENSEARCH_API_KEY`
+- Temporal: `PV_TEMPORAL_MODE`, `PV_TEMPORAL_ENDPOINT`, `PV_TEMPORAL_TOKEN`
+- LLM serving: `PV_LLM_SERVING_MODE`, `PV_LLM_SERVING_ENDPOINT`, `PV_LLM_SERVING_API_KEY`
 
 ## Local integration profile server
 
