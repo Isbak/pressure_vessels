@@ -8,7 +8,7 @@ You are implementing backlog item **BL-047: Implement production backend integra
 Authoritative source:
 - `docs/development_backlog.yaml`
 
-Backlog context (resolved as of 2026-04-21):
+Backlog context (resolved as of 2026-04-22):
 - `BL-042` status is `done`.
 - `BL-043` status is `done`.
 - `BL-047` status is `todo`.
@@ -44,10 +44,12 @@ Task:
 1) Implement BL-047 adapter integration with deterministic failure semantics.
 2) Keep interface contracts and runtime registry documentation aligned.
 3) Add or update integration tests for adapter wiring and missing-configuration fail-closed behavior.
-4) Keep backlog metadata unchanged except where implementation evidence requires it.
+4) As the final implementation step, update `docs/development_backlog.yaml` to reflect BL-047 status and implementation evidence.
+5) As the final documentation step, generate the next `docs/next_code_generation_prompt.md` for the next eligible backlog item using the same template structure previously used for BL-032-style roadmap prompts (title line, authoritative source, backlog context, restate-before-coding, task list, output format).
 
 Output format:
 - Provide a concise implementation plan first.
 - Then provide unified diffs/patches per file.
 - Then provide test/verification commands and expected results.
+- Then provide the backlog/progression update summary (BL-047 status change + newly selected next queued backlog item).
 ```
