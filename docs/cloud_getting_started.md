@@ -271,6 +271,21 @@ Use service-scoped variables. Required values come from backend API contract and
 | `backend` | `PV_POSTGRES_SCHEMA` | Yes | `public` | Required PostgreSQL adapter schema. |
 | `backend` | `PV_REDIS_URL` | Yes | `redis://...` | Required for backend run-status cache. |
 | `backend` | `PV_REDIS_NAMESPACE` | Yes | `pv` | Required Redis namespace for deterministic keying. |
+| `backend` | `PV_LLM_SERVING_MODE` | Yes (staging BL-050) | `required` | Must be `required` for Railway dedicated LLM service promotion. |
+| `backend` | `PV_LLM_SERVING_ENDPOINT` | Yes (staging BL-050) | `https://llm-serving.railway.internal` | Dedicated Railway endpoint for LLM adapter. |
+| `backend` | `PV_LLM_SERVING_API_KEY` | Yes (staging BL-050) | `<secret-from-railway>` | Credential secret for LLM adapter. |
+| `backend` | `PV_NEO4J_MODE` | Yes (staging BL-050) | `required` | Must be `required` for graph adapter fail-closed behavior. |
+| `backend` | `PV_NEO4J_ENDPOINT` | Yes (staging BL-050) | `bolt://neo4j.railway.internal:7687` | Dedicated Railway endpoint for Neo4j adapter. |
+| `backend` | `PV_NEO4J_TOKEN` | Yes (staging BL-050) | `<secret-from-railway>` | Credential secret for Neo4j adapter. |
+| `backend` | `PV_QDRANT_MODE` | Yes (staging BL-050) | `required` | Must be `required` for vector adapter fail-closed behavior. |
+| `backend` | `PV_QDRANT_ENDPOINT` | Yes (staging BL-050) | `https://qdrant.railway.internal` | Dedicated Railway endpoint for Qdrant adapter. |
+| `backend` | `PV_QDRANT_API_KEY` | Yes (staging BL-050) | `<secret-from-railway>` | Credential secret for Qdrant adapter. |
+| `backend` | `PV_OPENSEARCH_MODE` | Yes (staging BL-050) | `required` | Must be `required` for search adapter fail-closed behavior. |
+| `backend` | `PV_OPENSEARCH_ENDPOINT` | Yes (staging BL-050) | `https://opensearch.railway.internal` | Dedicated Railway endpoint for OpenSearch adapter. |
+| `backend` | `PV_OPENSEARCH_API_KEY` | Yes (staging BL-050) | `<secret-from-railway>` | Credential secret for OpenSearch adapter. |
+| `backend` | `PV_TEMPORAL_MODE` | Yes (staging BL-050) | `required` | Must be `required` for orchestration adapter fail-closed behavior. |
+| `backend` | `PV_TEMPORAL_ENDPOINT` | Yes (staging BL-050) | `temporal.railway.internal:7233` | Dedicated Railway endpoint for Temporal adapter. |
+| `backend` | `PV_TEMPORAL_TOKEN` | Yes (staging BL-050) | `<secret-from-railway>` | Credential secret for Temporal adapter. |
 | `backend` | `BACKEND_HOST` | No | `0.0.0.0` | Bind host. |
 | `backend` | `BACKEND_PORT` | No | `8000` | Explicit backend runtime port. |
 
@@ -301,10 +316,10 @@ NODE_ENV=production
 BACKEND_API_BASE_URL=https://backend.railway.internal
 ```
 
-### 11.4 Optional staging-only dependencies
+### 11.4 BL-050 staging dependency rollout (Railway dedicated services)
 
-Staging may add platform integrations while keeping production cutover
-controlled and fail-closed:
+BL-050 promotes these integrations from optional placeholders to dedicated
+Railway staging services with backend fail-closed wiring:
 
 - `llm-serving-railway` (`PV_LLM_SERVING_MODE`, `PV_LLM_SERVING_ENDPOINT`,
   `PV_LLM_SERVING_API_KEY`)
@@ -316,28 +331,33 @@ controlled and fail-closed:
 - `workflow-temporal` (`PV_TEMPORAL_MODE`, `PV_TEMPORAL_ENDPOINT`,
   `PV_TEMPORAL_TOKEN`)
 
-Recommendation: set optional services to `deterministic-fallback` until each
-endpoint + credential pair is validated in staging.
+For BL-050 staging, set each `*_MODE=required`. In this mode, backend adapter
+startup fails closed with `ADAPTER_CONFIG_MISSING` unless endpoint + credential
+pairs are present.
 
-Optional staging integration starter block:
+Staging integration starter block (required mode):
 
 ```bash
-PV_LLM_SERVING_MODE=deterministic-fallback
+PV_LLM_SERVING_MODE=required
 PV_LLM_SERVING_ENDPOINT=https://<llm-serving-url>
 PV_LLM_SERVING_API_KEY=<secret>
-PV_NEO4J_MODE=deterministic-fallback
+PV_NEO4J_MODE=required
 PV_NEO4J_ENDPOINT=bolt://<neo4j-host>:7687
 PV_NEO4J_TOKEN=<secret>
-PV_QDRANT_MODE=deterministic-fallback
+PV_QDRANT_MODE=required
 PV_QDRANT_ENDPOINT=https://<qdrant-host>
 PV_QDRANT_API_KEY=<secret>
-PV_OPENSEARCH_MODE=deterministic-fallback
+PV_OPENSEARCH_MODE=required
 PV_OPENSEARCH_ENDPOINT=https://<opensearch-host>
 PV_OPENSEARCH_API_KEY=<secret>
-PV_TEMPORAL_MODE=deterministic-fallback
+PV_TEMPORAL_MODE=required
 PV_TEMPORAL_ENDPOINT=<temporal-endpoint>
 PV_TEMPORAL_TOKEN=<secret>
 ```
+
+Service manifest/checklist source for BL-050:
+
+- `infra/platform/railway/bl-050.service-manifests.yaml`
 
 ### 11.5 Backend deployment checklist (Railway)
 
@@ -352,8 +372,17 @@ PV_TEMPORAL_TOKEN=<secret>
    - `POST /api/v1/design-runs` with valid JWT and payload returns `201`.
    - `GET /api/v1/design-runs/{runId}` with valid JWT returns `200`.
    - Missing required adapter vars must return deterministic `503`.
-4. Deploy/update `frontend` service and set `BACKEND_API_BASE_URL`.
-5. Validate frontend-to-backend networking by executing one complete
+4. Confirm BL-050 staging integration vars are all present and set to
+   `required`:
+   - `PV_LLM_SERVING_MODE`, `PV_LLM_SERVING_ENDPOINT`,
+     `PV_LLM_SERVING_API_KEY`
+   - `PV_NEO4J_MODE`, `PV_NEO4J_ENDPOINT`, `PV_NEO4J_TOKEN`
+   - `PV_QDRANT_MODE`, `PV_QDRANT_ENDPOINT`, `PV_QDRANT_API_KEY`
+   - `PV_OPENSEARCH_MODE`, `PV_OPENSEARCH_ENDPOINT`,
+     `PV_OPENSEARCH_API_KEY`
+   - `PV_TEMPORAL_MODE`, `PV_TEMPORAL_ENDPOINT`, `PV_TEMPORAL_TOKEN`
+5. Deploy/update `frontend` service and set `BACKEND_API_BASE_URL`.
+6. Validate frontend-to-backend networking by executing one complete
    `/api/prompt` flow from UI.
 
 ### 11.6 Release verification, rollback, and evidence capture
@@ -380,3 +409,5 @@ Evidence-capture checklist (governance aligned):
 - Environment-variable change record (names only; no secret values).
 - Rollback reference (if used), including triggering condition and validation outcome.
 - Operator/reviewer sign-off tied to deployment window.
+- BL-050 staging evidence file populated from
+  `docs/runbooks/templates/bl-050_railway_staging_evidence_template.md`.

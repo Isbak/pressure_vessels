@@ -31,7 +31,6 @@ spec:
           - PV_POSTGRES_SCHEMA
           - PV_REDIS_URL
           - PV_REDIS_NAMESPACE
-        optional:
           - PV_NEO4J_MODE
           - PV_NEO4J_ENDPOINT
           - PV_NEO4J_TOKEN

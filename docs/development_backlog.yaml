@@ -1188,7 +1188,7 @@ items:
   area: platform-operations
   phase: 'Phase 6: Productization'
   priority: P0
-  status: todo
+  status: done
   effort: M
   depends_on:
   - BL-047
@@ -1198,6 +1198,12 @@ items:
   - docs/platform_runtime_stack_registry.yaml
   - docs/runbooks/platform_runtime_stack_operations.md
   - infra/platform/environment.bootstrap.yaml
+  - infra/platform/railway/bl-050.service-manifests.yaml
+  implementation_evidence:
+  - docs/cloud_getting_started.md#114-bl-050-staging-dependency-rollout-railway-dedicated-services
+  - docs/runbooks/platform_runtime_stack_operations.md#bl-050-service-by-service-staging-smoke-tests
+  - docs/runbooks/templates/bl-050_railway_staging_evidence_template.md
+  - infra/platform/railway/bl-050.service-manifests.yaml
   acceptance_criteria:
   - >-
     Railway environment provisions dedicated services for LLM serving, Neo4j,

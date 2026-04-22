@@ -39,9 +39,12 @@ BL-047 runtime adapters execute through `psql` and `redis-cli` clients to persis
 and read design-run state from configured PostgreSQL and Redis services (no
 in-memory placeholder persistence).
 
-## Optional platform integration interface variables
+## Platform integration interface variables
 
-Each integration defaults to deterministic fallback mode and can be promoted to required mode.
+Each integration supports deterministic fallback mode and required mode.
+For Railway BL-050 staging promotions, all five integrations are expected to be
+configured with `*_MODE=required` and Railway-provided endpoint/credential
+pairs so adapter bootstrapping fails closed when variables are missing.
 
 - Neo4j: `PV_NEO4J_MODE`, `PV_NEO4J_ENDPOINT`, `PV_NEO4J_TOKEN`
 - Qdrant: `PV_QDRANT_MODE`, `PV_QDRANT_ENDPOINT`, `PV_QDRANT_API_KEY`
