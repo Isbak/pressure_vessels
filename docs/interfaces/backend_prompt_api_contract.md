@@ -32,16 +32,21 @@ Starts a deterministic design run from a basic pressure-vessel input payload.
 
 ### Authorization
 
-Requires `Authorization` header with bearer token format:
+Requires `Authorization` header with provider-issued JWT bearer token:
 
-`Authorization: Bearer v1:<actorId>:<role>:<scope>:<secret>`
+`Authorization: Bearer <oidc-jwt>`
 
-Where:
+Provider verification is fail-closed and requires all of:
 
-- `role` must be one of `engineer`, `reviewer`, `approver`.
-- `scope` must be `design_runs:write` for this endpoint.
-- `<secret>` must be resolved from runtime secret `PV_BACKEND_AUTH_TOKEN_SECRET`
-  loaded via approved module path `infra/platform/secrets/module.boundaries.yaml`.
+- Issuer from `PV_AUTH_PROVIDER_ISSUER`.
+- Audience from `PV_AUTH_PROVIDER_AUDIENCE`.
+- Verification keys from `PV_AUTH_PROVIDER_JWKS_JSON` loaded via approved module
+  boundary path `infra/platform/secrets/module.boundaries.yaml`.
+- JWT header constraints: `alg=HS256` and a known `kid`.
+- JWT claims constraints: `sub`, `exp` (not expired), valid `iss`, valid `aud`.
+- Role claim in `realm_access.roles` constrained to `engineer`, `reviewer`,
+  `approver` (deterministic first-match order).
+- Scope claim from `scope` or `scp`; this endpoint requires `design_runs:write`.
 
 ### Required adapter configuration (fail-closed)
 
@@ -122,12 +127,14 @@ references for a previously started design run.
 
 ### Authorization
 
-Requires `Authorization` header with bearer token format:
+Requires `Authorization` header with provider-issued JWT bearer token:
 
-`Authorization: Bearer v1:<actorId>:<role>:<scope>:<secret>`
+`Authorization: Bearer <oidc-jwt>`
 
-- `role` must be one of `engineer`, `reviewer`, `approver`.
-- `scope` must be `design_runs:read` or `design_runs:write`.
+- Role is resolved from `realm_access.roles` and must be one of `engineer`,
+  `reviewer`, `approver`.
+- Scope is resolved from `scope`/`scp` and must be `design_runs:read` or
+  stronger `design_runs:write`.
 
 ### Response (`200 OK`)
 
@@ -174,7 +181,19 @@ Requires `Authorization` header with bearer token format:
 
 ```json
 {
-  "error": "invalid authorization token"
+  "error": "invalid token issuer"
+}
+```
+
+```json
+{
+  "error": "invalid token audience"
+}
+```
+
+```json
+{
+  "error": "token expired or missing exp claim"
 }
 ```
 
@@ -226,7 +245,8 @@ Expected endpoint + credential variables by service:
 - Run status resolution order is deterministic: Redis cache first, then
   PostgreSQL persistence.
 - Artifact references are fixed to immutable sample artifact locations.
-- Auth role parsing and scope enforcement are deterministic and fail closed.
+- Auth verification is provider-backed JWT signature + claims validation,
+  followed by deterministic role/scope enforcement; all failures are fail closed.
 - Required adapter configuration failures return deterministic `503` errors.
 - Platform services configured in `required` mode are validated during adapter
   registry bootstrap; readiness failures fail closed before request handling.
