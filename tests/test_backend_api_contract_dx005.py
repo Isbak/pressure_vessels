@@ -42,7 +42,7 @@ def _parse_backlog_items() -> list[dict[str, object]]:
     return items
 
 
-def _next_eligible_backlog_id() -> str:
+def _next_eligible_backlog_id() -> str | None:
     items = _parse_backlog_items()
     item_by_id = {str(item['id']): item for item in items}
     for item in items:
@@ -51,7 +51,7 @@ def _next_eligible_backlog_id() -> str:
         depends_on = [str(dep) for dep in item['depends_on']]
         if all(str(item_by_id[dep]['status']) == 'done' for dep in depends_on):
             return str(item['id'])
-    raise AssertionError('No eligible todo backlog item found.')
+    return None
 
 
 def test_backend_main_exposes_bl034_versioned_design_run_routes() -> None:
@@ -130,5 +130,9 @@ def test_bl040_is_done_and_next_prompt_advances_to_bl041() -> None:
     assert 'status: done' in bl041_block
 
     expected_next_backlog_id = _next_eligible_backlog_id()
-    assert expected_next_backlog_id in next_prompt
-    assert f'next queued roadmap item: {expected_next_backlog_id}' in next_prompt
+    if expected_next_backlog_id is None:
+        assert 'next queued roadmap item: backlog queue refresh' in next_prompt
+        assert 'no currently eligible `todo` item' in next_prompt
+    else:
+        assert expected_next_backlog_id in next_prompt
+        assert f'next queued roadmap item: {expected_next_backlog_id}' in next_prompt
