@@ -11,7 +11,7 @@ components:
     status: deployed
     owner: platform-runtime
     module_path: services/backend
-    notes: NestJS-style service skeleton committed in-repo.
+    notes: NestJS-style service skeleton with BL-047 adapter registry wiring for PostgreSQL/Redis fail-closed runtime state and explicit platform-service integration interfaces.
   - key: datastore-postgresql
     capability: data
     status: scaffolded

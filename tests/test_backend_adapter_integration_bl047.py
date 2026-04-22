@@ -25,6 +25,7 @@ def test_backend_adapter_registry_fails_closed_without_postgres_or_redis_configu
     assert 'ADAPTER_CONFIG_MISSING' in registry_ts
     assert 'required for backend design-run state' in registry_ts
     assert 'required for backend design-run cache' in registry_ts
+    assert 'assertPlatformServicesReady(registry.platformServices)' in registry_ts
 
 
 def test_platform_service_interfaces_define_required_and_deterministic_fallback_modes() -> None:
@@ -41,6 +42,12 @@ def test_platform_service_interfaces_define_required_and_deterministic_fallback_
     assert 'if (this.mode === \"deterministic-fallback\")' not in platform_services_ts
     assert "if (this.mode === 'deterministic-fallback')" in platform_services_ts
     assert 'requires endpoint and credential in required mode' in platform_services_ts
+    assert 'parseAdapterMode' in Path('services/backend/src/adapters/registry.ts').read_text(
+        encoding='utf-8'
+    )
+    assert 'must be either required or deterministic-fallback' in Path(
+        'services/backend/src/adapters/registry.ts'
+    ).read_text(encoding='utf-8')
 
 
 def test_backend_contract_and_environment_bootstrap_document_adapter_wiring_expectations() -> None:
@@ -61,6 +68,7 @@ def test_backend_contract_and_environment_bootstrap_document_adapter_wiring_expe
     assert 'PV_OPENSEARCH_MODE' in contract
     assert 'PV_TEMPORAL_MODE' in contract
     assert 'PV_LLM_SERVING_MODE' in contract
+    assert 'Any other mode value fails closed during adapter registry bootstrap' in contract
 
     assert 'backend_adapter_env:' in bootstrap
     assert 'required:' in bootstrap
