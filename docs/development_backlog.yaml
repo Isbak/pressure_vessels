@@ -1087,16 +1087,21 @@ items:
   area: backend
   phase: 'Phase 6: Productization'
   priority: P0
-  status: todo
+  status: done
   effort: L
   depends_on:
   - BL-043
   - BL-034
   references:
   - services/backend/src/main.ts
+  - services/backend/src/adapters/postgresql.ts
+  - services/backend/src/adapters/redis.ts
+  - services/backend/src/adapters/registry.ts
   - services/backend/README.md
+  - docs/interfaces/backend_prompt_api_contract.md
   - infra/platform/environment.bootstrap.yaml
   - docs/platform_runtime_stack_registry.yaml
+  - tests/test_backend_adapter_integration_bl047.py
   acceptance_criteria:
   - >-
     Backend design-run execution path persists and reads runtime state using
@@ -1118,7 +1123,7 @@ items:
   area: security
   phase: 'Phase 6: Productization'
   priority: P0
-  status: blocked
+  status: todo
   effort: M
   depends_on:
   - BL-043
