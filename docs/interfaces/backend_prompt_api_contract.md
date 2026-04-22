@@ -206,6 +206,8 @@ Each mode accepts:
 - `required`: endpoint + credential are mandatory; missing values fail closed.
 - `deterministic-fallback` (default): endpoint/credential may be omitted and the
   adapter reports deterministic fallback mode.
+- Any other mode value fails closed during adapter registry bootstrap with
+  `ADAPTER_CONFIG_MISSING`.
 
 Expected endpoint + credential variables by service:
 
@@ -224,3 +226,5 @@ Expected endpoint + credential variables by service:
 - Artifact references are fixed to immutable sample artifact locations.
 - Auth role parsing and scope enforcement are deterministic and fail closed.
 - Required adapter configuration failures return deterministic `503` errors.
+- Platform services configured in `required` mode are validated during adapter
+  registry bootstrap; readiness failures fail closed before request handling.
