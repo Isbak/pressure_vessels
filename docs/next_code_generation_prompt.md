@@ -1,9 +1,9 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-Use this prompt to implement the **next queued roadmap item: BL-049 — Publish Railway deployment guide for full backend service rollout**.
+Use this prompt to implement the **next queued roadmap item: backlog queue refresh (no currently eligible `todo` item after BL-049)**.
 
 ```text
-You are implementing backlog item **BL-049: Publish Railway deployment guide for full backend service rollout** for the `pressure_vessels` repository.
+You are performing backlog queue refresh for the `pressure_vessels` repository because no backlog item is currently eligible after BL-049.
 
 Authoritative source:
 - `docs/development_backlog.yaml`
@@ -11,44 +11,42 @@ Authoritative source:
 Backlog context (resolved as of 2026-04-22):
 - `BL-047` status is `done`.
 - `BL-048` status is `done`.
-- `BL-049` status is `todo`.
-- `BL-049` dependencies (`BL-047`, `BL-048`) are both `done`.
-- Therefore `BL-049` is the next queued item.
+- `BL-049` status is `done`.
+- There are no remaining `todo` items whose dependencies are fully `done`.
+- Therefore there is no next queued implementation item at this time.
 
 Restate before coding:
-- Item ID/title: BL-049 — Publish Railway deployment guide for full backend service rollout
-- depends_on: [BL-047, BL-048]
+- Item ID/title: Backlog queue refresh — identify and prepare the next eligible roadmap item
+- depends_on: []
 - acceptance criteria:
-  1) Railway guide includes separate frontend/backend service deployment, backend required environment variables, and cross-service networking configuration.
-  2) Guide documents optional staging-only dependencies (for example llm-serving-railway) and clearly distinguishes bootstrap placeholders from production-integrated backend behavior.
-  3) Guide includes release verification checks, rollback steps, and evidence-capture checklist aligned to platform governance policy.
+  1) Determine whether any existing `todo` item is now dependency-unblocked.
+  2) If none are eligible, document that queue is blocked and identify minimal unblocking prerequisite work.
+  3) Publish updated operator prompt for the newly eligible item (or explicit blocked-queue handoff).
 - deliverables:
-  1) Updated Railway deployment section with backend-first guidance.
-  2) Backend deployment checklist (env vars, health checks, smoke tests).
-  3) Rollback and post-deploy validation procedure for Railway runtime.
+  1) Updated backlog progression notes with queued/blocked status.
+  2) Next `docs/next_code_generation_prompt.md` targeting the newly eligible backlog item or blocked-queue action.
+  3) Evidence references for queue-resolution decision.
 
 Repository constraints:
-- Keep changes minimal and focused; implement BL-049 only.
+- Keep changes minimal and focused on backlog progression only.
 - Follow contract-driven integration and avoid undocumented interface drift.
 - Preserve governance-by-default controls from `AGENT_GOVERNANCE.md`.
 - Prefer incremental delivery over broad rewrites; keep behavior deterministic.
 
 Likely relevant files:
-- `docs/cloud_getting_started.md`
+- `docs/development_backlog.yaml`
+- `docs/next_code_generation_prompt.md`
 - `docs/runbooks/platform_runtime_stack_operations.md`
-- `infra/platform/environment.bootstrap.yaml`
-- `docs/platform_runtime_stack_registry.yaml`
 
 Task:
-1) Implement BL-049 deployment guidance updates with backend-first runtime rollout instructions for Railway.
-2) Keep deployment documentation aligned with runtime environment variables and service contracts.
-3) Add or update verification/rollback/evidence checklist sections for operational readiness.
-4) As the final implementation step, update `docs/development_backlog.yaml` to reflect BL-049 status and implementation evidence.
-5) As the final documentation step, generate the next `docs/next_code_generation_prompt.md` for the next eligible backlog item using the same template structure previously used for BL-032-style roadmap prompts (title line, authoritative source, backlog context, restate-before-coding, task list, output format).
+1) Re-evaluate backlog dependency graph and identify the next eligible `todo` item.
+2) If no item is eligible, document blocked state and the concrete prerequisite needed to unblock queue progression.
+3) Update `docs/development_backlog.yaml` only if progression metadata needs correction.
+4) Generate the next `docs/next_code_generation_prompt.md` using this template structure with refreshed context.
 
 Output format:
 - Provide a concise implementation plan first.
 - Then provide unified diffs/patches per file.
 - Then provide test/verification commands and expected results.
-- Then provide the backlog/progression update summary (BL-049 status change + newly selected next queued backlog item).
+- Then provide the backlog/progression update summary (queue state + next action).
 ```

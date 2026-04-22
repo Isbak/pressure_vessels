@@ -78,6 +78,56 @@ This runbook defines BL-018 runtime foundation ownership and deployment operatio
 - Confirm model catalog boundary module exists:
   - `test -f infra/platform/model-catalog/module.boundaries.yaml`
 
+
+## BL-049 Railway Backend-First Rollout Operations
+
+Use this sequence for Railway runtime promotion when frontend and backend are
+split services.
+
+### Pre-deploy checks
+
+- Confirm runtime stack declarations:
+  - `python scripts/check_tech_stack.py`
+- Confirm backend required env contract is configured on Railway service:
+  - `PV_AUTH_PROVIDER_ISSUER`, `PV_AUTH_PROVIDER_AUDIENCE`,
+    `PV_AUTH_PROVIDER_JWKS_JSON`, `PV_BACKEND_AUTH_TOKEN_SECRET`,
+    `PV_POSTGRES_URL`, `PV_POSTGRES_SCHEMA`, `PV_REDIS_URL`,
+    `PV_REDIS_NAMESPACE`
+- Confirm cross-service routing target for frontend:
+  - `BACKEND_API_BASE_URL` points to backend private/public Railway URL.
+
+### Deploy + verification sequence
+
+1. Deploy `backend` service.
+2. Verify `GET /health` is `200`.
+3. Verify auth-protected smoke checks:
+   - `POST /api/v1/design-runs` returns `201` with valid JWT.
+   - `GET /api/v1/design-runs/{runId}` returns `200` with valid JWT.
+4. Deploy/update `frontend` service with `BACKEND_API_BASE_URL` set.
+5. Run end-to-end `/api/prompt` smoke test from frontend.
+6. For staging-only dependencies (`llm-serving-railway`, Neo4j, Qdrant,
+   OpenSearch, Temporal), keep `*_MODE=deterministic-fallback` until explicit
+   endpoint + credential checks pass.
+
+### Rollback procedure
+
+1. Roll back frontend service to previous release when frontend smoke test fails.
+2. Roll back backend service to previous release when health/auth/design-run checks fail.
+3. Revert environment variable edits to approved baseline.
+4. Re-run backend `/health` and design-run smoke checks.
+5. Record rollback evidence and incident timeline.
+
+### Evidence capture (platform governance)
+
+Capture and retain the following artifacts for each Railway release window:
+
+- Railway deployment IDs for frontend and backend.
+- Commit SHAs associated with each deployment.
+- Timestamped results for `/health`, `POST /api/v1/design-runs`,
+  `GET /api/v1/design-runs/{runId}`, and frontend `/api/prompt` smoke checks.
+- Variable change log containing variable names only (no secret values).
+- Rollback decision record and post-rollback validation results (if rollback occurs).
+
 ## Incident Operations
 
 - Required incident signals exposed by observability module:

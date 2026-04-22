@@ -1154,7 +1154,7 @@ items:
   area: platform-operations
   phase: 'Phase 6: Productization'
   priority: P1
-  status: todo
+  status: done
   effort: S
   depends_on:
   - BL-047
@@ -1164,6 +1164,9 @@ items:
   - docs/runbooks/platform_runtime_stack_operations.md
   - infra/platform/environment.bootstrap.yaml
   - docs/platform_runtime_stack_registry.yaml
+  implementation_evidence:
+  - docs/cloud_getting_started.md#11-railway-deployment-guide-backend-first-full-rollout
+  - docs/runbooks/platform_runtime_stack_operations.md#bl-049-railway-backend-first-rollout-operations
   acceptance_criteria:
   - >-
     Railway guide includes separate frontend/backend service deployment,

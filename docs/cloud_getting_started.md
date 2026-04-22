@@ -224,64 +224,112 @@ You are cloud-agnostic enough when:
 
 ---
 
-## 11. Railway Quickstart (Single-Service MVP)
+## 11. Railway Deployment Guide (Backend-First Full Rollout)
 
-For a fast MVP deployment on Railway, run only the frontend `web` process bound to Railway's `PORT`.
+Use this flow for BL-049 production-oriented Railway deployments where frontend
+and backend are separate services in the same Railway project.
 
-- Root `Procfile` now defines:
+### 11.1 Service topology and rollout order
+
+1. Deploy and validate `backend` service first.
+2. Deploy `frontend` service second and set `BACKEND_API_BASE_URL` to backend
+   private domain (preferred) or public Railway URL.
+3. Promote optional staging-only integrations (for example
+   `llm-serving-railway`) only after backend core checks pass.
+
+> Bootstrap placeholder behavior vs production integration:
+>
+> - **Bootstrap placeholder**: frontend may run with `BACKEND_API_BASE_URL`
+>   unset, and `/api/prompt` returns deterministic placeholder responses.
+> - **Production-integrated backend**: frontend `BACKEND_API_BASE_URL` is set,
+>   backend design-run endpoints are authenticated, and backend adapters use
+>   PostgreSQL/Redis runtime state (fail-closed if required configuration is
+>   missing).
+
+### 11.2 Railway process mapping
+
+- Root `Procfile` defines both process types:
   - `web`: `cd services/frontend && npm ci && npm run build && npm run start -- --hostname 0.0.0.0 --port ${PORT:-3000}`
   - `backend`: `cd services/backend && npm ci && BACKEND_HOST=0.0.0.0 BACKEND_PORT=${BACKEND_PORT:-8000} node local-integration-server.js`
-- Keep `backend` unscaled for single-service MVP deployments.
-- The backend process uses the deterministic local integration server and avoids the backend skeleton's incomplete NestJS build path.
-- The frontend `/api/prompt` route still works without backend wiring by returning deterministic placeholder responses when `BACKEND_API_BASE_URL` is unset.
-- LLM and data-plane infrastructure services (for example `infra/platform/vllm`, PostgreSQL, Redis, Neo4j, Qdrant, OpenSearch) are not launched from the root `Procfile`; run them as dedicated platform services/modules.
+- In full rollout mode, scale both `web` and `backend` as dedicated Railway
+  services. Do not rely on frontend-only single-service mode for production.
 
-Recommended Railway configuration:
+### 11.3 Environment-variable matrix (contract-aligned)
 
-1. **Root Directory**: repository root.
-2. **Start Command**: leave blank so Railway honors `Procfile` (or copy the command above explicitly).
-3. **Environment Variables**:
-   - `NODE_ENV=production`
-   - Optional: `BACKEND_API_BASE_URL=<your backend URL>` only when a compatible backend is deployed.
-4. **Health check**: `GET /` (or `GET /result` after first deploy).
-
-### Railway multi-service environment variable matrix
-
-Use the matrix below when running frontend and backend as separate Railway services
-inside one project. Keep service-scoped secrets on the owning service, and expose
-only cross-service endpoints needed for API calls.
+Use service-scoped variables. Required values come from backend API contract and
+`infra/platform/environment.bootstrap.yaml`.
 
 | Railway service | Variable | Required | Example value | Notes |
 | --- | --- | --- | --- | --- |
-| `frontend` | `NODE_ENV` | Yes | `production` | Next.js runtime mode in Railway deployment. |
-| `frontend` | `BACKEND_API_BASE_URL` | Optional* | `https://<backend-service>.up.railway.app` | Set when frontend `/api/prompt` should call a deployed backend service. |
-| `backend` | `PV_BACKEND_AUTH_TOKEN_SECRET` | Yes** | `replace-with-long-random-secret` | Required secret consumed by backend runtime and enforced by backend security baseline. |
-| `backend` | `BACKEND_HOST` | No | `0.0.0.0` | Bind host; local profile default is retained here for clarity. |
-| `backend` | `BACKEND_PORT` | No | `8000` | Service port if backend runtime uses explicit port configuration. |
+| `frontend` | `NODE_ENV` | Yes | `production` | Next.js runtime mode. |
+| `frontend` | `BACKEND_API_BASE_URL` | Yes (full rollout) | `https://backend.railway.internal` | Internal Railway DNS is preferred for cross-service calls. |
+| `backend` | `PV_AUTH_PROVIDER_ISSUER` | Yes | `https://keycloak.example.com/realms/pv` | JWT issuer validation (BL-048). |
+| `backend` | `PV_AUTH_PROVIDER_AUDIENCE` | Yes | `pressure-vessels-backend` | JWT audience validation (BL-048). |
+| `backend` | `PV_AUTH_PROVIDER_JWKS_JSON` | Yes | `<jwks-json-from-secrets-module>` | Provider keyset for token verification (BL-048). |
+| `backend` | `PV_BACKEND_AUTH_TOKEN_SECRET` | Yes | `replace-with-long-random-secret` | Legacy bootstrap secret remains required by runtime baseline. |
+| `backend` | `PV_POSTGRES_URL` | Yes | `postgresql://...` | Required for backend design-run persistence (BL-047). |
+| `backend` | `PV_POSTGRES_SCHEMA` | Yes | `public` | Required PostgreSQL adapter schema. |
+| `backend` | `PV_REDIS_URL` | Yes | `redis://...` | Required for backend run-status cache. |
+| `backend` | `PV_REDIS_NAMESPACE` | Yes | `pv` | Required Redis namespace for deterministic keying. |
+| `backend` | `BACKEND_HOST` | No | `0.0.0.0` | Bind host. |
+| `backend` | `BACKEND_PORT` | No | `8000` | Explicit backend runtime port. |
 
-- \* Optional for bootstrap mode: frontend falls back to deterministic placeholder responses when `BACKEND_API_BASE_URL` is unset.
-- \** Required whenever backend auth-protected runtime paths are enabled.
+### 11.4 Optional staging-only dependencies
 
-#### Infra/platform service coverage (what else to configure)
+Staging may add platform integrations while keeping production cutover
+controlled and fail-closed:
 
-The platform stack includes additional modules under `infra/platform/*`. These are
-tracked in the runtime stack registry and environment bootstrap manifests. Include
-them in Railway/environment planning even when canonical variable names are managed
-by provider modules or external secret stores.
+- `llm-serving-railway` (`PV_LLM_SERVING_MODE`, `PV_LLM_SERVING_ENDPOINT`,
+  `PV_LLM_SERVING_API_KEY`)
+- `graph-neo4j` (`PV_NEO4J_MODE`, `PV_NEO4J_ENDPOINT`, `PV_NEO4J_TOKEN`)
+- `retrieval-qdrant` (`PV_QDRANT_MODE`, `PV_QDRANT_ENDPOINT`,
+  `PV_QDRANT_API_KEY`)
+- `search-opensearch` (`PV_OPENSEARCH_MODE`, `PV_OPENSEARCH_ENDPOINT`,
+  `PV_OPENSEARCH_API_KEY`)
+- `workflow-temporal` (`PV_TEMPORAL_MODE`, `PV_TEMPORAL_ENDPOINT`,
+  `PV_TEMPORAL_TOKEN`)
 
-| Stack component key | Module path | Dev | Staging | Variable source of truth |
-| --- | --- | --- | --- | --- |
-| `frontend-nextjs` | `services/frontend` | ✅ | ✅ | Railway service variables (for example `NODE_ENV`, `BACKEND_API_BASE_URL`). |
-| `backend-nestjs` | `services/backend` | ✅ | ✅ | Railway service variables + approved secret module (`PV_BACKEND_AUTH_TOKEN_SECRET`). |
-| `datastore-postgresql` | `infra/platform/postgresql` | ✅ | ✅ | Provider-managed DB variables/secrets (module-owned; no repo-global env var contract yet). |
-| `cache-redis` | `infra/platform/redis` | ✅ | ✅ | Provider-managed cache variables/secrets (module-owned; no repo-global env var contract yet). |
-| `auth-keycloak` | `infra/platform/keycloak` | ✅ | ✅ | Identity-provider variables/secrets per Keycloak module boundaries. |
-| `graph-neo4j` | `infra/platform/neo4j` | ❌ | ✅ | Graph service variables/secrets per module boundaries. |
-| `retrieval-qdrant` | `infra/platform/qdrant` | ❌ | ✅ | Vector retrieval variables/secrets per module boundaries. |
-| `llm-serving-railway` | `infra/platform/vllm` | ❌ | ✅ | Dedicated Railway LLM service variables/secrets per vLLM module boundaries. |
-| `search-opensearch` | `infra/platform/opensearch` | ❌ | ✅ | Search cluster variables/secrets per module boundaries. |
-| `workflow-temporal` | `infra/platform/temporal` | ❌ | ✅ | Workflow service variables/secrets per module boundaries. |
-| `observability-prometheus-grafana-loki-tempo` | `infra/platform/observability` | ✅ | ✅ | Observability stack variables/secrets per module boundaries. |
-| `secrets-vault-or-sops-age` | `infra/platform/secrets` | ❌ | ✅ | Centralized secret issuance/encryption source of truth. |
-| `iac-opentofu-or-terraform` | `infra/platform/iac` | ✅ | ✅ | IaC backend/provider credentials managed by platform module boundaries. |
-| `runtime-docker-kubernetes` | `infra/platform/runtime` | ✅ | ✅ | Runtime target variables/secrets per deployment module boundaries. |
+Recommendation: set optional services to `deterministic-fallback` until each
+endpoint + credential pair is validated in staging.
+
+### 11.5 Backend deployment checklist (Railway)
+
+1. Confirm backend required env vars are present before first deploy:
+   - `PV_AUTH_PROVIDER_ISSUER`, `PV_AUTH_PROVIDER_AUDIENCE`,
+     `PV_AUTH_PROVIDER_JWKS_JSON`, `PV_BACKEND_AUTH_TOKEN_SECRET`,
+     `PV_POSTGRES_URL`, `PV_POSTGRES_SCHEMA`, `PV_REDIS_URL`,
+     `PV_REDIS_NAMESPACE`.
+2. Deploy `backend` service and run health check:
+   - `GET /health` returns `200` with `{"service":"pressure-vessels-backend","status":"ok"}`.
+3. Run auth and smoke checks against backend:
+   - `POST /api/v1/design-runs` with valid JWT and payload returns `201`.
+   - `GET /api/v1/design-runs/{runId}` with valid JWT returns `200`.
+   - Missing required adapter vars must return deterministic `503`.
+4. Deploy/update `frontend` service and set `BACKEND_API_BASE_URL`.
+5. Validate frontend-to-backend networking by executing one complete
+   `/api/prompt` flow from UI.
+
+### 11.6 Release verification, rollback, and evidence capture
+
+Release verification checks:
+
+- Backend health and auth-protected smoke checks pass.
+- Frontend `/api/prompt` calls backend successfully over configured
+  cross-service network path.
+- Railway deployment logs show no adapter/auth bootstrap failures.
+
+Rollback steps:
+
+1. Roll back `frontend` to last known-good release if API integration fails.
+2. Roll back `backend` to prior Railway deployment if health/auth/smoke checks fail.
+3. Revert changed environment variables to last approved values.
+4. Re-run `/health` and smoke checks on rolled-back versions.
+5. Record incident + rollback reason in platform operations log/runbook.
+
+Evidence-capture checklist (governance aligned):
+
+- Backend and frontend release IDs/commit SHAs.
+- Timestamped health and smoke test results.
+- Environment-variable change record (names only; no secret values).
+- Rollback reference (if used), including triggering condition and validation outcome.
+- Operator/reviewer sign-off tied to deployment window.
