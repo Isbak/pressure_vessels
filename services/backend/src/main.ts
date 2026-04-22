@@ -3,7 +3,8 @@ import {
   PersistedDesignRunRecord,
 } from './adapters/interfaces';
 import { createAdapterRegistry, readDesignRunRecord } from './adapters/registry';
-import { getRuntimeAuthSecret } from './secrets';
+import { getRuntimeAuthProviderConfig } from './secrets';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 export type BackendResponse<T> = {
   status: number;
@@ -35,7 +36,6 @@ export type ErrorResponse = {
 };
 
 const DESIGN_RUN_API_VERSION = 'v1';
-const AUTH_TOKEN_VERSION = 'v1';
 const ALLOWED_AUTH_ROLES = ['engineer', 'reviewer', 'approver'] as const;
 
 type AuthRole = (typeof ALLOWED_AUTH_ROLES)[number];
@@ -244,23 +244,31 @@ export function authorizeRuntimeToken(
     };
   }
 
-  const secret = getRuntimeAuthSecret();
-  const [version, actorId, role, scope, tokenSecret] = authToken.split(':');
-  if (
-    version !== AUTH_TOKEN_VERSION ||
-    !actorId ||
-    !ALLOWED_AUTH_ROLES.includes(role as AuthRole) ||
-    (scope !== 'design_runs:write' && scope !== 'design_runs:read') ||
-    tokenSecret !== secret
-  ) {
+  const token = parseJwt(authToken.trim());
+  if (!token.ok) {
     return {
       status: 401,
       body: {
-        error: 'invalid authorization token',
+        error: token.error,
       },
     };
   }
 
+  const validated = validateProviderClaims(token.value);
+  if (!validated.ok) {
+    return {
+      status: 401,
+      body: {
+        error: validated.error,
+      },
+    };
+  }
+
+  const {
+    actorId,
+    role,
+    scope,
+  } = validated.value;
   if (scope !== requiredScope && !(requiredScope === 'design_runs:read' && scope === 'design_runs:write')) {
     return {
       status: 403,
@@ -278,4 +286,172 @@ export function authorizeRuntimeToken(
       scope,
     },
   };
+}
+
+type JwtHeader = {
+  alg: string;
+  kid?: string;
+  typ?: string;
+};
+
+type JwtPayload = {
+  sub?: string;
+  iss?: string;
+  aud?: string | string[];
+  exp?: number;
+  nbf?: number;
+  iat?: number;
+  scope?: string;
+  scp?: string[];
+  realm_access?: {
+    roles?: string[];
+  };
+};
+
+type RuntimeJwt = {
+  header: JwtHeader;
+  payload: JwtPayload;
+  signingInput: string;
+  signature: string;
+};
+
+type AuthDecision<T> = {
+  ok: true;
+  value: T;
+} | {
+  ok: false;
+  error: string;
+};
+
+function parseJwt(token: string): AuthDecision<RuntimeJwt> {
+  const segments = token.split('.');
+  if (segments.length !== 3) {
+    return {
+      ok: false,
+      error: 'invalid authorization token',
+    };
+  }
+
+  const [encodedHeader, encodedPayload, signature] = segments;
+  if (!encodedHeader || !encodedPayload || !signature) {
+    return {
+      ok: false,
+      error: 'invalid authorization token',
+    };
+  }
+
+  try {
+    const header = JSON.parse(Buffer.from(encodedHeader, 'base64url').toString('utf8')) as JwtHeader;
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8')) as JwtPayload;
+    return {
+      ok: true,
+      value: {
+        header,
+        payload,
+        signingInput: `${encodedHeader}.${encodedPayload}`,
+        signature,
+      },
+    };
+  } catch (_error) {
+    return {
+      ok: false,
+      error: 'invalid authorization token',
+    };
+  }
+}
+
+function validateProviderClaims(token: RuntimeJwt): AuthDecision<RuntimeAuthContext> {
+  const provider = getRuntimeAuthProviderConfig();
+  if (token.header.alg !== 'HS256' || !token.header.kid) {
+    return { ok: false, error: 'invalid authorization token' };
+  }
+
+  const key = provider.keys.find((candidate) => candidate.kid === token.header.kid);
+  if (!key) {
+    return { ok: false, error: 'invalid authorization token' };
+  }
+
+  const expectedSignature = createHmac('sha256', key.secret)
+    .update(token.signingInput)
+    .digest('base64url');
+  const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+  const providedBuffer = Buffer.from(token.signature, 'utf8');
+  if (
+    expectedBuffer.length !== providedBuffer.length ||
+    !timingSafeEqual(expectedBuffer, providedBuffer)
+  ) {
+    return { ok: false, error: 'invalid authorization token' };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (typeof token.payload.exp !== 'number' || token.payload.exp <= now) {
+    return { ok: false, error: 'token expired or missing exp claim' };
+  }
+  if (typeof token.payload.nbf === 'number' && token.payload.nbf > now) {
+    return { ok: false, error: 'token is not active yet' };
+  }
+
+  if (token.payload.iss !== provider.issuer) {
+    return { ok: false, error: 'invalid token issuer' };
+  }
+
+  const audiences = Array.isArray(token.payload.aud)
+    ? token.payload.aud
+    : typeof token.payload.aud === 'string'
+      ? [token.payload.aud]
+      : [];
+  if (!audiences.includes(provider.audience)) {
+    return { ok: false, error: 'invalid token audience' };
+  }
+
+  const role = resolveRole(token.payload.realm_access?.roles ?? []);
+  if (!role) {
+    return { ok: false, error: 'invalid authorization token' };
+  }
+
+  const scope = resolveScope(token.payload);
+  if (!scope) {
+    return { ok: false, error: 'invalid authorization token' };
+  }
+
+  if (!token.payload.sub || token.payload.sub.trim().length === 0) {
+    return { ok: false, error: 'invalid authorization token' };
+  }
+
+  return {
+    ok: true,
+    value: {
+      actorId: token.payload.sub.trim(),
+      role,
+      scope,
+    },
+  };
+}
+
+function resolveRole(roles: string[]): AuthRole | null {
+  for (const allowedRole of ALLOWED_AUTH_ROLES) {
+    if (roles.includes(allowedRole)) {
+      return allowedRole;
+    }
+  }
+
+  return null;
+}
+
+function resolveScope(payload: JwtPayload): RuntimeAuthContext['scope'] | null {
+  const scopeClaims: string[] = [];
+  if (typeof payload.scope === 'string') {
+    scopeClaims.push(...payload.scope.split(' '));
+  }
+  if (Array.isArray(payload.scp)) {
+    scopeClaims.push(...payload.scp);
+  }
+
+  if (scopeClaims.includes('design_runs:write')) {
+    return 'design_runs:write';
+  }
+  if (scopeClaims.includes('design_runs:read')) {
+    return 'design_runs:read';
+  }
+  return null;
 }

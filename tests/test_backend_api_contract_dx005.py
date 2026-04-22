@@ -73,16 +73,21 @@ def test_backend_api_contract_documents_versioned_design_run_endpoints() -> None
     assert 'POST /api/v1/design-runs' in contract
     assert 'GET /api/v1/design-runs/{runId}' in contract
     assert 'Primary consumer: `services/frontend`' in contract
-    assert 'Authorization: Bearer v1:<actorId>:<role>:<scope>:<secret>' in contract
+    assert 'Authorization: Bearer <oidc-jwt>' in contract
     assert 'engineer' in contract
     assert 'reviewer' in contract
     assert 'approver' in contract
+    assert 'PV_AUTH_PROVIDER_ISSUER' in contract
+    assert 'PV_AUTH_PROVIDER_AUDIENCE' in contract
+    assert 'PV_AUTH_PROVIDER_JWKS_JSON' in contract
 
 
 def test_backend_secrets_integration_uses_approved_module_path_without_plaintext_fallback() -> None:
     secrets_ts = Path('services/backend/src/secrets.ts').read_text(encoding='utf-8')
     assert "infra/platform/secrets/module.boundaries.yaml" in secrets_ts
-    assert 'PV_BACKEND_AUTH_TOKEN_SECRET' in secrets_ts
+    assert 'PV_AUTH_PROVIDER_ISSUER' in secrets_ts
+    assert 'PV_AUTH_PROVIDER_AUDIENCE' in secrets_ts
+    assert 'PV_AUTH_PROVIDER_JWKS_JSON' in secrets_ts
     assert 'fallback' not in secrets_ts.lower()
 
 
