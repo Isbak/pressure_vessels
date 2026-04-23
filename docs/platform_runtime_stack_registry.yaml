@@ -26,13 +26,13 @@ components:
     notes: Redis module skeleton with queue/cache ownership and lifecycle boundaries committed in-repo.
   - key: graph-neo4j
     capability: knowledge-graph
-    status: deployed
+    status: scaffolded
     owner: knowledge-platform
     module_path: infra/platform/neo4j
     notes: Dedicated Railway Neo4j service provisioned for staging with private-network adapter wiring to backend runtime.
   - key: retrieval-qdrant
     capability: vector-retrieval
-    status: deployed
+    status: scaffolded
     owner: retrieval-platform
     module_path: infra/platform/qdrant
     notes: Dedicated Railway Qdrant service provisioned for staging with private-network adapter wiring to backend runtime.
@@ -50,13 +50,13 @@ components:
     notes: Approved base model family set.
   - key: search-opensearch
     capability: search-analytics
-    status: deployed
+    status: scaffolded
     owner: retrieval-platform
     module_path: infra/platform/opensearch
     notes: Dedicated Railway OpenSearch service provisioned for staging with private-network adapter wiring to backend runtime.
   - key: workflow-temporal
     capability: orchestration
-    status: deployed
+    status: scaffolded
     owner: orchestration-platform
     module_path: infra/platform/temporal
     notes: Dedicated Railway Temporal service provisioned for staging with private-network adapter wiring to backend runtime.
