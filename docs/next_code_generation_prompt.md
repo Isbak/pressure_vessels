@@ -1,6 +1,7 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-As of 2026-04-22, there is **no queued `todo` item after BL-050** in `docs/development_backlog.yaml`.
+As of 2026-04-23, there is **no currently eligible `todo` item** in `docs/development_backlog.yaml`.
+next queued roadmap item: backlog queue refresh
 
 Use this prompt to add and queue the next backlog item before implementation work resumes.
 
