@@ -1,9 +1,8 @@
 # Next Code Generation Prompt (Roadmap-Aligned)
 
-As of 2026-04-23, there is **no currently eligible `todo` item** in `docs/development_backlog.yaml`.
-next queued roadmap item: backlog queue refresh
+As of 2026-04-23, next queued roadmap item: backlog queue refresh.
 
-Use this prompt to add and queue the next backlog item before implementation work resumes.
+There is no currently eligible `todo` item in `docs/development_backlog.yaml`; use this prompt to add and queue the next backlog item before implementation work resumes.
 
 ```text
 You are the Codex implementation agent for `pressure_vessels`.
@@ -12,7 +11,7 @@ Task: Propose and add the next backlog item after BL-050 in `docs/development_ba
 Authoritative source:
 - `docs/development_backlog.yaml`
 
-Context (resolved as of 2026-04-22):
+Context (resolved as of 2026-04-23):
 - BL-047 status is done.
 - BL-049 status is done.
 - BL-050 status is done.
