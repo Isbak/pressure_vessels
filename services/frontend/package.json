@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "smoke": "next dev --help"
+    "smoke": "node -e \"const pkg=require('./package.json');const lock=require('./package-lock.json');const expected='14.2.35';const pkgNext=pkg.dependencies&&pkg.dependencies.next;const lockNext=lock.packages&&lock.packages['']&&lock.packages[''].dependencies&&lock.packages[''].dependencies.next;if(pkgNext!==expected||lockNext!==expected){console.error('Next version mismatch: package.json='+pkgNext+', package-lock='+lockNext+', expected='+expected);process.exit(1);}console.log('Next version pin validated at '+expected);\""
   },
   "dependencies": {
     "next": "14.2.35",
